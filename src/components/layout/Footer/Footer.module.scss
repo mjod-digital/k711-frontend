@@ -1,0 +1,39 @@
+@use "breakpoints" as *;
+
+.footer {
+  border-top: 1px solid var(--color-border);
+  padding-block: var(--space-l);
+}
+
+.inner {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-s);
+  align-items: center;
+  text-align: center;
+
+  @include desktop {
+    flex-direction: row;
+    justify-content: space-between;
+    text-align: start;
+  }
+}
+
+.copy {
+  color: var(--color-muted);
+  font-size: var(--fs-300);
+}
+
+.nav {
+  display: flex;
+  gap: var(--space-m);
+}
+
+.link {
+  color: var(--color-muted);
+  font-size: var(--fs-300);
+
+  &:hover {
+    color: var(--color-fg);
+  }
+}
