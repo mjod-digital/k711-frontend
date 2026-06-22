@@ -1,81 +1,185 @@
 @use "breakpoints" as *;
 
 .header {
-  position: sticky;
-  top: 0;
-  z-index: 10;
-  background: color-mix(in srgb, var(--color-bg) 85%, transparent);
-  backdrop-filter: blur(8px);
-  border-bottom: 1px solid var(--color-border);
+  position: fixed;
+  inset: 0 0 auto; // top: 0; left/right: 0
+  z-index: 100;
+  background: var(--color-badge-light);
+  transition: transform 0.35s ease;
+  will-change: transform;
+}
+
+// Скрыт при скролле вниз — уезжает вверх за край экрана
+.hidden {
+  transform: translateY(-100%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .header {
+    transition: none;
+  }
 }
 
 .inner {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  min-height: 64px;
+  min-height: var(--header-h);
+  padding-inline: fluid(20);
+
+  @include mobile {
+    padding-inline: 0; // на мобайле иконки прижаты к краю своим внутренним паддингом
+  }
 }
 
-.logo {
-  font-weight: 700;
-  font-size: var(--fs-500);
+// ----- Кластеры по краям -----
+.cluster {
+  display: flex;
+  align-items: center;
+  gap: fluid(10);
+
+  @include mobile {
+    gap: fluid(4);
+  }
 }
 
+// ----- Анимированный бургер ↔ крестик -----
 .burger {
+  position: relative;
+  display: block;
+  width: var(--icon-size);
+  height: var(--icon-size);
+
+  span {
+    position: absolute;
+    left: 12%;
+    right: 12%;
+    height: 1.5px;
+    background: currentColor;
+    border-radius: 1px;
+    transition:
+      top 0.3s cubic-bezier(0.22, 1, 0.36, 1),
+      transform 0.3s cubic-bezier(0.22, 1, 0.36, 1),
+      opacity 0.2s ease;
+  }
+
+  span:nth-child(1) {
+    top: 32%;
+  }
+  span:nth-child(2) {
+    top: 50%;
+  }
+  span:nth-child(3) {
+    top: 68%;
+  }
+}
+
+// Открыто: верх/низ сходятся к центру и поворачиваются в ✕, средняя гаснет.
+.burgerOpen {
+  span:nth-child(1) {
+    top: 50%;
+    transform: rotate(45deg);
+  }
+  span:nth-child(2) {
+    opacity: 0;
+  }
+  span:nth-child(3) {
+    top: 50%;
+    transform: rotate(-45deg);
+  }
+}
+
+// ----- Иконочные кнопки (бургер / телефон / избранное) -----
+.iconBtn {
+  --icon-size: #{fluid(28)};
   display: inline-flex;
-  flex-direction: column;
+  align-items: center;
   justify-content: center;
-  gap: 5px;
-  width: 44px;
-  height: 44px;
-  padding: 10px;
+  padding: fluid(10);
+  color: var(--color-brown-dark);
   background: none;
   border: 0;
   cursor: pointer;
+  transition: color 0.2s ease;
 
-  span {
-    display: block;
-    height: 2px;
-    background: var(--color-fg);
-    border-radius: 2px;
+  &:hover {
+    color: var(--color-brown-medium);
   }
 
-  @include desktop {
+  svg {
+    display: block;
+    width: var(--icon-size);
+    height: var(--icon-size);
+  }
+
+  @include mobile {
+    --icon-size: #{fluid(20)};
+    padding: fluid(8); // тап-зона + выравнивание глифа к краю
+  }
+}
+
+// ----- Логотип по центру (абсолютно отцентрован) -----
+.logo {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: block;
+}
+
+.logoImg {
+  display: block;
+  width: auto;
+  height: fluid(40);
+  aspect-ratio: 248 / 40;
+
+  @include mobile {
+    height: fluid(24);
+  }
+}
+
+// ----- Телефон текстом (только десктоп, левая зона) -----
+.phone {
+  display: inline-block;
+  font-family: var(--font-display);
+  font-size: var(--fs-h4);
+  line-height: var(--lh-h4);
+  letter-spacing: var(--ls-h4);
+  text-transform: uppercase;
+  color: var(--color-brown-dark);
+  white-space: nowrap;
+
+  @include mobile {
     display: none;
   }
 }
 
-.nav {
+// ----- Телефон иконкой (только мобайл, правая зона) -----
+.phoneIcon {
   display: none;
-  position: absolute;
-  inset-inline: 0;
-  top: 100%;
-  flex-direction: column;
-  gap: var(--space-s);
-  padding: var(--space-s) var(--container-pad);
-  background: var(--color-bg);
-  border-bottom: 1px solid var(--color-border);
 
-  &.navOpen {
-    display: flex;
-  }
-
-  @include desktop {
-    position: static;
-    display: flex;
-    flex-direction: row;
-    gap: var(--space-m);
-    padding: 0;
-    background: none;
-    border: 0;
+  @include mobile {
+    display: revert;
   }
 }
 
-.navLink {
-  color: var(--color-muted);
-  transition: color 0.15s ease;
+// ----- CTA-кнопка «выбрать резиденцию» (только десктоп) -----
+.cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: fluid(48);
+  padding-inline: fluid(20);
+  font-family: var(--font-display);
+  font-size: var(--fs-button);
+  line-height: var(--lh-button);
+  letter-spacing: var(--ls-button);
+  text-transform: uppercase;
+  white-space: nowrap;
+  @include ctaSecondary;
 
-  &:hover {
-    color: var(--color-fg);
+  @include mobile {
+    display: none;
   }
 }

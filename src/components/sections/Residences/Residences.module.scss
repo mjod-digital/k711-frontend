@@ -1,0 +1,163 @@
+@use "breakpoints" as *;
+
+// ============================================================
+//   Residences — «46 резиденций».
+//   Мобайл: фото сверху (срез угла), текст — правая колонка под ним.
+//   Десктоп: фото слева (~половина), текст справа, по центру по вертикали.
+// ============================================================
+.residences {
+  // Десктоп: блоки примыкают; визуальные ~fluid(60) дают нижний паддинг Statement (40)
+  // + верхний отступ фото (20). Доп. margin не нужен.
+  margin-top: 0;
+  display: grid;
+  flex-direction: column;
+  grid-template-columns: 49% minmax(0, 1fr);
+  align-items: center;
+  column-gap: fluid(202);
+  padding: fluid(20);
+
+  @include mobile {
+    // Мобайл: реальный зазор fluid(60) от Statement (у него нет нижнего паддинга).
+    margin-top: fluid(60);
+    display: flex;
+    grid-template-columns: none;
+    align-items: stretch;
+    column-gap: normal;
+    padding: fluid(8) 0 0 0;
+  }
+}
+
+// ----- Фото со срезанным верхним-правым углом -----
+.media {
+  position: relative; // под next/image fill
+  margin: 0;
+  aspect-ratio: 690 / 768;
+  // срез угла (десктоп) — более пологий
+  clip-path: polygon(0 0, 85.5% 0, 100% 15%, 100% 100%, 0 100%);
+
+  @include mobile {
+    margin: 0 fluid(8); // мобайл: боковые отступы фото
+    aspect-ratio: 344 / 374;
+    // срез угла (мобайл) — из Figma-маски: 88.95% по верху → 32.1% по правому краю
+    clip-path: polygon(0 0, 88.95% 0, 100% 32.1%, 100% 100%, 0 100%);
+  }
+}
+
+.image {
+  object-fit: cover;
+  object-position: center;
+}
+
+// ----- Текстовая колонка -----
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: fluid(80);
+  align-self: center;
+  justify-self: end;
+  width: auto;
+  max-width: fluid(448);
+  margin-top: 0;
+  margin-inline-end: fluid(64);
+
+  @include mobile {
+    gap: fluid(28);
+    align-self: flex-end; // мобайл: правая колонка
+    justify-self: auto;
+    width: 71%; // ≈fluid(256) при 360 → левый зазор ≈fluid(96)
+    max-width: none;
+    margin-top: fluid(29); // отступ фото → текст
+    margin-inline-end: fluid(8);
+  }
+}
+
+// ----- Счётчик «46 / резиденций» -----
+.count {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  color: var(--color-brown-medium);
+  font-family: var(--font-display);
+  text-transform: uppercase;
+}
+
+.num {
+  font-size: var(--fs-h1); // 44 → 120
+  line-height: var(--lh-h1);
+  letter-spacing: var(--ls-h1);
+  margin-bottom: fluid(-12); // поджать «резиденций», как в макете
+
+  @include mobile {
+    margin-bottom: 0;
+  }
+}
+
+.word {
+  // кастомная шкала блока: fluid(28)@360 → fluid(68)@1440 (как в Statement)
+  font-size: var(--fs-lead);
+  line-height: 1.29; // 88/68
+  letter-spacing: -0.02em;
+
+  @include mobile {
+    line-height: 1.1;
+  }
+}
+
+// ----- Описание + кнопка -----
+.info {
+  display: flex;
+  flex-direction: column;
+  gap: fluid(40);
+
+  @include mobile {
+    gap: fluid(20);
+  }
+}
+
+.desc {
+  color: var(--color-fg);
+  font-family: var(--font-body);
+  font-size: var(--fs-body); // 14 → 20
+  line-height: 1.4;
+  letter-spacing: 0.01em;
+}
+
+// CTA: мобайл — залитая; десктоп — контурная (как в макете)
+.cta {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: fluid(48);
+  padding: fluid(13) fluid(20) fluid(12);
+  padding-block: fluid(13);
+  border: fluid(1) solid var(--color-brown-dark);
+  background: transparent;
+  color: var(--color-brown-dark);
+  font-family: var(--font-display);
+  font-size: var(--fs-button);
+  line-height: var(--lh-button);
+  letter-spacing: var(--ls-button);
+  white-space: nowrap;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease;
+
+  &:hover {
+    background: var(--color-brown-dark);
+    color: var(--color-badge-light);
+  }
+
+  @include mobile {
+    height: auto;
+    padding: fluid(13) fluid(20) fluid(12);
+    padding-block: fluid(13) fluid(12);
+    background: var(--color-brown-dark);
+    color: var(--color-badge-light);
+
+    &:hover {
+      background: transparent;
+      color: var(--color-brown-dark);
+    }
+  }
+}

@@ -1,0 +1,57 @@
+@use "breakpoints" as *;
+
+// ============================================================
+//   CascadeHeading — каскадный многострочный заголовок.
+//   Строка слева/по центру/справа; части обычные (28→68) или
+//   крупные (44→120, как H1). Дисплейный шрифт, uppercase.
+//   Тон: brown (на креме) / white (поверх фото).
+// ============================================================
+.heading {
+  display: flex;
+  flex-direction: column;
+  font-family: var(--font-display);
+  text-transform: uppercase;
+}
+
+.brown {
+  color: var(--color-brown-medium);
+}
+
+.white {
+  color: var(--color-white);
+}
+
+.line {
+  display: flex;
+  align-items: flex-start;
+  gap: fluid(12);
+
+  // лёгкое наложение строк, как в макете (mb -12)
+  &:not(:first-child) {
+    margin-top: -0.06em;
+  }
+}
+
+.alignStart {
+  align-self: flex-start;
+}
+.alignCenter {
+  align-self: center;
+}
+.alignEnd {
+  align-self: flex-end;
+}
+.alignCustom {
+  padding-left: fluid(125);
+}
+
+.lg {
+  font-size: var(--fs-lead); // 28 → 68
+  line-height: 1.1;
+}
+
+.big {
+  font-size: var(--fs-h1); // 44 → 120
+  line-height: var(--lh-h1);
+  letter-spacing: -0.02em;
+}

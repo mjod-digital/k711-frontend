@@ -1,0 +1,54 @@
+@use "breakpoints" as *;
+
+// Каскадный заголовок на кремовом (напр. «перейти в режим тихой пресни»).
+.section {
+  max-width: fluid(890);
+  width: 100%;
+  margin: 0 auto;
+
+  @include mobile {
+    margin-top: fluid(60);
+    padding-block: fluid(0);
+    padding-inline: fluid(8);
+  }
+}
+
+.heading {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  color: var(--color-brown-medium);
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  @include mobile {
+    padding-left: fluid(12);
+  }
+}
+
+.l1 {
+  font-size: var(--fs-lead);
+  line-height: 1.29;
+  letter-spacing: -0.02em;
+}
+
+.l2 {
+  display: flex;
+  align-items: flex-start;
+  gap: fluid(12);
+  margin-left: fluid(130);
+  @include mobile {
+    margin-left: unset;
+  }
+}
+
+.lg {
+  font-size: var(--fs-lead);
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+}
+
+.big {
+  font-size: var(--fs-h1);
+  line-height: var(--lh-h1);
+  letter-spacing: -0.02em;
+}

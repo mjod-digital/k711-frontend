@@ -1,17 +1,74 @@
-// Единственный источник правды по брейкпоинту «мобильный ↔ десктопный».
-// Должен совпадать с min-шириной десктоп-артборда в Figma (десктоп 1440, мобилка 360).
+// Единственный источник правды по брейкпоинту «десктоп ↔ мобильный».
+// Граница = min-ширина десктоп-артборда Figma (десктоп 1440, мобилка 360).
 $bp-desktop: 768px;
 
-// Mobile-first: базовые стили = мобильный макет, миксин включает десктопный.
+// Desktop-first: базовые стили = десктоп, миксин mobile включает мобильные
+// переопределения через max-width.
+@mixin mobile {
+  @media (max-width: ($bp-desktop - 0.02px)) {
+    @content;
+  }
+}
+
+// Обратное направление (на всякий случай / редкие desktop-only стили).
 @mixin desktop {
   @media (min-width: $bp-desktop) {
     @content;
   }
 }
 
-// На случай стилей только для мобильного диапазона.
-@mixin mobile-only {
-  @media (max-width: ($bp-desktop - 0.02px)) {
-    @content;
+// «Резина»: значение из макета в px → пропорция от ширины вьюпорта.
+// fluid(20) => calc(20 / var(--vw-screen) * 100 * 1vw).
+// --vw-screen — ширина текущего артборда (1440 десктоп / 360 мобайл),
+// задаётся в globals.scss. На опорной ширине fluid($px) == $px.
+@function fluid($px) {
+  @return calc(#{$px} / var(--vw-screen) * 100 * 1vw);
+}
+
+// ----- Состояния кнопок (Figma 232-3487). Только цвета/границы/переходы;
+// размеры/паддинги задаёт сам компонент. -----
+// Контурная (secondary): def — контур; hover — заливка тёмная; active — темнее + светлый текст.
+@mixin ctaSecondary {
+  border: 1px solid var(--color-brown-dark);
+  background: transparent;
+  color: var(--color-brown-dark);
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease;
+
+  &:hover {
+    background: var(--color-brown-dark);
+    border-color: var(--color-brown-dark);
+    color: var(--color-badge-light-2);
+  }
+
+  &:active {
+    background: var(--color-brown-dark-2);
+    border-color: var(--color-brown-dark-2);
+    color: var(--color-brown-light);
+  }
+}
+
+// Залитая (primary): def — тёмная; hover — темнее; active — ещё темнее + светлый текст.
+@mixin ctaPrimary {
+  border: 1px solid var(--color-brown-dark);
+  background: var(--color-brown-dark);
+  color: var(--color-badge-light);
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease;
+
+  &:hover {
+    background: var(--color-brown-dark-2);
+    border-color: var(--color-brown-dark-2);
+    color: var(--color-badge-light-2);
+  }
+
+  &:active {
+    background: var(--color-brown-dark-3);
+    border-color: var(--color-brown-dark-3);
+    color: var(--color-brown-light);
   }
 }

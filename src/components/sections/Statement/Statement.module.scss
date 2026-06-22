@@ -1,0 +1,94 @@
+@use "breakpoints" as *;
+
+// ============================================================
+//   Statement — «В центре культурной Москвы».
+//   Фон кремовый — наследуется от --color-bg (вся страница кремовая),
+//   поэтому собственного фона у секции нет.
+//   Контент — правая колонка, слева большое негативное пространство.
+// ============================================================
+.statement {
+  margin-top: fluid(60); // отступ от Hero (оба брейкпоинта)
+
+  // Десктоп: блок с собственными паддингами.
+  display: block;
+  padding: fluid(40) fluid(20) fluid(40) 0;
+
+  @include mobile {
+    // Мобайл: правая колонка ~71% ширины, прижата вправо.
+    display: flex;
+    justify-content: flex-end;
+    padding: 0;
+    padding-inline-end: fluid(8);
+    margin-bottom: fluid(80); // отступ от следующей секции
+  }
+}
+
+.inner {
+  width: 100%;
+  max-width: fluid(867);
+  margin-left: auto; // прижато вправо, левый офсет растёт до ~fluid(553) при 1440
+  display: flex;
+  flex-direction: column;
+  gap: fluid(40);
+
+  @include mobile {
+    width: 71%; // левый зазор ≈fluid(96) при 360
+    max-width: none;
+    margin-left: 0;
+    gap: fluid(12); // заголовок ↔ текст (мобайл)
+  }
+}
+
+.heading {
+  display: flex;
+  flex-direction: column; // строки-спаны друг под другом (для построчной шторки)
+  width: 100%;
+  color: var(--color-brown-medium);
+  font-family: var(--font-display);
+  // Кастомная шкала блока: fluid(28)@360 → fluid(68)@1440
+  font-size: var(--fs-lead);
+  line-height: 1.25;
+  letter-spacing: -0.02em;
+  text-transform: uppercase;
+  text-wrap: wrap; // перенос по ширине колонки (override reset balance)
+}
+
+.body {
+  display: flex;
+  flex-direction: row;
+  gap: fluid(20);
+  max-width: fluid(690);
+
+  @include mobile {
+    flex-direction: column;
+    max-width: none;
+  }
+}
+
+.paragraph {
+  color: var(--color-fg);
+  font-family: var(--font-body);
+  // Кастомная шкала блока: fluid(14)@360 → fluid(20)@1440
+  font-size: var(--fs-body);
+  line-height: 1.4;
+  letter-spacing: 0.01em;
+
+  // Десктоп: P1 тянется, P2 фиксированной ширины.
+  &:first-child {
+    flex: 1;
+
+    @include mobile {
+      flex: 0 1 auto;
+    }
+  }
+
+  &:last-child {
+    width: fluid(335);
+    flex-shrink: 0;
+
+    @include mobile {
+      width: auto;
+      flex-shrink: 1;
+    }
+  }
+}

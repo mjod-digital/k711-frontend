@@ -1,0 +1,50 @@
+@use "breakpoints" as *;
+
+// ============================================================
+//   HistoricCenter — «ИСТОРИЧЕСКИЙ / центр москвы».
+//   Только текст на кремовом (фон Cam_07 в макете перекрыт кремом).
+//   line1 слева, line2 — крупно ниже и прижата вправо.
+// ============================================================
+.historic {
+  margin-top: 0; // десктоп: внутренний паддинг даёт визуальный зазор
+  padding-block: fluid(80);
+  padding-inline: fluid(123);
+
+  @include mobile {
+    margin-top: fluid(68); // мобайл: ритм между блоками
+    padding-block: fluid(17);
+    padding-inline: fluid(8);
+  }
+}
+
+.title {
+  display: flex;
+  flex-direction: column;
+  color: var(--color-brown-medium);
+  font-family: var(--font-display);
+  text-transform: uppercase;
+}
+
+.line1 {
+  align-self: flex-start;
+  // кастомная шкала: 36@360 → 120@1440
+  font-size: fluid(120);
+  line-height: 1;
+
+  @include mobile {
+    font-size: fluid(36);
+  }
+}
+
+.line2 {
+  padding-left: fluid(660);
+  // кастомная шкала: fluid(28)@360 → fluid(68)@1440 (как в Statement / Residences)
+  font-size: var(--fs-lead);
+  line-height: 1.29; // 88/68
+  letter-spacing: -0.02em;
+
+  @include mobile {
+    line-height: 1.1;
+    padding-left: fluid(130);
+  }
+}

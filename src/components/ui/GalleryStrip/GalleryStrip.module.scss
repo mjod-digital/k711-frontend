@@ -1,0 +1,174 @@
+@use "breakpoints" as *;
+
+// ============================================================
+//   GalleryStrip — горизонтальная лента кадров разной ширины
+//   (макет 373-10064). Десктоп: «пин» секции + прокрутка ленты по
+//   вертикальному скроллу (sticky + translateX, без перехвата колеса).
+//   Мобайл / reduced-motion: обычный горизонтальный скролл.
+// ============================================================
+.section {
+  position: relative;
+  background: var(--color-bg);
+
+  @include mobile {
+    margin-top: fluid(110);
+  }
+}
+
+.sticky {
+  background: var(--color-bg);
+}
+
+// ----- Пин-режим (десктоп) -----
+// Высота полосы = МАКЕТНАЯ (контент), НЕ 100vh. По вертикали полосу центрирует
+// JS (sticky.top из замера), поэтому здесь только sticky + клип ленты.
+.pinned .sticky {
+  position: sticky;
+  top: 0;
+  display: flex;
+  align-items: flex-start;
+  overflow: hidden; // лента шире экрана — клипаем, без горизонтального скролла страницы
+}
+
+.pinned .track {
+  display: flex;
+  align-items: flex-start;
+  gap: fluid(80);
+  padding-inline: fluid(40);
+  width: max-content;
+  will-change: transform;
+}
+
+// ----- Нативный горизонтальный скролл (мобайл / reduced-motion) -----
+.native .sticky {
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+
+  // Мобайл: не лента, а вертикальная «шахматная» колонка (макет 373-12515) —
+  // горизонтальный скролл выключаем, секция течёт по высоте страницы.
+  @include mobile {
+    overflow: visible;
+  }
+}
+
+.native .track {
+  display: flex;
+  align-items: flex-start;
+  gap: fluid(40);
+  padding-inline: fluid(20);
+  width: max-content;
+
+  @include mobile {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: fluid(40);
+    padding-inline: 0;
+    width: auto;
+  }
+}
+
+// ----- Кадр -----
+.item {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: fluid(16);
+
+  @include mobile {
+    gap: fluid(8);
+  }
+}
+
+// Макетные размеры (явные width/height — иначе aspect-ratio+height в flex даёт
+// нулевую ширину на мобиле/Safari, и картинки не видны).
+// Высота: макетные 680, но если экран ниже — ужимаем под вьюпорт (min). 78vh
+// оставляет запас под подпись + центрирование внутри 100vh-пина.
+.imageBox {
+  position: relative;
+  height: min(fluid(680), 78vh);
+  overflow: hidden;
+}
+
+.wide .imageBox {
+  width: fluid(1100);
+
+  // Мобайл: широкий кадр почти во всю ширину (344×260 @360, макет 373-12515).
+  @include mobile {
+    width: fluid(344);
+    height: fluid(260);
+  }
+}
+
+.narrow .imageBox {
+  width: fluid(520);
+
+  // Мобайл: узкий кадр 212×262 @360 (макет 373-12515).
+  @include mobile {
+    width: fluid(212);
+    height: fluid(262);
+  }
+}
+
+// Мобайл — горизонтальные смещения «шахматки» (макет 373-12515):
+// широкий кадр прижат к левому краю (8px), узкие чередуют сдвиг вправо/влево.
+.wide {
+  @include mobile {
+    margin-left: fluid(8);
+  }
+}
+
+.narrow[data-side="right"] {
+  @include mobile {
+    margin-left: fluid(96);
+
+    .imageBox {
+      height: fluid(266); // макет 373-12515: первый узкий кадр чуть выше
+    }
+  }
+}
+
+.narrow[data-side="left"] {
+  @include mobile {
+    margin-left: fluid(52);
+
+    .imageBox {
+      height: fluid(260); // макет 373-12515: второй узкий кадр чуть ниже
+    }
+  }
+}
+
+// Слой параллакса. Десктоп — без сдвига (inset 0). Мобайл — картинка с запасом
+// сверху/снизу, сдвиг по --par текущего кадра (см. JS), эффект «глубины» при скролле.
+.parallax {
+  position: absolute;
+  inset: 0;
+
+  @include mobile {
+    inset: -8% 0;
+    will-change: transform;
+    transform: translate3d(0, calc(var(--par, 0) * 8%), 0);
+  }
+}
+
+.image {
+  object-fit: cover;
+  object-position: center;
+}
+
+.caption {
+  color: var(--color-brown-medium);
+  font-family: var(--font-body);
+  font-size: fluid(14);
+  line-height: fluid(16);
+  letter-spacing: 0.01em;
+
+  @include mobile {
+    font-size: fluid(12);
+  }
+}

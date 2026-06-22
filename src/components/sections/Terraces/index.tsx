@@ -1,0 +1,117 @@
+"use client";
+
+import Image from "next/image";
+import { useRef, useState } from "react";
+import { CascadeHeading } from "@/components/ui/CascadeHeading";
+import { useIsomorphicLayoutEffect } from "@/lib/useIsomorphicLayoutEffect";
+import styles from "./Terraces.module.scss";
+
+const clamp01 = (v: number) => Math.min(1, Math.max(0, v));
+
+export function Terraces() {
+  const ref = useRef<HTMLElement>(null);
+  const [mobile, setMobile] = useState(false);
+
+  // Мобайл (макет 373-12537): заголовок в 3 строки и уже; десктоп — 2 строки.
+  useIsomorphicLayoutEffect(() => {
+    const mql = window.matchMedia("(max-width: 767.98px)");
+    const decide = () => setMobile(mql.matches);
+    decide();
+    mql.addEventListener("change", decide);
+    return () => mql.removeEventListener("change", decide);
+  }, []);
+
+  // Скролл-скраб: --p (0→1) по проходу секции. Заголовок опускается вниз НА фото,
+  // фото разворачивается сверху вниз, текст всплывает. Демпфирование (lerp) →
+  // плавно. reduced-motion → сразу финальное состояние.
+  useIsomorphicLayoutEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      el.style.setProperty("--p", "1");
+      return;
+    }
+    let v = 0;
+    let raf = 0;
+    let ticking = false;
+    const tick = () => {
+      const rect = el.getBoundingClientRect();
+      const vh = window.innerHeight || 1;
+      const target = clamp01((vh - rect.top) / (vh * 0.9));
+      v += (target - v) * 0.085;
+      const settled = Math.abs(target - v) < 0.0004;
+      if (settled) v = target;
+      el.style.setProperty("--p", String(v));
+      // фото разворачивается ПОЗЖЕ — когда заголовок/текст уже наезжает на него
+      el.style.setProperty("--pu", String(clamp01((v - 0.4) / 0.6)));
+      if (!settled) raf = requestAnimationFrame(tick);
+      else ticking = false;
+    };
+    const wake = () => {
+      if (!ticking) {
+        ticking = true;
+        raf = requestAnimationFrame(tick);
+      }
+    };
+    wake();
+    window.addEventListener("scroll", wake, { passive: true });
+    window.addEventListener("resize", wake);
+    return () => {
+      window.removeEventListener("scroll", wake);
+      window.removeEventListener("resize", wake);
+      cancelAnimationFrame(raf);
+      ticking = false;
+    };
+  }, []);
+
+  return (
+    <section ref={ref} className={styles.terraces}>
+      <div className={styles.headingWrap}>
+        <CascadeHeading
+          as="h2"
+          lines={
+            mobile
+              ? [
+                  { parts: [{ text: "Дом,", big: true }] },
+                  { parts: [{ text: "где история", big: true }] },
+                  { parts: [{ text: "не замолкает", big: true }] },
+                ]
+              : [
+                  { parts: [{ text: "Дом, где история", big: true }] },
+                  { parts: [{ text: "не замолкает", big: true }] },
+                ]
+          }
+          className={styles.heading}
+        />
+      </div>
+
+      <div className={styles.row}>
+        <div className={styles.media}>
+          <div className={styles.unfold}>
+            <Image
+              src="/images/terraces.png"
+              alt="Фасад k711 — сохранённая историческая стена"
+              fill
+              sizes="(min-width: 768px) 37vw, 100vw"
+              className={styles.image}
+            />
+          </div>
+        </div>
+
+        <div className={styles.cols}>
+          <p className={styles.paragraph}>
+            В основании k 7/11 — стена первого московского «тучереза», построенного
+            Эрнстом-Рихардом Нирнзее в 1905 году. Она бережно сохранена и стала
+            частью нового облика дома. Современные линии панорамных окон и чёткая
+            геометрия фасада не спорят с историей — они подчёркивают её, создавая
+            контрастную гармонию.
+          </p>
+          <p className={styles.paragraph}>
+            Проект Сергея Чобана превращает здание в архитектурный диалог: каждый
+            элемент здесь — одновременно жест уважения к прошлому и шаг вперёд.
+          </p>
+        </div>
+      </div>
+    </section>
+  );
+}

@@ -1,90 +1,129 @@
 @use "breakpoints" as *;
 
-.inner {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-l);
+.hero {
+  background: var(--color-badge-light); // кремовое поле под скруглённым фото
+  padding-inline: fluid(20); // десктоп
 
-  @include desktop {
-    flex-direction: row;
-    align-items: center;
+  @include mobile {
+    padding-inline: fluid(8); // боковые отступы фото (мобайл)
+    padding-bottom: fluid(8); // отступ снизу, чтобы фото не упиралось в экран
   }
 }
 
-.content {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-s);
-
-  @include desktop {
-    flex: 1 1 55%;
+// ----- Фото-сцена -----
+.media {
+  position: relative;
+  height: calc(100svh - var(--header-h)); // фото на всю высоту экрана под хедером
+  min-height: fluid(480);
+  overflow: hidden;
+  isolation: isolate; // локальный stacking-контекст для слоёв
+  @include mobile {
+    height: calc(100svh - var(--header-h) - fluid(8));
   }
 }
 
-.eyebrow {
-  font-size: var(--fs-300);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--color-muted);
+// Слой параллакса: выше media на 12% сверху/снизу — запас под сдвиг.
+.parallax {
+  position: absolute;
+  inset: -12% 0;
+  z-index: 0;
+  will-change: transform;
+  transform: translate3d(0, var(--py, 0%), 0);
+}
+
+.image {
+  object-fit: cover;
+  object-position: center;
+}
+
+// затемнение снизу — чтобы белый текст читался поверх фото
+.media::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: linear-gradient(
+    to top,
+    rgba(27, 9, 11, 0.6) 0%,
+    rgba(27, 9, 11, 0) 55%
+  );
+  pointer-events: none;
+}
+
+// ----- Текстовый блок (по центру, прижат к низу) -----
+.overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  gap: fluid(60);
+  padding: 0 fluid(16) fluid(48);
+  text-align: center;
+
+  @include mobile {
+    gap: fluid(20);
+    padding-bottom: fluid(40);
+    padding-inline: unset;
+  }
 }
 
 .title {
-  font-size: var(--fs-700);
-  font-weight: 700;
-  letter-spacing: -0.02em;
-}
-
-.subtitle {
-  font-size: var(--fs-500);
-  color: var(--color-muted);
-  max-width: 52ch;
-}
-
-.actions {
   display: flex;
   flex-direction: column;
-  gap: var(--space-xs);
-  margin-top: var(--space-xs);
-
-  @include desktop {
-    flex-direction: row;
-  }
+  align-items: center; // строки-спаны по центру (под построчную шторку)
+  max-width: fluid(1236);
+  color: var(--color-white);
+  font-family: var(--font-display);
+  font-size: var(--fs-h1);
+  line-height: var(--lh-h1);
+  letter-spacing: var(--ls-h1);
+  text-transform: uppercase;
 }
 
-.primary,
-.secondary {
+// ----- Кнопка «выбрать резиденцию» (светлый вариант поверх фото) -----
+.cta {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 0.75rem 1.5rem;
-  border-radius: var(--radius);
-  font-weight: 600;
-  transition: opacity 0.15s ease, background-color 0.15s ease;
-}
+  height: fluid(48);
+  padding-inline: fluid(20);
+  border: 1px solid var(--color-badge-light);
+  color: var(--color-badge-light);
+  font-family: var(--font-display);
+  font-size: var(--fs-button);
+  line-height: var(--lh-button);
+  letter-spacing: var(--ls-button);
+  white-space: nowrap;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease;
 
-.primary {
-  background: var(--color-accent);
-  color: var(--color-accent-fg);
+  // Появление через opacity (после заголовка). reduced-motion → сразу видна.
+  @media (prefers-reduced-motion: no-preference) {
+    opacity: 0;
+    animation: heroCtaIn 0.6s ease 0.9s forwards;
+  }
 
   &:hover {
-    opacity: 0.9;
+    background: var(--color-badge-light);
+    color: var(--color-brown-dark);
+  }
+
+  @include mobile {
+    height: fluid(44);
   }
 }
 
-.secondary {
-  border: 1px solid var(--color-border);
-
-  &:hover {
-    background: var(--color-border);
+@keyframes heroCtaIn {
+  from {
+    opacity: 0;
+    transform: translateY(fluid(8));
   }
-}
-
-.media {
-  aspect-ratio: 4 / 3;
-  border-radius: var(--radius);
-  background: linear-gradient(135deg, var(--color-border), #f4f6fa);
-
-  @include desktop {
-    flex: 1 1 45%;
+  to {
+    opacity: 1;
+    transform: none;
   }
 }

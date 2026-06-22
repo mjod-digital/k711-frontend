@@ -1,0 +1,106 @@
+@use "breakpoints" as *;
+
+// ============================================================
+//   TextDuo — заголовок + два текстовых столбца.
+//   variant=right — правая колонка (как Statement);
+//   variant=full — на всю ширину.
+// ============================================================
+.section {
+  margin-top: 0;
+
+  @include mobile {
+    margin-top: fluid(60);
+  }
+}
+
+.right {
+  display: block;
+  justify-content: flex-end;
+  padding: fluid(75) fluid(20) fluid(75) 0;
+
+  @include mobile {
+    display: flex;
+    padding: 0 fluid(8) 0 0;
+  }
+}
+
+.full {
+  padding: 0 fluid(20);
+
+  @include mobile {
+    padding: fluid(17) fluid(8);
+  }
+}
+
+.inner {
+  display: flex;
+  flex-direction: column;
+  gap: fluid(60);
+
+  @include mobile {
+    gap: fluid(28);
+  }
+}
+
+.right .inner {
+  width: 100%;
+  max-width: fluid(867);
+  margin-left: auto;
+
+  @include mobile {
+    width: 71%;
+    max-width: none;
+    margin-left: 0;
+  }
+}
+
+.full .inner {
+  width: 100%;
+}
+
+.heading {
+  width: 100%;
+}
+
+.body {
+  display: flex;
+  flex-direction: row;
+  gap: fluid(20);
+
+  @include mobile {
+    flex-direction: column;
+    gap: fluid(20);
+  }
+}
+
+.right .body {
+  max-width: fluid(690);
+
+  @include mobile {
+    max-width: none;
+  }
+}
+
+.paragraph {
+  color: var(--color-fg);
+  font-family: var(--font-body);
+  font-size: var(--fs-body); // 14 → 20
+  line-height: 1.4;
+  letter-spacing: 0.01em;
+  flex: 1;
+  max-width: fluid(512);
+  width: 100%;
+
+  @include mobile {
+    flex: 0 1 auto;
+  }
+}
+
+// right: вторая колонка фикс. ширины (как Statement)
+.right .paragraph:last-child {
+  flex: 0 0 fluid(335);
+
+  @include mobile {
+    flex: 0 1 auto;
+  }
+}
