@@ -1,0 +1,56 @@
+@use "breakpoints" as *;
+
+// ============================================================
+//   Surroundings — «в окружении / ЛЮБИМЫХ / музеев и ресторанов».
+//   Каскад на кремовом: строка слева, большая по центру, справа.
+// ============================================================
+.surroundings {
+  padding-block: fluid(68);
+  // padding-inline: fluid(198);
+  max-width: fluid(1045);
+  width: 100%;
+  margin: 0 auto;
+
+  @include mobile {
+    margin-top: fluid(60);
+    padding-block: fluid(17);
+    padding-inline: fluid(8);
+  }
+}
+
+.title {
+  display: flex;
+  flex-direction: column;
+  color: var(--color-brown-medium);
+  font-family: var(--font-display);
+  text-transform: uppercase;
+}
+
+.line1 {
+  align-self: flex-start;
+  font-size: var(--fs-lead); // 28 → 68
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+}
+
+.line2 {
+  margin-left: fluid(170);
+  font-size: var(--fs-h1); // 44 → 120
+  line-height: var(--lh-h1);
+  letter-spacing: var(--ls-h1);
+
+  @include mobile {
+    margin-left: fluid(43);
+  }
+}
+
+.line3 {
+  font-size: var(--fs-lead); // 28 → 68
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  margin-left: fluid(245);
+
+  @include mobile {
+    margin-left: fluid(30);
+  }
+}

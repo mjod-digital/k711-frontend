@@ -1,0 +1,142 @@
+@use "breakpoints" as *;
+
+// ============================================================
+//   Presentation — «ПРЕЗЕНТАЦИЯ О ПРОЕКТЕ».
+//   Фото с диагональным срезом + текст и кнопка скачивания.
+//   Мобайл: фото сверху (срез снизу), текст ниже (правая колонка).
+//   Десктоп: фото слева (срез справа), текст справа по центру.
+// ============================================================
+.presentation {
+  background: var(--color-badge-light);
+  display: block;
+  flex-direction: column;
+  position: relative;
+  aspect-ratio: 1440 / 860;
+
+  @include mobile {
+    margin-top: fluid(60);
+    display: flex;
+    position: static;
+    aspect-ratio: auto;
+  }
+}
+
+.media {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 58%;
+  height: 100%;
+  aspect-ratio: auto;
+  clip-path: polygon(0 0, 100% 0, 72% 100%, 0 100%); // десктоп: срез справа
+
+  @include mobile {
+    position: relative;
+    inset: auto;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 360 / 220;
+    clip-path: polygon(0 0, 100% 0, 100% 84%, 0 100%); // мобайл: срез снизу
+  }
+}
+
+// Разворот слева направо (clip), scrubbed по --intro. Плавность даёт
+// демпфирование --intro в JS (lerp), а не CSS-transition.
+.unfold {
+  position: absolute;
+  inset: 0;
+  clip-path: inset(0 calc((1 - var(--intro, 0)) * 100%) 0 0);
+  will-change: clip-path;
+}
+
+.image {
+  object-fit: cover;
+  object-position: center;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .unfold {
+    clip-path: none;
+  }
+}
+
+.content {
+  position: absolute;
+  top: 50%;
+  right: fluid(120);
+  transform: translateY(-50%);
+  align-self: auto;
+  width: min(35%, fluid(448));
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: fluid(20);
+
+  @include mobile {
+    position: static;
+    top: auto;
+    right: auto;
+    transform: none;
+    align-self: flex-end;
+    width: 71%;
+    margin-top: fluid(16);
+    margin-inline-end: fluid(8);
+    gap: fluid(28);
+  }
+}
+
+.title {
+  color: var(--color-brown-medium);
+  font-family: var(--font-display);
+  font-size: var(--fs-lead); // 28 → 68
+  line-height: 1.29; // 88/68
+  letter-spacing: -0.02em;
+  text-transform: uppercase;
+
+  @include mobile {
+    line-height: 1.1;
+  }
+}
+
+.info {
+  display: flex;
+  flex-direction: column;
+  gap: fluid(40);
+
+  @include mobile {
+    max-width: fluid(230);
+    gap: fluid(20);
+  }
+}
+
+.desc {
+  color: var(--color-fg);
+  font-family: var(--font-body);
+  font-size: var(--fs-body); // 14 → 20
+  line-height: 1.4;
+  letter-spacing: 0.01em;
+  max-width: fluid(320);
+}
+
+// CTA — залитая тёмная кнопка
+.cta {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: fluid(13) fluid(20) fluid(12);
+  font-family: var(--font-display);
+  font-size: var(--fs-button);
+  line-height: var(--lh-button);
+  letter-spacing: var(--ls-button);
+  white-space: nowrap;
+  cursor: pointer;
+  @include ctaPrimary;
+
+  height: fluid(48);
+  padding-block: fluid(13);
+
+  @include mobile {
+    height: auto;
+    padding-block: fluid(13) fluid(12);
+  }
+}

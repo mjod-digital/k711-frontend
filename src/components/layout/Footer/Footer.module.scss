@@ -1,39 +1,119 @@
 @use "breakpoints" as *;
 
 .footer {
-  border-top: 1px solid var(--color-border);
-  padding-block: var(--space-l);
-}
+  flex-shrink: 0;
+  margin-top: fluid(80);
+  padding: fluid(40) fluid(20);
+  background: var(--color-brown-dark-2);
+  color: #f1f2f2;
 
-.inner {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-s);
-  align-items: center;
-  text-align: center;
-
-  @include desktop {
-    flex-direction: row;
-    justify-content: space-between;
-    text-align: start;
+  @include mobile {
+    margin-top: fluid(60);
+    padding: fluid(40) fluid(8);
+    position: relative;
   }
 }
 
-.copy {
-  color: var(--color-muted);
-  font-size: var(--fs-300);
+.main {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: fluid(40);
+
+  @include mobile {
+    flex-direction: column;
+    justify-content: normal;
+    align-items: normal;
+    gap: fluid(32);
+  }
+}
+
+.logo {
+  width: fluid(248);
+  height: auto;
+
+  @include mobile {
+    align-self: auto;
+    width: fluid(200);
+  }
 }
 
 .nav {
   display: flex;
-  gap: var(--space-m);
+  gap: fluid(200);
+
+  @include mobile {
+    gap: fluid(40);
+  }
+}
+
+.col {
+  display: flex;
+  flex-direction: column;
+  gap: fluid(12);
+  list-style: none;
 }
 
 .link {
-  color: var(--color-muted);
-  font-size: var(--fs-300);
+  font-family: var(--font-body);
+  font-size: fluid(14);
+  line-height: fluid(16);
+  letter-spacing: 0.01em;
+  transition: opacity 0.2s ease;
 
   &:hover {
-    color: var(--color-fg);
+    opacity: 0.7;
+  }
+}
+
+.contacts {
+  display: flex;
+  flex-direction: column;
+  gap: fluid(12);
+  font-family: var(--font-body);
+  font-size: var(--fs-p1); // 16 → 20
+  font-style: normal;
+  color: var(--color-white);
+  text-align: right;
+
+  @include mobile {
+    text-align: left;
+  }
+}
+
+.bottom {
+  margin-top: fluid(40);
+
+  @include mobile {
+    margin-top: fluid(16);
+  }
+}
+
+.disclaimer {
+  max-width: fluid(1400);
+  color: var(--color-brown-light);
+  font-family: var(--font-body);
+  font-size: fluid(12);
+  line-height: fluid(16);
+  letter-spacing: 0.01em;
+  text-align: justify;
+}
+
+// Логотип MR Private — картинка, прижата вправо под адрес (макет 373-10117).
+.mrLogo {
+  display: block;
+  width: fluid(134);
+  height: auto;
+  margin-top: fluid(32);
+  margin-left: auto;
+
+  @include mobile {
+    margin-top: fluid(24);
+    margin-left: 0; // на мобайле — по левому краю, как остальной контент
+    position: absolute;
+    bottom: fluid(255);
+    right: fluid(70);
+    width: fluid(105);
   }
 }

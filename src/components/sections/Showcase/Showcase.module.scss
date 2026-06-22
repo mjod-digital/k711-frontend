@@ -1,0 +1,243 @@
+@use "breakpoints" as *;
+
+// ============================================================
+//   Showcase — Residences + 2×FeatureScreen в одном scroll-lock блоке.
+//   Десктоп (.pinned): секция залипает, скролл ведёт прогресс по шагам.
+//   Каждый шаг: картинка разворачивается сверху вниз (clip), текст —
+//   шторкой снизу вверх, потом параллакс. Шаги стоят стопкой (absolute),
+//   будущие клипнуты «в ноль» (прозрачны), активный разворачивается над
+//   предыдущим. Мобайл / reduced-motion (.static): обычная стопка блоков.
+// ============================================================
+.section {
+  position: relative;
+  background: var(--color-bg);
+}
+
+// ---------- Пин-режим ----------
+.pinned {
+  height: calc(var(--steps, 3) * 100vh);
+}
+
+.pinned .stage {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.pinned .step {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  column-gap: fluid(202);
+  padding: fluid(20);
+  pointer-events: none; // перекрытие будущих/прошлых не блокирует активный
+}
+
+.pinned .step[data-state="active"] {
+  pointer-events: auto;
+}
+
+// ---------- Медиа (фото со срезом угла) ----------
+.media {
+  position: relative;
+  justify-self: start;
+  height: min(fluid(768), 82vh); // всегда влезает по высоте
+  aspect-ratio: 690 / 768;
+  clip-path: polygon(0 0, 85.5% 0, 100% 15%, 100% 100%, 0 100%);
+}
+
+// Разворот СНИЗУ ВВЕРХ, scrubbed по --intro (0 — скрыт, 1 — раскрыт). Плавность
+// даёт демпфирование --intro в JS (lerp), а не CSS-transition — clip следует
+// за сглаженным прогрессом покадрово. Активный раскрывается над предыдущим.
+.unfold {
+  position: absolute;
+  inset: 0;
+  clip-path: inset(calc((1 - var(--intro, 0)) * 100%) 0 0 0);
+  will-change: clip-path;
+}
+
+// Слой параллакса (запас сверху/снизу), сдвиг по --par текущего шага.
+.parallax {
+  position: absolute;
+  inset: -8% 0;
+  will-change: transform;
+  transform: translate3d(0, calc(var(--par, 0) * 8%), 0);
+
+  // Мобайл — параллакс чуть заметнее (больше амплитуда сдвига).
+  @include mobile {
+    inset: -12% 0;
+    transform: translate3d(0, calc(var(--par, 0) * 12%), 0);
+  }
+}
+
+.image {
+  object-fit: cover;
+  object-position: center;
+}
+
+// ---------- Текст (правая колонка) ----------
+.content {
+  align-self: center;
+  justify-self: end;
+  display: flex;
+  flex-direction: column;
+  width: auto;
+  max-width: fluid(512);
+  margin-inline-end: fluid(64);
+}
+
+// Шторка текста снизу вверх, scrubbed по --introText.
+.textClip {
+  display: flex;
+  flex-direction: column;
+  gap: fluid(80);
+  clip-path: inset(calc((1 - var(--introText, 0)) * 100%) 0 0 0);
+  will-change: clip-path;
+}
+
+// ----- Счётчик «46 / резиденций» -----
+.count {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  color: var(--color-brown-medium);
+  font-family: var(--font-display);
+  text-transform: uppercase;
+}
+
+.num {
+  font-size: var(--fs-h1);
+  line-height: var(--lh-h1);
+  letter-spacing: var(--ls-h1);
+  margin-bottom: fluid(-12);
+}
+
+.word {
+  font-size: var(--fs-lead);
+  line-height: 1.29;
+  letter-spacing: -0.02em;
+}
+
+// ----- Описание + кнопка -----
+.info {
+  display: flex;
+  flex-direction: column;
+  gap: fluid(40);
+}
+
+.desc {
+  max-width: fluid(350);
+  color: var(--color-fg);
+  font-family: var(--font-body);
+  font-size: var(--fs-body);
+  line-height: 1.4;
+  letter-spacing: 0.01em;
+}
+
+.cta {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: fluid(48);
+  padding: fluid(13) fluid(20);
+  font-family: var(--font-display);
+  font-size: var(--fs-button);
+  line-height: var(--lh-button);
+  letter-spacing: var(--ls-button);
+  white-space: nowrap;
+  cursor: pointer;
+  @include ctaSecondary;
+}
+
+// ============================================================
+//   STATIC — мобайл и reduced-motion: обычная стопка, без клипов/пина.
+// ============================================================
+.static .stage {
+  display: flex;
+  flex-direction: column;
+}
+
+.static .step {
+  position: static;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  column-gap: fluid(202);
+  padding: fluid(20);
+}
+
+.static .step + .step {
+  margin-top: fluid(60);
+}
+
+.static .unfold {
+  clip-path: none;
+}
+
+// .static .parallax — параллакс оставлен включённым (мобайл): сдвиг по --par из JS.
+
+.static .textClip {
+  clip-path: none;
+}
+
+// ----- Мобайл-раскладка (всегда .static на мобайле): фото сверху, текст ниже -----
+@include mobile {
+  .section {
+    padding-inline: fluid(8);
+  }
+
+  .static .step {
+    display: flex;
+    flex-direction: column;
+    padding: 0;
+  }
+
+  .static .step + .step {
+    margin-top: fluid(20);
+  }
+
+  .media {
+    height: auto;
+    margin: 0 fluid(8);
+    aspect-ratio: 344 / 374;
+    width: 100%;
+    clip-path: polygon(0 0, 88.95% 0, 100% 32.1%, 100% 100%, 0 100%);
+  }
+
+  .content {
+    align-self: flex-end;
+    justify-self: auto;
+    width: 71%;
+    max-width: none;
+    margin-top: fluid(29);
+    margin-inline-end: fluid(8);
+  }
+
+  .textClip {
+    gap: fluid(28);
+  }
+
+  .info {
+    gap: fluid(20);
+  }
+
+  .num {
+    margin-bottom: 0;
+  }
+
+  .cta {
+    height: auto;
+    padding: fluid(13) fluid(20) fluid(12);
+    background: var(--color-brown-dark);
+    color: var(--color-badge-light);
+
+    &:hover {
+      background: transparent;
+      color: var(--color-brown-dark);
+    }
+  }
+}

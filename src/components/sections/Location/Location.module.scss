@@ -1,0 +1,553 @@
+@use "breakpoints" as *;
+
+// ============================================================
+//   Location — «Тихий интеллигентный квартал».
+//   Иллюстрированная карта района (map.png с вшитыми маркерами) +
+//   пин дома, заголовок, фильтр-категории (десктоп: табы, мобайл:
+//   дропдаун), карточка места (десктоп). Пока статика, без логики.
+// ============================================================
+.location {
+  @include mobile {
+    margin-top: fluid(60);
+  }
+}
+
+// Высота ограничена вьюпортом (карта влезает на экран); на высоких — макетная.
+.map {
+  position: relative;
+  width: 100%;
+  height: min(fluid(860), 88vh);
+  overflow: hidden;
+
+  @include mobile {
+    height: min(fluid(560), 78vh); // мобайл — портретный кроп
+  }
+}
+
+// Перетаскиваемый слой карты: размер по макетным пропорциям, КРОЕТ контейнер
+// (height 100% + aspect-ratio + min-width 100%) → на узких/мелких экранах шире
+// контейнера и его можно таскать (transform по --px/--py из JS).
+.pan {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: auto;
+  aspect-ratio: 1440 / 860;
+  min-width: 100%;
+  transform: translate3d(var(--px, 0px), var(--py, 0px), 0);
+  touch-action: pan-y; // вертикаль — скролл страницы, горизонталь — пан карты
+}
+
+// Курсор-«рука», только когда реально есть что таскать (data-pannable от JS).
+.map[data-pannable="1"] .pan {
+  cursor: grab;
+}
+.map[data-pannable="1"] .pan:active {
+  cursor: grabbing;
+}
+
+.mapImg {
+  object-fit: cover;
+  object-position: center;
+  opacity: 0; // карта проступает через прозрачность при входе в вид
+  transition: opacity 1s ease;
+  user-select: none;
+}
+
+// Состояние «секция в виде»: карта проявилась, пины падают
+.dropped .mapImg {
+  opacity: 1;
+}
+
+// ----- Заголовок -----
+// Позиционирование — на обёртке; за ней наблюдает IntersectionObserver Reveal
+// (у неё реальная высота). Сам h2 внутри клипается шторкой.
+.headingWrap {
+  position: absolute;
+  top: fluid(60);
+  left: fluid(20);
+  z-index: 2;
+  max-width: fluid(690);
+
+  @include mobile {
+    left: fluid(8);
+    max-width: fluid(300);
+  }
+}
+
+.heading {
+  display: flex;
+  flex-direction: column; // слова-строки друг под другом (для построчной шторки)
+  color: var(--color-brown-medium);
+  font-family: var(--font-display);
+  font-size: var(--fs-h2);
+  line-height: var(--lh-h2);
+  letter-spacing: var(--ls-h2);
+  text-transform: uppercase;
+
+  @include mobile {
+    font-size: fluid(28); // мобайл: меньше макетных 36
+  }
+}
+
+// ----- Пин дома -----
+.pin {
+  position: absolute;
+  left: 39%;
+  top: 38%;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: fluid(12);
+  transform: none;
+  opacity: 0; // проявляется вместе с картой
+  transition: opacity 1s ease;
+
+  @include mobile {
+    left: 50%;
+    top: 42%;
+    gap: fluid(8);
+    transform: translateX(-50%);
+  }
+}
+
+.dropped .pin {
+  opacity: 1;
+}
+
+.pinBuilding {
+  width: fluid(87);
+  height: fluid(104);
+
+  @include mobile {
+    width: fluid(64);
+  }
+}
+
+.pinLogo {
+  width: fluid(130);
+  height: auto;
+
+  @include mobile {
+    width: fluid(100);
+  }
+}
+
+// ----- Пины заведений (привязаны к категориям) -----
+// .mapPin — кнопка: якорится остриём в (x,y) через translate(-50%,-100%),
+// этим же transform-ом масштабируется при фильтре. Падение — на .mapPinInner
+// (отдельный transform), чтобы не конфликтовать с якорем.
+.mapPin {
+  position: absolute;
+  z-index: 3;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--color-brown-medium); // тёмно-коричневый по умолчанию
+  cursor: pointer;
+  transform: translate(-50%, -100%) scale(1);
+  transform-origin: bottom center;
+  transition:
+    transform 0.3s ease,
+    opacity 0.3s ease,
+    color 0.2s ease;
+
+  &:hover {
+    color: var(--color-brown-dark);
+  }
+}
+
+// Скрыт фильтром категорий
+.mapPinHidden {
+  opacity: 0;
+  transform: translate(-50%, -100%) scale(0);
+  pointer-events: none;
+}
+
+// Выбранный (после клика) — светлый и крупнее (бьёт :hover по специфичности)
+.mapPinActive,
+.mapPinActive:hover {
+  z-index: 4;
+  color: var(--color-brown-light); // светлый — нажатый пин
+  transform: translate(-50%, -100%) scale(1.18);
+}
+
+.mapPinInner {
+  display: block;
+  transform: translateY(-160%); // стартуют над картой
+  opacity: 0;
+
+  svg {
+    display: block;
+    width: fluid(28);
+    height: auto;
+
+    @include mobile {
+      width: fluid(22);
+    }
+  }
+}
+
+// Падение пинов вниз (со ступенчатой задержкой --pd, мягкий «приземляющий» ease)
+.dropped .mapPinInner {
+  transform: translateY(0);
+  opacity: 1;
+  transition:
+    transform 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) var(--pd, 0ms),
+    opacity 0.45s ease var(--pd, 0ms);
+}
+
+// ----- Категории: табы (десктоп) -----
+.tabs {
+  position: absolute;
+  left: fluid(20);
+  bottom: fluid(20);
+  z-index: 2;
+  display: flex;
+  gap: fluid(8);
+
+  @include mobile {
+    position: static;
+    left: auto;
+    bottom: auto;
+    display: none;
+  }
+}
+
+.tab {
+  display: inline-flex;
+  align-items: baseline;
+  gap: fluid(4);
+  padding: fluid(8) fluid(12) fluid(10);
+  background: var(--color-white);
+  color: var(--color-brown-light);
+  border: 0;
+  cursor: pointer;
+  white-space: nowrap;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease;
+
+  &:hover {
+    color: var(--color-brown-medium);
+  }
+}
+
+.tabActive {
+  background: var(--color-brown-dark);
+  color: var(--color-badge-light);
+
+  &:hover {
+    color: var(--color-badge-light);
+  }
+}
+
+.tabName {
+  font-family: var(--font-display);
+  font-size: var(--fs-button);
+  line-height: 1;
+  letter-spacing: var(--ls-button);
+}
+
+.tabCount {
+  font-family: var(--font-body);
+  font-size: fluid(12);
+  line-height: fluid(16);
+  letter-spacing: 0.01em;
+}
+
+// ----- Категории: дропдаун (мобайл) -----
+.dropdownWrap {
+  position: absolute;
+  left: fluid(8);
+  right: fluid(8);
+  bottom: fluid(8);
+  z-index: 6; // выше карточки места (z 5)
+  display: none;
+
+  @include mobile {
+    display: block;
+  }
+}
+
+.dropdown {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+  height: fluid(44);
+  padding: 0 fluid(12);
+  background: var(--color-white);
+  border: 1px solid var(--color-brown-medium);
+  color: var(--color-brown-medium);
+  cursor: pointer;
+
+  svg {
+    width: fluid(20);
+    height: fluid(20);
+    transition: transform 0.2s ease;
+  }
+
+  &[aria-expanded="true"] svg {
+    transform: rotate(180deg);
+  }
+}
+
+.dropdownLabel {
+  font-family: var(--font-display);
+  font-size: var(--fs-button);
+  letter-spacing: var(--ls-button);
+  text-transform: uppercase;
+}
+
+.dropdownCount {
+  font-family: var(--font-body);
+  font-size: fluid(12);
+  letter-spacing: 0.01em;
+}
+
+// Выпадающий список — над кнопкой (она у нижней кромки карты)
+.dropdownMenu {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: calc(100% + #{fluid(8)});
+  max-height: fluid(320);
+  overflow-y: auto;
+  background: var(--color-white);
+  border: 1px solid var(--color-brown-medium);
+  scrollbar-width: none;
+  animation: dropdownIn 0.2s ease both;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+
+  li + li {
+    border-top: 1px solid rgb(117 59 41 / 12%);
+  }
+}
+
+@keyframes dropdownIn {
+  from {
+    opacity: 0;
+    transform: translateY(fluid(8));
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.dropdownItem {
+  display: flex;
+  width: 100%;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: fluid(8);
+  padding: fluid(12);
+  background: none;
+  border: 0;
+  color: var(--color-brown-light);
+  text-align: left;
+  cursor: pointer;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease;
+
+  &:hover {
+    color: var(--color-brown-medium);
+  }
+}
+
+.dropdownItemActive,
+.dropdownItemActive:hover {
+  background: var(--color-brown-dark);
+  color: var(--color-badge-light);
+}
+
+.dropdownItemName {
+  font-family: var(--font-display);
+  font-size: var(--fs-button);
+  line-height: 1;
+  letter-spacing: var(--ls-button);
+  text-transform: uppercase;
+}
+
+.dropdownItemCount {
+  font-family: var(--font-body);
+  font-size: fluid(12);
+  line-height: fluid(16);
+  letter-spacing: 0.01em;
+}
+
+// ----- Карточка места (десктоп) -----
+.card {
+  position: absolute;
+  right: fluid(20);
+  bottom: fluid(20);
+  z-index: 5; // выше пинов, чтобы перекрывать те, что под ней
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  width: fluid(335);
+  height: fluid(335);
+  padding: fluid(40) fluid(24) fluid(24);
+  background: var(--color-white);
+  border-radius: var(--radius);
+  box-shadow: 0 fluid(8) fluid(32) rgb(38 17 19 / 8%);
+  animation: cardIn 0.4s ease both; // появление при клике на пин
+
+  @include mobile {
+    right: fluid(8);
+    left: fluid(8);
+    bottom: fluid(60); // над дропдауном категорий
+    width: auto;
+    height: auto;
+  }
+}
+
+@keyframes cardIn {
+  from {
+    opacity: 0;
+    transform: translateY(fluid(16));
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+// Стабильная aria-live обёртка: своего бокса нет (display:contents), регион не
+// пересоздаётся при смене слайда → скринридер озвучивает место один раз.
+.cardLive {
+  display: contents;
+}
+
+// .cardBody ремонтируется по key={openPlace.id}. Сам бокс не анимируется
+// (анимируются .wipe внутри), чтобы клип не дёргал раскладку фикс-карточки.
+.cardBody {
+  min-height: 0;
+}
+
+// Фирменный reveal сайта: clip-path inset, «окно» у нижней кромки → растёт вверх,
+// ease expo-out — как у Reveal. На свежесмонтированном узле анимация играет с
+// кадра 0 → wipe повторяется на каждой смене слайда и на первом открытии.
+// inline-block: clip-path нужен бокс, поток сохранён (margin/переносы целы).
+.wipe {
+  display: inline-block;
+  will-change: clip-path;
+  animation: cardWipe var(--wipe-dur, 640ms) var(--wipe-ease) var(--wipe-delay, 0ms)
+    both;
+
+  --wipe-ease: cubic-bezier(0.22, 1, 0.36, 1); // expo-out, как у Reveal
+}
+
+// Стаггер: заголовок ведёт, текст вступает чуть позже и чуть дольше.
+.cardTitle .wipe {
+  --wipe-delay: 40ms;
+}
+
+.cardText .wipe {
+  --wipe-delay: 200ms;
+  --wipe-dur: 700ms;
+}
+
+@keyframes cardWipe {
+  from {
+    clip-path: inset(100% 0 0 0); // окно у нижней кромки → растёт вверх
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+.cardTitle {
+  color: var(--color-brown-medium);
+  font-family: var(--font-display);
+  font-size: var(--fs-h4);
+  line-height: 1;
+  letter-spacing: var(--ls-h4);
+  text-transform: uppercase;
+}
+
+.cardText {
+  margin-top: fluid(12);
+  color: var(--color-brown-medium);
+  font-family: var(--font-body);
+  font-size: fluid(14);
+  line-height: fluid(16);
+  letter-spacing: 0.01em;
+}
+
+.cardFooter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.cardCount {
+  color: var(--color-brown-light);
+  font-family: var(--font-body);
+  font-size: fluid(14);
+  letter-spacing: 0.02em;
+  font-variant-numeric: tabular-nums;
+}
+
+.cardArrows {
+  display: flex;
+  gap: fluid(8);
+}
+
+.cardArrow {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: fluid(28);
+  height: fluid(28);
+  padding: fluid(6);
+  border: 1.2px solid var(--color-brown-medium);
+  background: none;
+  color: var(--color-brown-medium);
+  cursor: pointer;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease;
+
+  svg {
+    width: 100%;
+    height: 100%;
+  }
+
+  &:hover {
+    background: var(--color-brown-medium);
+    color: var(--color-white);
+  }
+}
+
+.cardArrowNext svg {
+  transform: scaleX(-1);
+}
+
+// ----- Reduced-motion: без падения/проявления, всё сразу на местах -----
+@media (prefers-reduced-motion: reduce) {
+  .mapImg,
+  .pin {
+    opacity: 1;
+    transition: none;
+  }
+  .mapPinInner {
+    transform: none;
+    opacity: 1;
+    transition: none;
+  }
+  .card {
+    animation: none;
+  }
+  .wipe {
+    animation: none !important;
+    clip-path: none !important; // не зависаем на скрытом from-кадре
+  }
+}

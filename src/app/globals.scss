@@ -1,16 +1,9 @@
+@use "breakpoints" as *;
+@use "reset";
+
 /* ============================================================
-   Reset (минимальный, современный)
+   Base — проектные базовые стили (поверх reset)
    ============================================================ */
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
-}
-
-* {
-  margin: 0;
-}
-
 html {
   -webkit-text-size-adjust: 100%;
 }
@@ -25,8 +18,8 @@ body {
   display: flex;
   flex-direction: column;
   font-family: var(--font-sans);
-  font-size: var(--fs-400);
-  line-height: 1.6;
+  font-size: var(--fs-p1);
+  line-height: 1.4;
   color: var(--color-fg);
   background: var(--color-bg);
   -webkit-font-smoothing: antialiased;
@@ -34,28 +27,14 @@ body {
 
 main {
   flex: 1 0 auto;
-}
-
-img,
-picture,
-svg,
-video {
-  display: block;
-  max-width: 100%;
-  height: auto;
-}
-
-input,
-button,
-textarea,
-select {
-  font: inherit;
-  color: inherit;
+  padding-top: var(--header-h); /* компенсация fixed-хедера */
+  /* гасит горизонтальное переполнение от vw-единиц (ширина скроллбара) и
+     полноширинных заголовков; clip (не hidden) НЕ ломает position: sticky */
+  overflow-x: clip;
 }
 
 a {
   color: inherit;
-  text-decoration: none;
 }
 
 h1,
@@ -72,102 +51,136 @@ p {
 }
 
 /* ============================================================
-   Design tokens — источник правды: Figma «k711».
-   Десктоп 1440 — node 277-16678, мобайл 360 — node 277-16963.
-   Fluid-шкалы интерполируют между макетами 360 → 1440 через clamp().
-   Исключение: H4 — мобильного токена в макете нет, значение фиксированное.
+   «Резина» (mamison-style) — desktop-first, без clamp.
+   Каждое значение = fluid(px) = calc(px / var(--vw-screen) * 100 * 1vw).
+   --vw-screen — ширина артборда (1440 десктоп / 360 мобайл).
+   Корневой font-size НЕ трогаем (16px) ⇒ устойчиво к browser min-font-size.
+   На опорной ширине fluid(px) == px; дальше тянется пропорционально.
+   ============================================================ */
+
+/* ============================================================
+   Design tokens — Figma «k711». Базовые значения = десктоп 1440;
+   мобильные переопределения — в @media ниже.
    ============================================================ */
 :root {
-  /* ----- Шрифты (Figma) -----
-     Файлы шрифтов в репозиторий ещё не добавлены — пока работает fallback
-     (next/font: Inter). Подключить TT Ricordi Allegria + CoFo Gothic через
-     next/font/local. */
-  --font-display: "TT Ricordi Allegria", Georgia, "Times New Roman", serif;
-  --font-body: "CoFo Gothic", var(--font-inter), system-ui, -apple-system,
-    "Segoe UI", Roboto, sans-serif;
-  --font-sans: var(--font-body); /* back-compat алиас */
+  /* Ширина артборда для fluid() (десктоп) */
+  --vw-screen: 1440;
 
-  /* ----- Цвета (Figma: k711) ----- */
+  /* ----- Шрифты ----- */
+  --font-display: var(--font-ricordi), Georgia, "Times New Roman", serif;
+  --font-body: var(--font-cofo), system-ui, -apple-system, "Segoe UI", Roboto,
+    sans-serif;
+  --font-sans: var(--font-body);
+
+  /* ----- Цвета ----- */
   --color-white: #ffffff;
   --color-black: #1d1d1d;
-
   --color-brown-light: #b0725f;
   --color-brown-medium: #753b29;
   --color-brown-dark: #3e2022;
   --color-brown-dark-2: #261113;
-
+  --color-brown-dark-3: #1b090b;
   --color-badge-light: #f4f2ea;
   --color-badge-light-2: #e6d6cb;
-
   --color-dom-brown-light: #a98f71;
 
-  /* Семантические алиасы (на них завязаны компоненты) */
-  --color-bg: var(--color-white);
+  --color-bg: var(--color-badge-light);
   --color-fg: var(--color-black);
   --color-muted: var(--color-dom-brown-light);
   --color-border: var(--color-badge-light-2);
   --color-accent: var(--color-brown-medium);
   --color-accent-fg: var(--color-white);
 
-  /* ----- Типографика — роли из Figma, fluid 360 → 1440 -----
-     size / line-height / letter-spacing. Дисплейный шрифт — H*, текстовый — P*.
-     clamp(): min = значение на 360, max = на 1440. */
-  /* H1 — 44 → 120px, ls −2 → 0 */
-  --fs-h1: clamp(2.75rem, 1.1667rem + 7.037vw, 7.5rem);
-  --lh-h1: 1; /* 44/44, 120/120 */
-  --ls-h1: clamp(-0.125rem, -0.1667rem + 0.1852vw, 0rem);
-  /* H2 — 36 → 68px, lh 40 → 88px (длина, не множитель), ls 0 */
-  --fs-h2: clamp(2.25rem, 1.5833rem + 2.963vw, 4.25rem);
-  --lh-h2: clamp(2.5rem, 1.5rem + 4.444vw, 5.5rem);
+  /* ----- Типографика (десктоп 1440; мобайл — в @media ниже) ----- */
+  --fs-h1: #{fluid(120)}; /* 120 */
+  --lh-h1: 1;
+  --ls-h1: 0;
+  --fs-h2: #{fluid(68)}; /* 68 */
+  --lh-h2: #{fluid(88)}; /* 88 (длина) */
   --ls-h2: 0;
-  /* H3 — 28 → 36px, ls −2 → 4 */
-  --fs-h3: clamp(1.75rem, 1.5833rem + 0.7407vw, 2.25rem);
-  --lh-h3: 1; /* 100% на обоих */
-  --ls-h3: clamp(-0.125rem, -0.25rem + 0.5556vw, 0.25rem);
-  /* H4 — только десктоп (мобильного токена в макете нет) */
-  --fs-h4: 1.5rem; /* 24px */
+  --fs-h3: #{fluid(36)}; /* 36 */
+  --lh-h3: 1;
+  --ls-h3: 0.04em; /* 4% */
+  --fs-h4: #{fluid(24)}; /* 24 */
   --lh-h4: 1;
-  --ls-h4: 0.25rem; /* 4px */
-  /* P1 — 16 → 20px */
-  --fs-p1: clamp(1rem, 0.9167rem + 0.3704vw, 1.25rem);
-  --lh-p1: 1; /* 100% на обоих */
+  --ls-h4: 0.04em;
+  --fs-p1: #{fluid(20)}; /* 20 */
+  --lh-p1: 1.4;
   --ls-p1: 0;
-  /* P2 — 14px (фикс.) */
-  --fs-p2: 0.875rem;
-  --lh-p2: 1.143; /* 16/14 */
-  --ls-p2: 0.0625rem; /* 1px */
-  /* caption — 12px (фикс.) */
-  --fs-caption: 0.75rem;
-  --lh-caption: 1.333; /* 16/12 */
-  --ls-caption: 0.0625rem; /* 1px */
-  /* button — 14 → 16px, ls 5 */
-  --fs-button: clamp(0.875rem, 0.8333rem + 0.1852vw, 1rem);
+  --fs-p2: #{fluid(14)}; /* 14 */
+  --lh-p2: 1.143;
+  --ls-p2: 0.01em;
+  --fs-caption: #{fluid(12)}; /* 12 */
+  --lh-caption: 1.333;
+  --ls-caption: 0.01em;
+  --fs-button: #{fluid(16)}; /* 16 */
   --lh-button: 1;
-  --ls-button: 0.3125rem; /* 5px */
+  --ls-button: 0.05em;
 
-  /* ----- Числовая fluid-шкала (legacy, back-compat для компонентов) ----- */
-  --fs-300: 0.875rem;
-  --fs-400: clamp(1rem, 0.958rem + 0.19vw, 1.125rem);
-  --fs-500: clamp(1.25rem, 1.083rem + 0.74vw, 1.75rem);
-  --fs-600: clamp(1.75rem, 1.5rem + 1.11vw, 2.5rem);
-  --fs-700: clamp(2.25rem, 1.667rem + 2.59vw, 4rem);
+  /* Сквозные шкалы заголовка/текста секций */
+  --fs-lead: #{fluid(68)}; /* 68 (↓ 28 на мобайле) */
+  --fs-body: #{fluid(20)}; /* 20 (↓ 14 на мобайле) */
 
-  /* ----- Fluid-отступы (360 → 1440) ----- */
-  --space-2xs: clamp(0.5rem, 0.417rem + 0.37vw, 0.75rem);
-  --space-xs: clamp(0.75rem, 0.667rem + 0.37vw, 1rem);
-  --space-s: clamp(1rem, 0.833rem + 0.74vw, 1.5rem);
-  --space-m: clamp(1.5rem, 1.167rem + 1.48vw, 2.5rem);
-  --space-l: clamp(2.5rem, 2rem + 2.22vw, 4rem);
-  --space-xl: clamp(4rem, 3.333rem + 2.96vw, 6rem);
-  --space-section: clamp(3rem, 1.333rem + 7.41vw, 8rem);
-  --space-s8: 3rem; /* Figma: s8 = 48px */
+  /* ----- Числовая шкала (legacy, back-compat) ----- */
+  --fs-300: #{fluid(14)};
+  --fs-400: #{fluid(18)};
+  --fs-500: #{fluid(28)};
+  --fs-600: #{fluid(40)};
+  --fs-700: #{fluid(64)};
+
+  /* ----- Отступы (десктоп) ----- */
+  --space-2xs: #{fluid(12)};
+  --space-xs: #{fluid(16)};
+  --space-s: #{fluid(24)};
+  --space-m: #{fluid(40)};
+  --space-l: #{fluid(64)};
+  --space-xl: #{fluid(96)};
+  --space-section: #{fluid(128)};
+  --space-s8: #{fluid(48)}; /* 48 */
 
   /* ----- Раскладка ----- */
-  --container-max: 1320px;
-  --container-pad: clamp(1rem, 0.083rem + 4.07vw, 3.75rem);
+  --container-max: #{fluid(1320)}; /* 1320 */
+  --container-pad: #{fluid(60)};
+  --header-h: #{fluid(68)}; /* 68 */
+  --radius: #{fluid(12)}; /* 12 */
+}
 
-  /* ----- Радиусы ----- */
-  --radius: 12px;
+@media (max-width: 767.98px) {
+  :root {
+    /* Артборд для fluid() (мобайл) */
+    --vw-screen: 360;
+
+    /* Типографика (мобайл 360) */
+    --fs-h1: #{fluid(44)}; /* 44 */
+    --ls-h1: -0.02em; /* -2% */
+    --fs-h2: #{fluid(36)}; /* 36 */
+    --lh-h2: #{fluid(40)}; /* 40 */
+    --fs-h3: #{fluid(28)}; /* 28 */
+    --ls-h3: -0.02em; /* -2% */
+    --fs-p1: #{fluid(16)}; /* 16 */
+    --fs-button: #{fluid(14)}; /* 14 */
+    --fs-lead: #{fluid(28)}; /* 28 */
+    --fs-body: #{fluid(14)}; /* 14 */
+
+    /* Числовая шкала */
+    --fs-400: #{fluid(16)};
+    --fs-500: #{fluid(20)};
+    --fs-600: #{fluid(28)};
+    --fs-700: #{fluid(36)};
+
+    /* Отступы */
+    --space-2xs: #{fluid(8)};
+    --space-xs: #{fluid(12)};
+    --space-s: #{fluid(16)};
+    --space-m: #{fluid(24)};
+    --space-l: #{fluid(40)};
+    --space-xl: #{fluid(64)};
+    --space-section: #{fluid(48)};
+
+    /* Раскладка */
+    --container-pad: #{fluid(16)};
+    --header-h: #{fluid(46)}; /* 46 */
+  }
 }
 
 /* ============================================================
@@ -183,4 +196,25 @@ p {
   clip: rect(0 0 0 0);
   white-space: nowrap;
   border: 0;
+}
+
+/* ============================================================
+   Per-line reveal — «шторка» по строкам (снизу вверх, каскадом).
+   Хост: <Reveal variant="lines"> ставит data-reveal на ВНУТРЕННИЙ элемент
+   (он не клипается, поэтому имеет высоту даже при position:absolute).
+   Каждая строка — класс .reveal-line + style="--i" (порядок в каскаде).
+   Тайминги тюнятся переменными --reveal-line-duration / --reveal-line-stagger.
+   Без data-reveal (SSR / no-JS) и при reduced-motion строки видны сразу.
+   ============================================================ */
+@media (prefers-reduced-motion: no-preference) {
+  [data-reveal="hidden"] .reveal-line {
+    clip-path: inset(100% 0 0 0); /* окно у нижней кромки → строка скрыта */
+    will-change: clip-path;
+  }
+  [data-reveal="visible"] .reveal-line {
+    clip-path: inset(0 0 0 0); /* раскрывается снизу вверх */
+    transition: clip-path var(--reveal-line-duration, 900ms)
+      var(--reveal-ease, cubic-bezier(0.22, 1, 0.36, 1))
+      calc(var(--i, 0) * var(--reveal-line-stagger, 150ms));
+  }
 }

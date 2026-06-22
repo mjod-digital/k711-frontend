@@ -1,0 +1,124 @@
+@use "breakpoints" as *;
+
+// ============================================================
+//   Reveal — появление «через шторку».
+//   IO наблюдает за .reveal (внешняя обёртка, НЕ клипается); состояние
+//   data-reveal живёт на ней. Анимируемый внутренний элемент (.clip / .panel)
+//   клипается, не мешая наблюдателю. (clip-path на наблюдаемом элементе
+//   обнуляет площадь пересечения — поэтому слои разделены.)
+//   Нет data-reveal (SSR / no-JS / до arming) = полностью видно.
+// ============================================================
+.reveal {
+  display: block;
+  --reveal-duration: 720ms;
+  --reveal-delay: 0ms;
+  --reveal-ease: cubic-bezier(0.22, 1, 0.36, 1); // expo-out: резкая кромка, мягкое затухание
+}
+
+// ----- CLIP (default, clip-path wipe) -----
+// Контент остаётся в DOM и в дереве доступности (намеренно) — НЕ заменять
+// на visibility/display:hidden, иначе скроем его от скринридеров.
+.clip {
+  --reveal-inset: 0 0 100% 0; // T R B L; перекрывается классом направления
+  clip-path: inset(var(--reveal-inset));
+}
+.reveal:not([data-reveal]) .clip {
+  clip-path: none; // SSR / no-JS / до arming — видно полностью
+}
+.reveal[data-reveal="hidden"] .clip {
+  clip-path: inset(var(--reveal-inset));
+  will-change: clip-path; // хинт только пока вооружено-скрыто
+}
+.reveal[data-reveal="visible"] .clip {
+  clip-path: inset(0 0 0 0);
+  transition: clip-path var(--reveal-duration) var(--reveal-ease)
+    var(--reveal-delay);
+}
+
+// Направления (inset = T R B L; «окно» прижато к одной кромке и растёт от неё)
+.up {
+  --reveal-inset: 100% 0 0 0; // окно у НИЖНЕЙ кромки → растёт вверх (снизу вверх)
+}
+.down {
+  --reveal-inset: 0 0 100% 0; // окно у ВЕРХНЕЙ кромки → растёт вниз (сверху вниз)
+}
+.right {
+  --reveal-inset: 0 0 0 100%; // открывается слева направо
+}
+.left {
+  --reveal-inset: 0 100% 0 0; // открывается справа налево
+}
+
+// ----- PANEL (opt-in: кремовая шторка съезжает) -----
+.panel {
+  position: relative;
+  overflow: hidden;
+}
+.content {
+  display: block; // реальный текст, всегда непрозрачный
+}
+.sheet {
+  position: absolute;
+  inset: 0;
+  background: var(--reveal-panel-color, var(--color-badge-light));
+  transform: scaleX(0);
+  transform-origin: right;
+}
+.panel.up .sheet {
+  transform-origin: top;
+}
+.panel.down .sheet {
+  transform-origin: bottom;
+}
+.panel.left .sheet {
+  transform-origin: left;
+}
+.panel.right .sheet {
+  transform-origin: right;
+}
+
+.reveal:not([data-reveal]) .sheet {
+  display: none; // no-JS — обложку-шторку не показываем
+}
+
+// Скрыто — шторка закрывает (+ хинт компоновщику на время)
+.reveal[data-reveal="hidden"] .panel .sheet {
+  will-change: transform;
+}
+.reveal[data-reveal="hidden"] .panel.up .sheet,
+.reveal[data-reveal="hidden"] .panel.down .sheet {
+  transform: scaleY(1);
+}
+.reveal[data-reveal="hidden"] .panel.left .sheet,
+.reveal[data-reveal="hidden"] .panel.right .sheet {
+  transform: scaleX(1);
+}
+
+// Видно — шторка съезжает
+.reveal[data-reveal="visible"] .panel.up .sheet,
+.reveal[data-reveal="visible"] .panel.down .sheet {
+  transform: scaleY(0);
+  transition: transform var(--reveal-duration) var(--reveal-ease)
+    var(--reveal-delay);
+}
+.reveal[data-reveal="visible"] .panel.left .sheet,
+.reveal[data-reveal="visible"] .panel.right .sheet {
+  transform: scaleX(0);
+  transition: transform var(--reveal-duration) var(--reveal-ease)
+    var(--reveal-delay);
+}
+
+// ----- Reduced-motion (страховка для обоих вариантов) -----
+@media (prefers-reduced-motion: reduce) {
+  .clip {
+    clip-path: none !important;
+    transition: none !important;
+  }
+  .sheet {
+    display: none !important;
+  }
+  .content {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}

@@ -1,0 +1,159 @@
+@use "breakpoints" as *;
+
+// ============================================================
+//   ImageHeading — фото на всю ширину + белый каскадный заголовок
+//   по центру. Для блоков «Скандинавский сад», «Лобби 5 метров».
+// ============================================================
+.section {
+  margin-top: fluid(80);
+
+  @include mobile {
+    margin-top: fluid(60);
+    padding-inline: fluid(8)
+  }
+}
+
+.media {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1440 / 768;
+  overflow: hidden;
+
+  @include mobile {
+    aspect-ratio: 344 / 580; // мобайл — портрет
+  }
+}
+
+.image {
+  object-fit: cover;
+  object-position: center;
+}
+
+.overlay {
+  position: absolute;
+  inset: 0;
+  background: rgb(0 0 0 / calc(var(--overlay, 0.3) * 100%));
+  pointer-events: none;
+}
+
+.headingWrap {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1;
+
+  @include mobile {
+    // left: unset;
+    max-width: fluid(310);
+    width: 100%;
+    right: unset;
+  }
+}
+
+// ----- Сад (373-10074): лесенка вправо, «сад» крупный у правого края -----
+.gardenHeading {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  color: var(--color-white);
+  font-family: var(--font-display);
+  text-transform: uppercase;
+}
+
+.gLine1 {
+  align-self: flex-start; // «камерный» — слева
+  font-size: var(--fs-h2);
+  line-height: var(--lh-h2);
+
+  @include mobile {
+    font-size: fluid(28);
+  }
+}
+
+.gLine2 {
+  font-size: var(--fs-h2);
+  line-height: var(--lh-h2);
+  margin-left: fluid(255); // «лесенка» — отступ для второй строки
+
+   @include mobile {
+    font-size: fluid(28);
+    margin-left: fluid(32);
+  }
+}
+
+.gLine3 {
+  font-size: var(--fs-h1);
+  line-height: var(--lh-h1);
+  margin-left: fluid(800);
+
+  @include mobile {
+    margin-left: fluid(220);
+  }
+}
+
+// ----- Лобби (373-10087): «5» крупное в строке между словами -----
+.lobbyHeading {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  color: var(--color-white);
+  font-family: var(--font-display);
+  text-transform: uppercase;
+
+  @include mobile {
+    font-size: fluid(28);
+  }
+}
+
+.lLine1 {
+  font-size: var(--fs-h2);
+  line-height: var(--lh-h2);
+  margin-bottom: fluid(-12);
+  @include mobile {
+    font-size: fluid(28);
+  }
+}
+
+// «с потолками» — отдельная строка, прижата вправо в своей зоне
+// вторая строка — ряд «с потолками 5 метров», «5» крупно
+.lLine2 {
+  display: flex;
+  align-items: flex-end;
+  gap: fluid(24);
+
+  @include mobile {
+    gap: unset;
+    font-size: fluid(28);
+    flex-wrap: wrap;
+  }
+}
+
+.lPre {
+  width: fluid(690); // «с потолками» прижато вправо в своей зоне
+  text-align: right;
+  align-self: flex-start;
+  font-size: var(--fs-h2);
+
+  @include mobile {
+    width: 100%;
+    font-size: fluid(28);
+    margin-right: fluid(25);
+  }
+}
+
+.lNum {
+  font-size: var(--fs-h1); // «5» крупно
+  line-height: 1;
+  @include mobile {
+    margin-left: auto;
+  }
+}
+
+.lPost {
+  font-size: var(--fs-h2);
+  line-height: var(--lh-h2);
+  @include mobile {
+    font-size: fluid(28);
+  }
+}

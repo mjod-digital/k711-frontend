@@ -1,0 +1,164 @@
+@use "breakpoints" as *;
+
+// ============================================================
+//   Menu — выезжающая панель навигации (по клику на бургер).
+//   Эффект фона — «матовое стекло»: полупрозрачный коричневый тон
+//   + backdrop-filter: blur (размывает страницу за панелью).
+//   Десктоп: панель слева ~530px. Мобайл: на всю ширину.
+// ============================================================
+.root {
+  position: fixed;
+  inset: 0;
+  z-index: 90; // под шапкой (z 100): X и логотип остаются поверх
+  visibility: hidden;
+  pointer-events: none;
+  // Закрытие: держим контейнер видимым, пока панель доезжает (0.55s), и лишь
+  // потом прячем — иначе visibility:hidden мгновенно обрубает уход панели
+  // (меню «закрывается резко»). Длительность синхронна transition у .panel.
+  transition: visibility 0s linear 0.55s;
+}
+
+.open {
+  visibility: visible;
+  pointer-events: auto;
+  transition: visibility 0s linear 0s; // открытие — показываем сразу
+}
+
+// Ловит клик мимо панели (на десктопе справа видна страница).
+.backdrop {
+  position: absolute;
+  inset: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+.panel {
+  position: absolute;
+  inset: 0 auto 0 0;
+  display: flex;
+  width: fluid(530);
+  color: var(--color-badge-light);
+  background: rgb(117 59 41 / 42%); // коричневый тон
+  backdrop-filter: blur(40px); // матовое стекло — размытие страницы за панелью
+  -webkit-backdrop-filter: blur(40px);
+  border-right: 1px solid rgb(244 242 234 / 20%);
+  transform: translateX(-100%);
+  transition: transform 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+
+  @include mobile {
+    width: 100%;
+    border-right: 0;
+  }
+}
+
+.open .panel {
+  transform: translateX(0);
+}
+
+// Reduced-motion: без слайда — панель появляется и пропадает мгновенно
+// (тот же приём, что и у .header в Header.module.scss).
+@media (prefers-reduced-motion: reduce) {
+  .root,
+  .open,
+  .panel {
+    transition: none;
+  }
+}
+
+.scroll {
+  display: flex;
+  flex-direction: column;
+  gap: fluid(60);
+  width: 100%;
+  // верх — ниже шапки; контент начинается на уровне макета (top 137 = 68 + 69)
+  padding: calc(var(--header-h) + fluid(69)) fluid(55) fluid(40) fluid(23);
+  overflow-y: auto;
+  scrollbar-width: none; // Firefox — без скроллбара
+  -ms-overflow-style: none;
+
+  &::-webkit-scrollbar {
+    display: none; // WebKit — без скроллбара
+  }
+
+  @include mobile {
+    gap: fluid(28);
+    padding: calc(var(--header-h) + fluid(39)) fluid(16) fluid(32);
+  }
+}
+
+.group {
+  display: flex;
+  flex-direction: column;
+  gap: fluid(16);
+
+  @include mobile {
+    gap: fluid(8);
+  }
+}
+
+.label {
+  font-family: var(--font-body);
+  font-size: fluid(12);
+  line-height: fluid(16);
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
+  opacity: 0.5;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: fluid(16);
+
+  @include mobile {
+    gap: fluid(12);
+  }
+}
+
+.link {
+  display: inline-block;
+  font-family: var(--font-display);
+  font-size: fluid(24);
+  line-height: 1;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-badge-light);
+  transition: opacity 0.2s ease;
+
+  &:hover {
+    opacity: 0.65;
+  }
+
+  @include mobile {
+    font-size: fluid(20);
+  }
+}
+
+// Телефон в панели — только мобайл
+.contacts {
+  display: none;
+
+  @include mobile {
+    display: flex;
+  }
+}
+
+.phone {
+  font-family: var(--font-display);
+  font-size: fluid(20);
+  line-height: 1;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-badge-light);
+}
+
+// Логотип MR Private — картинка, прижат к низу панели (макет 373-10156).
+.brand {
+  display: block;
+  width: fluid(134);
+  height: auto;
+  margin-top: auto;
+  padding-top: fluid(40);
+}

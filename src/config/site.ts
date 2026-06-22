@@ -3,6 +3,14 @@ export const siteConfig = {
   description:
     "Резиновый лендинг на Next.js с SCSS-модулями и контентом из MODX.",
   url: "https://example.com",
+  phone: {
+    display: "+7 (495) 678-34-12",
+    href: "tel:+74956783412",
+  },
+  cta: {
+    label: "выбрать резиденцию",
+    href: "/residences",
+  },
   nav: [
     { label: "Главная", href: "/" },
     { label: "О проекте", href: "/about" },

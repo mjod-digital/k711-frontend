@@ -1,0 +1,123 @@
+@use "breakpoints" as *;
+
+// ============================================================
+//   FeatureScreen — фото слева (срез угла) + каскадный заголовок,
+//   описание и кнопка справа. Мобайл: фото сверху, текст ниже.
+//   (Паттерн «second screen»: фрагмент фасада, проект Чобана.)
+// ============================================================
+.feature {
+  margin-top: 0;
+  display: grid;
+  flex-direction: column;
+  grid-template-columns: 49% minmax(0, 1fr);
+  align-items: center;
+  column-gap: fluid(202);
+  padding: fluid(20);
+
+  @include mobile {
+    margin-top: fluid(60);
+    display: flex;
+    grid-template-columns: none;
+    align-items: stretch;
+    column-gap: normal;
+    padding: 0;
+  }
+}
+
+.media {
+  position: relative;
+  margin: 0;
+  aspect-ratio: 690 / 768;
+  clip-path: polygon(0 0, 85.5% 0, 100% 15%, 100% 100%, 0 100%);
+
+  @include mobile {
+    margin: 0 fluid(8);
+    aspect-ratio: 344 / 374;
+    clip-path: polygon(0 0, 88.95% 0, 100% 32.1%, 100% 100%, 0 100%);
+  }
+}
+
+.image {
+  object-fit: cover;
+  object-position: center;
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: fluid(80);
+  align-self: center;
+  justify-self: end;
+  width: auto;
+  max-width: fluid(512);
+  margin-top: 0;
+  margin-inline-end: fluid(64);
+
+  @include mobile {
+    gap: fluid(28);
+    align-self: flex-end;
+    justify-self: auto;
+    width: 71%;
+    max-width: none;
+    margin-top: fluid(29);
+    margin-inline-end: fluid(8);
+  }
+}
+
+.info {
+  display: flex;
+  flex-direction: column;
+  gap: fluid(40);
+
+  @include mobile {
+    gap: fluid(20);
+  }
+}
+
+.desc {
+  max-width: fluid(350);
+  color: var(--color-fg);
+  font-family: var(--font-body);
+  font-size: var(--fs-body); // 14 → 20
+  line-height: 1.4;
+  letter-spacing: 0.01em;
+}
+
+// CTA: мобайл — залитая, десктоп — контурная
+.cta {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: fluid(48);
+  padding: fluid(13) fluid(20) fluid(13);
+  border: fluid(1) solid var(--color-brown-dark);
+  background: transparent;
+  color: var(--color-brown-dark);
+  font-family: var(--font-display);
+  font-size: var(--fs-button);
+  line-height: var(--lh-button);
+  letter-spacing: var(--ls-button);
+  white-space: nowrap;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease;
+
+  &:hover {
+    background: var(--color-brown-dark);
+    color: var(--color-badge-light);
+  }
+
+  @include mobile {
+    height: auto;
+    padding: fluid(13) fluid(20) fluid(12);
+    padding-block: fluid(13) fluid(12);
+    background: var(--color-brown-dark);
+    color: var(--color-badge-light);
+
+    &:hover {
+      background: transparent;
+      color: var(--color-brown-dark);
+    }
+  }
+}

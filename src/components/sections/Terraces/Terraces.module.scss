@@ -1,0 +1,148 @@
+@use "breakpoints" as *;
+
+// ============================================================
+//   Terraces — крупный заголовок опускается ВНИЗ на фото, фото
+//   разворачивается СВЕРХУ ВНИЗ, текст всплывает (скролл-скраб --p).
+//   («Дом, где история не замолкает».)
+// ============================================================
+.terraces {
+  margin-top: 0;
+  padding: fluid(40) fluid(20) 0;
+  position: relative;
+
+  @include mobile {
+    margin-top: fluid(60);
+    padding: fluid(20) fluid(8) 0;
+  }
+}
+
+// Заголовок абсолютный, опускается вниз НА фото по --p (0 — выше, 1 — на месте).
+.headingWrap {
+  position: absolute;
+  top: fluid(40);
+  left: 0;
+  right: 0;
+  z-index: 2;
+  padding-left: fluid(20); // выравниваем заголовок с контентом ниже (десктоп)
+  transform: translate3d(0, calc((var(--p, 1) - 1) * fluid(200)), 0);
+  will-change: transform;
+
+  // Мобайл (макет 373-12537): заголовок в потоке, но с z-index — «наезжает»
+  // на верх фото; смещён вправо (текст начинается на x≈52 = паддинг 8 + 44).
+  @include mobile {
+    position: relative;
+    z-index: 2;
+    top: auto;
+    left: auto;
+    right: auto;
+    padding-left: fluid(44);
+    transform: translate3d(0, calc((var(--p, 1) - 1) * fluid(60)), 0);
+  }
+}
+
+// Заголовок: десктоп — слева (CascadeHeading). Мобайл — слева, размер 36/40.
+.heading {
+  @include mobile {
+    & span span {
+      font-size: fluid(36); // вместо H1 (44)
+      line-height: fluid(40);
+    }
+  }
+}
+
+.row {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-end; // текст — в нижней зоне, мимо опустившегося заголовка
+  gap: fluid(197);
+  margin-top: fluid(150); // фото стартует ниже первой строки заголовка
+
+  @include mobile {
+    flex-direction: column;
+    align-items: normal;
+    gap: fluid(40);
+    margin-top: fluid(-14); // фото наезжает под последнюю строку заголовка
+  }
+}
+
+.media {
+  position: relative;
+  width: 100%;
+  flex: 0 0 37%;
+  aspect-ratio: 513 / 620;
+  border-radius: var(--radius);
+  overflow: hidden;
+
+  @include mobile {
+    flex: 0 1 auto;
+    border-radius: unset;
+    aspect-ratio: 212 / 280;
+    width: fluid(212);
+    height: fluid(280);
+  }
+}
+
+// Разворот фото СВЕРХУ ВНИЗ по --p: окно у верхней кромки растёт вниз.
+.unfold {
+  position: absolute;
+  inset: 0;
+  clip-path: inset(0 0 calc((1 - var(--pu, 1)) * 100%) 0);
+  will-change: clip-path;
+}
+
+.image {
+  object-fit: cover;
+  object-position: center;
+}
+
+.cols {
+  display: flex;
+  flex: 1;
+  flex-direction: row;
+  gap: fluid(20);
+  max-width: fluid(690);
+
+  @include mobile {
+    flex: 0 1 auto;
+    flex-direction: column;
+    max-width: none;
+  }
+}
+
+// Параграфы всплывают снизу вверх (движение + прозрачность, БЕЗ шторки),
+// вместе с разворотом фото (--pu); второй — чуть позже (стаггер).
+.paragraph {
+  --pr: var(--pu, 1);
+  color: var(--color-fg);
+  font-family: var(--font-body);
+  font-size: var(--fs-body); // 14 → 20
+  line-height: 1.4;
+  letter-spacing: 0.01em;
+  flex: 1;
+  transform: translate3d(0, calc((1 - var(--pr)) * fluid(50)), 0);
+  opacity: var(--pr);
+  will-change: transform, opacity;
+
+  &:last-child {
+    --pr: clamp(0, calc((var(--pu, 1) - 0.15) / 0.85), 1);
+  }
+
+  @include mobile {
+    flex: 0 1 auto;
+    max-width: fluid(300);
+    margin-left: auto;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .headingWrap,
+  .paragraph {
+    transform: none;
+  }
+  .paragraph {
+    opacity: 1;
+  }
+  .unfold {
+    clip-path: none;
+  }
+}

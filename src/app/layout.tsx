@@ -1,13 +1,24 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import localFont from "next/font/local";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { siteConfig } from "@/config/site";
 import "./globals.scss";
 
-const inter = Inter({
-  variable: "--font-inter",
-  subsets: ["latin", "cyrillic"],
+// Дисплейный шрифт (заголовки) и текстовый — локальные, self-hosted.
+const ricordi = localFont({
+  src: "../../public/fonts/TT_Ricordi_Allegria_Regular.woff2",
+  variable: "--font-ricordi",
+  weight: "400",
+  style: "normal",
+  display: "swap",
+});
+
+const cofo = localFont({
+  src: "../../public/fonts/CoFoGothic-Regular.otf",
+  variable: "--font-cofo",
+  weight: "400",
+  style: "normal",
   display: "swap",
 });
 
@@ -25,7 +36,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="ru" className={inter.variable}>
+    <html lang="ru" className={`${ricordi.variable} ${cofo.variable}`}>
       <body>
         <Header />
         <main>{children}</main>
