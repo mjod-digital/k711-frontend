@@ -40,12 +40,28 @@
 }
 
 // Разворот слева направо (clip), scrubbed по --intro. Плавность даёт
-// демпфирование --intro в JS (lerp), а не CSS-transition.
+// демпфирование --intro в JS (lerp), а не CSS-transition. Шторка повторяет ФОРМУ
+// среза картинки (.media): десктоп — диагональ справа; масштабируем её по --intro.
 .unfold {
   position: absolute;
   inset: 0;
-  clip-path: inset(0 calc((1 - var(--intro, 0)) * 100%) 0 0);
+  clip-path: polygon(
+    0 0,
+    calc(var(--intro, 0) * 100%) 0,
+    calc(var(--intro, 0) * 72%) 100%,
+    0 100%
+  );
   will-change: clip-path;
+
+  @include mobile {
+    // мобайл — срез снизу, как у .media
+    clip-path: polygon(
+      0 0,
+      calc(var(--intro, 0) * 100%) 0,
+      calc(var(--intro, 0) * 100%) 84%,
+      0 100%
+    );
+  }
 }
 
 .image {
