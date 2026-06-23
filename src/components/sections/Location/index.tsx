@@ -1,8 +1,8 @@
 "use client";
 
-import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import type { CSSProperties, PointerEvent as ReactPointerEvent } from "react";
+import { MapVector } from "@/components/ui/MapVector";
 import { Reveal } from "@/components/ui/Reveal";
 import { useIsomorphicLayoutEffect } from "@/lib/useIsomorphicLayoutEffect";
 import { cn } from "@/lib/utils";
@@ -204,14 +204,7 @@ export function Location() {
           onPointerUp={onPointerUp}
           onPointerCancel={onPointerUp}
         >
-          <Image
-            src="/images/map-empty.png"
-            alt="Карта района: k711 в центре Пресни"
-            fill
-            sizes="100vw"
-            className={styles.mapImg}
-            draggable={false}
-          />
+          <MapVector className={styles.mapImg} />
 
           {/* Пин дома */}
           <div className={styles.pin}>
