@@ -49,7 +49,12 @@ export function Scenario() {
             className={styles.image}
           />
         </div>
-        <Reveal as="h2" variant="lines" className={styles.title}>
+        <Reveal
+          as="h2"
+          variant="lines"
+          rootMargin="0px 0px -20% 0px" // чуть раньше остальных (запрос дизайнера)
+          className={styles.title}
+        >
           <span className={`${styles.line1} reveal-line`} style={{ "--i": 0 } as CSSProperties}>
             квартиры
           </span>

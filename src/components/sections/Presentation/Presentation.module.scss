@@ -40,15 +40,17 @@
 }
 
 // Разворот слева направо (clip), scrubbed по --intro. Плавность даёт
-// демпфирование --intro в JS (lerp), а не CSS-transition. Шторка повторяет ФОРМУ
-// среза картинки (.media): десктоп — диагональ справа; масштабируем её по --intro.
+// демпфирование --intro в JS (lerp). Ведущая кромка ВСЕГДА под финальным углом
+// (срез .media: 100%→72% = −28% ширины на высоту), просто едет слева направо.
+// (Раньше масштабировали полигон → угол кромки менялся и совпадал с финалом
+// лишь в конце.)
 .unfold {
   position: absolute;
   inset: 0;
   clip-path: polygon(
     0 0,
     calc(var(--intro, 0) * 100%) 0,
-    calc(var(--intro, 0) * 72%) 100%,
+    calc(var(--intro, 0) * 100% - 28%) 100%,
     0 100%
   );
   will-change: clip-path;
@@ -128,8 +130,7 @@
   color: var(--color-fg);
   font-family: var(--font-body);
   font-size: var(--fs-body); // 14 → 20
-  line-height: 1.4;
-  letter-spacing: 0.01em;
+  line-height: normal;
   max-width: fluid(320);
 }
 
@@ -140,6 +141,7 @@
   align-items: center;
   justify-content: center;
   padding: fluid(13) fluid(20) fluid(12);
+  -webkit-text-stroke-width: fluid(0.3);
   font-family: var(--font-display);
   font-size: var(--fs-button);
   line-height: var(--lh-button);

@@ -27,6 +27,9 @@ export type RevealProps = {
   panelColor?: string;
   /** true — сыграть один раз; false — переигрывать при каждом входе в вид. По умолчанию true. */
   once?: boolean;
+  /** rootMargin для IO. По умолчанию запуск ближе к центру; можно переопределить
+   *  на секцию (напр. Scenario — чуть раньше). */
+  rootMargin?: string;
 };
 
 export function Reveal({
@@ -39,6 +42,7 @@ export function Reveal({
   variant = "clip",
   panelColor,
   once = true,
+  rootMargin = "0px 0px -35% 0px",
 }: RevealProps) {
   // ВАЖНО: IntersectionObserver наблюдает за ВНЕШНЕЙ обёрткой (.reveal), которая
   // НЕ клипается. Если наблюдать за самим клипнутым элементом, clip-path обнуляет
@@ -76,15 +80,14 @@ export function Reveal({
           el.dataset.reveal = "hidden";
         }
       },
-      // Запуск ближе к центру экрана: нижние 35% вьюпорта не считаются «в виду»,
-      // поэтому анимация стартует, когда контент дошёл примерно до центра, а не
-      // едва коснулся нижней кромки.
-      { threshold: 0.2, rootMargin: "0px 0px -35% 0px" },
+      // Запуск ближе к центру экрана: нижние 35% вьюпорта не считаются «в виду»
+      // (rootMargin по умолчанию). Можно переопределить на секцию.
+      { threshold: 0.2, rootMargin },
     );
     io.observe(el);
 
     return () => io.disconnect();
-  }, [delay, duration, once, isLines]);
+  }, [delay, duration, once, isLines, rootMargin]);
 
   const style = panelColor
     ? ({ "--reveal-panel-color": panelColor } as CSSProperties)
