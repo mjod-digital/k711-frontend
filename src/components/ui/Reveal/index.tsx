@@ -76,7 +76,10 @@ export function Reveal({
           el.dataset.reveal = "hidden";
         }
       },
-      { threshold: 0.2, rootMargin: "0px 0px -10% 0px" },
+      // Запуск ближе к центру экрана: нижние 35% вьюпорта не считаются «в виду»,
+      // поэтому анимация стартует, когда контент дошёл примерно до центра, а не
+      // едва коснулся нижней кромки.
+      { threshold: 0.2, rootMargin: "0px 0px -35% 0px" },
     );
     io.observe(el);
 

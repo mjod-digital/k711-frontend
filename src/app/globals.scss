@@ -213,8 +213,9 @@ p {
   }
   [data-reveal="visible"] .reveal-line {
     clip-path: inset(0 0 0 0); /* раскрывается снизу вверх */
-    transition: clip-path var(--reveal-line-duration, 900ms)
+    /* медленнее и с бОльшим шагом между строками (было 900ms / 150ms) */
+    transition: clip-path var(--reveal-line-duration, 1300ms)
       var(--reveal-ease, cubic-bezier(0.22, 1, 0.36, 1))
-      calc(var(--i, 0) * var(--reveal-line-stagger, 150ms));
+      calc(var(--i, 0) * var(--reveal-line-stagger, 220ms));
   }
 }
