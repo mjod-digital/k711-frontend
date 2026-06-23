@@ -67,7 +67,8 @@ export function Menu({ open, onClose }: MenuProps) {
       />
 
       <nav className={styles.panel} style={FROST} aria-label="Главное меню">
-        <div className={styles.scroll}>
+        {/* data-lenis-prevent: Lenis не перехватывает колесо над меню → нативный скролл панели */}
+        <div className={styles.scroll} data-lenis-prevent>
           <div className={styles.group}>
             <p className={styles.label}>Меню</p>
             <ul className={styles.list}>

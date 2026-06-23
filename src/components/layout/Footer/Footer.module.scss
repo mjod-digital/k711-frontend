@@ -62,7 +62,7 @@
 .link {
   font-family: var(--font-body);
   font-size: fluid(14); // без явного размера li наследовал крупный кегль (высота «плыла»)
-  transition: opacity 0.2s ease;
+  transition: opacity 0.3s ease;
   line-height: fluid(16);
 
   &:hover {
@@ -105,12 +105,14 @@
 
 .disclaimer a {
   color: var(--color-brown-light);
-  text-decoration: underline!important;
+  // Подчёркивание как в макете 373-10117: толщина и позиция from-font, сплошное.
+  // Лонгханды (не шорткат) — иначе !important-шорткат сбрасывает thickness в auto.
+  text-decoration-line: underline !important;
+  text-decoration-style: solid !important;
+  text-decoration-thickness: from-font !important; // иначе reset a:link сбрасывает в auto
   text-decoration-skip-ink: none;
-  text-decoration-thickness: auto;
-  text-underline-offset: auto;
   text-underline-position: from-font;
-  transition: opacity 0.2s ease;
+  transition: opacity 0.3s ease;
 
   &:hover {
     opacity: 0.7;

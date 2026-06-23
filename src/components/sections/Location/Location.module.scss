@@ -12,16 +12,13 @@
   }
 }
 
-// Высота ограничена вьюпортом (карта влезает на экран); на высоких — макетная.
+// Фулскрин: карта на всю высоту экрана (без учёта хедера) — закрывает вьюпорт
+// при скролле (коммент клиента). Контент-слой .pan шире → можно панить.
 .map {
   position: relative;
   width: 100%;
-  height: min(fluid(860), 88vh);
+  height: 100vh;
   overflow: hidden;
-
-  @include mobile {
-    height: min(fluid(560), 78vh); // мобайл — портретный кроп
-  }
 }
 
 // Перетаскиваемый слой карты: размер по макетным пропорциям, КРОЕТ контейнер
@@ -158,7 +155,7 @@
   transition:
     transform 0.3s ease,
     opacity 0.3s ease,
-    color 0.2s ease;
+    color 0.3s ease;
 
   &:hover {
     color: var(--color-brown-dark);
@@ -229,12 +226,14 @@
   padding: fluid(8) fluid(12) fluid(10);
   background: var(--color-white);
   color: var(--color-brown-light);
+  -webkit-text-stroke-width: fluid(0.3);
+  -webkit-text-stroke-color: var(--color-brown-dark);
   border: 0;
   cursor: pointer;
   white-space: nowrap;
   transition:
-    background-color 0.2s ease,
-    color 0.2s ease;
+    background-color 0.3s ease,
+    color 0.3s ease;
 
   &:hover {
     color: var(--color-brown-medium);
@@ -244,6 +243,7 @@
 .tabActive {
   background: var(--color-brown-dark);
   color: var(--color-badge-light);
+  -webkit-text-stroke-color: var(--color-badge-light);
 
   &:hover {
     color: var(--color-badge-light);
@@ -293,7 +293,7 @@
   svg {
     width: fluid(20);
     height: fluid(20);
-    transition: transform 0.2s ease;
+    transition: transform 0.3s ease;
   }
 
   &[aria-expanded="true"] svg {
@@ -325,7 +325,7 @@
   background: var(--color-white);
   border: 1px solid var(--color-brown-medium);
   scrollbar-width: none;
-  animation: dropdownIn 0.2s ease both;
+  animation: dropdownIn 0.3s ease both;
 
   &::-webkit-scrollbar {
     display: none;
@@ -360,8 +360,8 @@
   text-align: left;
   cursor: pointer;
   transition:
-    background-color 0.2s ease,
-    color 0.2s ease;
+    background-color 0.3s ease,
+    color 0.3s ease;
 
   &:hover {
     color: var(--color-brown-medium);
@@ -438,17 +438,16 @@
   min-height: 0;
 }
 
-// Фирменный reveal сайта: clip-path inset, «окно» у нижней кромки → растёт вверх,
-// ease expo-out — как у Reveal. На свежесмонтированном узле анимация играет с
-// кадра 0 → wipe повторяется на каждой смене слайда и на первом открытии.
-// inline-block: clip-path нужен бокс, поток сохранён (margin/переносы целы).
+// При смене слайда строки заголовка/текста проявляются через FADE (не шторку) —
+// запрос дизайнера. Анимация играет с кадра 0 свежесмонтированного узла
+// (key={openPlace.id}) → повторяется на каждой смене слайда и на первом открытии.
 .wipe {
   display: inline-block;
-  will-change: clip-path;
-  animation: cardWipe var(--wipe-dur, 640ms) var(--wipe-ease) var(--wipe-delay, 0ms)
+  will-change: opacity;
+  animation: cardFade var(--wipe-dur, 640ms) var(--wipe-ease) var(--wipe-delay, 0ms)
     both;
 
-  --wipe-ease: cubic-bezier(0.22, 1, 0.36, 1); // expo-out, как у Reveal
+  --wipe-ease: ease; // мягкое затухание
 }
 
 // Стаггер: заголовок ведёт, текст вступает чуть позже и чуть дольше.
@@ -461,12 +460,12 @@
   --wipe-dur: 700ms;
 }
 
-@keyframes cardWipe {
+@keyframes cardFade {
   from {
-    clip-path: inset(100% 0 0 0); // окно у нижней кромки → растёт вверх
+    opacity: 0;
   }
   to {
-    clip-path: inset(0 0 0 0);
+    opacity: 1;
   }
 }
 
@@ -519,8 +518,8 @@
   color: var(--color-brown-medium);
   cursor: pointer;
   transition:
-    background-color 0.2s ease,
-    color 0.2s ease;
+    background-color 0.3s ease,
+    color 0.3s ease;
 
   svg {
     width: 100%;
@@ -554,6 +553,6 @@
   }
   .wipe {
     animation: none !important;
-    clip-path: none !important; // не зависаем на скрытом from-кадре
+    opacity: 1 !important; // fade-вариант — сразу видно
   }
 }

@@ -75,11 +75,20 @@
   // верх — ниже шапки; контент начинается на уровне макета (top 137 = 68 + 69)
   padding: calc(var(--header-h) + fluid(69)) fluid(55) fluid(40) fluid(23);
   overflow-y: auto;
-  scrollbar-width: none; // Firefox — без скроллбара
-  -ms-overflow-style: none;
+  overscroll-behavior: contain;
+  // Тонкий тёмно-коричневый скроллбар (темнее фона панели).
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-brown-dark-2) transparent;
 
   &::-webkit-scrollbar {
-    display: none; // WebKit — без скроллбара
+    width: fluid(6);
+  }
+  &::-webkit-scrollbar-thumb {
+    background: var(--color-brown-dark-2);
+    border-radius: fluid(3);
+  }
+  &::-webkit-scrollbar-track {
+    background: transparent;
   }
 
   @include mobile {
@@ -125,7 +134,7 @@
   letter-spacing: 0.04em;
   text-transform: uppercase;
   color: var(--color-badge-light);
-  transition: opacity 0.2s ease;
+  transition: opacity 0.3s ease;
 
   &:hover {
     opacity: 0.65;
