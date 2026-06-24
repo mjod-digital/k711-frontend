@@ -52,7 +52,14 @@ export function Hero() {
         </div>
 
         <div className={styles.overlay}>
-          <Reveal as="h1" variant="lines" className={styles.title}>
+          <Reveal
+            as="h1"
+            variant="lines"
+            // hero — первый экран: запускаем шторку сразу при входе, без сдвига
+            // к центру (иначе на мобилке заголовок в нижних 35% и ждёт скролла).
+            rootMargin="0px 0px 0px 0px"
+            className={styles.title}
+          >
             <span className="reveal-line" style={{ "--i": 0 } as CSSProperties}>
               Клубный дом
             </span>
