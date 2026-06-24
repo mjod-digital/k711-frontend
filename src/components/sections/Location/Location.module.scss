@@ -235,19 +235,19 @@
     background-color 0.3s ease,
     color 0.3s ease;
 
+  // hover (макет 258-3788, index/secondary): тёмная заливка, текст brown-light
   &:hover {
-    color: var(--color-brown-medium);
+    background: var(--color-brown-dark);
+    color: var(--color-brown-light);
+    -webkit-text-stroke-color: var(--color-brown-light);
   }
 }
 
-.tabActive {
+.tabActive,
+.tabActive:hover {
   background: var(--color-brown-dark);
   color: var(--color-badge-light);
   -webkit-text-stroke-color: var(--color-badge-light);
-
-  &:hover {
-    color: var(--color-badge-light);
-  }
 }
 
 .tabName {

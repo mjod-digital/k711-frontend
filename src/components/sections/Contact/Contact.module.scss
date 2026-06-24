@@ -158,6 +158,8 @@
   text-decoration: underline;
 }
 
+// Состояния по макету 258-3788 (base/primary): def — тёмная заливка + текст
+// brown-medium; hover — текст brown-light; active(нажатие) — заливка badge-light.
 .submit {
   align-self: flex-end;
   display: inline-flex;
@@ -165,9 +167,9 @@
   justify-content: center;
   height: fluid(48);
   padding-inline: fluid(34);
-  background: var(--color-badge-light);
-  border: fluid(1) solid var(--color-brown-dark);
-  color: var(--color-brown-dark);
+  -webkit-text-stroke-width: fluid(0.3);
+  background: var(--color-brown-dark);
+  color: var(--color-brown-medium);
   font-family: var(--font-display);
   font-size: var(--fs-button);
   line-height: var(--lh-button);
@@ -175,12 +177,17 @@
   white-space: nowrap;
   cursor: pointer;
   transition:
-    background-color 0.2s ease,
-    color 0.2s ease;
+    background-color 0.3s ease,
+    color 0.3s ease;
 
   &:hover {
-    background: var(--color-brown-light);
-    color: var(--color-badge-light);
+    background: var(--color-brown-dark);
+    color: var(--color-brown-light);
+  }
+
+  &:active {
+    background: var(--color-badge-light);
+    color: var(--color-brown-dark-2);
   }
 
   @include mobile {
