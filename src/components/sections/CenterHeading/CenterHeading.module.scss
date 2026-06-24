@@ -1,0 +1,26 @@
+@use "breakpoints" as *;
+
+.section {
+  display: flex;
+  justify-content: center;
+  padding: fluid(40) fluid(20);
+
+  @include mobile {
+    padding: fluid(30) fluid(8);
+  }
+}
+
+.wrap {
+  width: 100%;
+}
+
+// строки центрируются через align (передаётся в lines), контейнер — на всю ширину
+.heading {
+  width: 100%;
+  align-items: center;
+
+  // центрированный заголовок не переносим по словам (как в макете — одна строка)
+  span {
+    white-space: nowrap;
+  }
+}

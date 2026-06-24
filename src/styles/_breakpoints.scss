@@ -50,6 +50,27 @@ $bp-desktop: 768px;
   }
 }
 
+// Декоративный «сглаженный» уголок (Figma: cream-треугольник, mix-blend soft-light)
+// в правом верхнем углу фото. Оверлей, НЕ клип — сохраняет border-radius.
+// $w/$h — катеты треугольника из макета (px на опорной ширине).
+// ВАЖНО: вызывающий сам задаёт позиционирование (position: relative/absolute) —
+// миксин его НЕ трогает, чтобы не затирать уже выставленный у элемента position.
+@mixin cornerFade($w, $h) {
+  &::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: fluid($w);
+    height: fluid($h);
+    background: var(--color-badge-light);
+    mix-blend-mode: soft-light;
+    clip-path: polygon(0 0, 100% 0, 100% 100%);
+    pointer-events: none;
+    z-index: 1;
+  }
+}
+
 // Залитая (primary): def — тёмная; hover — темнее; active — ещё темнее + светлый текст.
 @mixin ctaPrimary {
   border: 1px solid var(--color-brown-dark);
