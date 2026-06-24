@@ -158,5 +158,14 @@
   @include mobile {
     height: auto;
     padding-block: fluid(13) fluid(12);
+    // мобайл: цвет как у Showcase — залитая тёмная, ховер прозрачная
+    background: var(--color-brown-dark);
+    border-color: var(--color-brown-dark);
+    color: var(--color-badge-light);
+
+    &:hover {
+      background: transparent;
+      color: var(--color-brown-dark);
+    }
   }
 }

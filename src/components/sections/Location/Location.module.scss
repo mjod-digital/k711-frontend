@@ -152,9 +152,10 @@
   cursor: pointer;
   transform: translate(-50%, -100%) scale(1);
   transform-origin: bottom center;
+  // фильтр/выбор (scale, opacity) — снапко; ховер (color) — плавно
   transition:
-    transform 0.45s ease,
-    opacity 0.45s ease,
+    transform 0.3s ease,
+    opacity 0.3s ease,
     color 0.45s ease;
 
   &:hover {
@@ -293,7 +294,7 @@
   svg {
     width: fluid(20);
     height: fluid(20);
-    transition: transform 0.45s ease;
+    transition: transform 0.25s ease; // поворот шеврона — снапко (не ховер)
   }
 
   &[aria-expanded="true"] svg {
@@ -325,7 +326,7 @@
   background: var(--color-white);
   border: 1px solid var(--color-brown-medium);
   scrollbar-width: none;
-  animation: dropdownIn 0.45s ease both;
+  animation: dropdownIn 0.2s ease both; // появление списка — быстро (не ховер)
 
   &::-webkit-scrollbar {
     display: none;

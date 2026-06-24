@@ -61,14 +61,7 @@ export function Reveal({
     if (!el) return;
 
     // Reduced-motion: не вооружаем — контент остаётся полностью видимым.
-    const mql = window.matchMedia("(prefers-reduced-motion: reduce)");
-    if (mql.matches) return;
-
-    // По умолчанию запуск ближе к центру (десктоп). На мобилке — чуть раньше
-    // (нижние 15% вместо 35%). Явно переданный rootMargin приоритетнее.
-    const isMobile = window.matchMedia("(max-width: 767.98px)").matches;
-    const effectiveRootMargin =
-      rootMargin ?? (isMobile ? "0px 0px -15% 0px" : "0px 0px -35% 0px");
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
     el.style.setProperty("--reveal-delay", `${delay}ms`);
     if (duration) el.style.setProperty("--reveal-duration", `${duration}ms`);
@@ -76,21 +69,42 @@ export function Reveal({
     // Вооружаем синхронно до первой отрисовки — без вспышки.
     el.dataset.reveal = "hidden";
 
-    const io = new IntersectionObserver(
-      ([entry], obs) => {
-        if (entry.isIntersecting) {
-          el.dataset.reveal = "visible";
-          if (once) obs.disconnect();
-        } else if (!once) {
-          // Переигрываемый режим: ушли из вида — снова прячем под шторку.
-          el.dataset.reveal = "hidden";
-        }
-      },
-      { threshold: 0.2, rootMargin: effectiveRootMargin },
-    );
-    io.observe(el);
+    // По умолчанию запуск ближе к центру (десктоп), на мобилке — чуть раньше
+    // (нижние 15% вместо 35%). Явно переданный rootMargin приоритетнее.
+    // observer пересобираем при смене брейкпоинта (поворот/resize), пока ревил
+    // ещё не сыграл — иначе rootMargin «застывает» на значении момента загрузки.
+    const mqMobile = window.matchMedia("(max-width: 767.98px)");
+    let io: IntersectionObserver | null = null;
+    let revealed = false;
 
-    return () => io.disconnect();
+    const arm = () => {
+      io?.disconnect();
+      if (once && revealed) return; // уже сыграл — не пересобираем (без мигания)
+      const margin =
+        rootMargin ?? (mqMobile.matches ? "0px 0px -15% 0px" : "0px 0px -35% 0px");
+      io = new IntersectionObserver(
+        ([entry], obs) => {
+          if (entry.isIntersecting) {
+            el.dataset.reveal = "visible";
+            revealed = true;
+            if (once) obs.disconnect();
+          } else if (!once) {
+            // Переигрываемый режим: ушли из вида — снова прячем под шторку.
+            el.dataset.reveal = "hidden";
+          }
+        },
+        { threshold: 0.2, rootMargin: margin },
+      );
+      io.observe(el);
+    };
+
+    arm();
+    mqMobile.addEventListener("change", arm);
+
+    return () => {
+      io?.disconnect();
+      mqMobile.removeEventListener("change", arm);
+    };
   }, [delay, duration, once, isLines, rootMargin]);
 
   const style = panelColor
