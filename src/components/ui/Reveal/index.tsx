@@ -42,7 +42,7 @@ export function Reveal({
   variant = "clip",
   panelColor,
   once = true,
-  rootMargin = "0px 0px -35% 0px",
+  rootMargin,
 }: RevealProps) {
   // ВАЖНО: IntersectionObserver наблюдает за ВНЕШНЕЙ обёрткой (.reveal), которая
   // НЕ клипается. Если наблюдать за самим клипнутым элементом, clip-path обнуляет
@@ -64,6 +64,12 @@ export function Reveal({
     const mql = window.matchMedia("(prefers-reduced-motion: reduce)");
     if (mql.matches) return;
 
+    // По умолчанию запуск ближе к центру (десктоп). На мобилке — чуть раньше
+    // (нижние 15% вместо 35%). Явно переданный rootMargin приоритетнее.
+    const isMobile = window.matchMedia("(max-width: 767.98px)").matches;
+    const effectiveRootMargin =
+      rootMargin ?? (isMobile ? "0px 0px -15% 0px" : "0px 0px -35% 0px");
+
     el.style.setProperty("--reveal-delay", `${delay}ms`);
     if (duration) el.style.setProperty("--reveal-duration", `${duration}ms`);
 
@@ -80,9 +86,7 @@ export function Reveal({
           el.dataset.reveal = "hidden";
         }
       },
-      // Запуск ближе к центру экрана: нижние 35% вьюпорта не считаются «в виду»
-      // (rootMargin по умолчанию). Можно переопределить на секцию.
-      { threshold: 0.2, rootMargin },
+      { threshold: 0.2, rootMargin: effectiveRootMargin },
     );
     io.observe(el);
 

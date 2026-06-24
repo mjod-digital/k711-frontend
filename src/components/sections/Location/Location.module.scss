@@ -153,9 +153,9 @@
   transform: translate(-50%, -100%) scale(1);
   transform-origin: bottom center;
   transition:
-    transform 0.3s ease,
-    opacity 0.3s ease,
-    color 0.3s ease;
+    transform 0.45s ease,
+    opacity 0.45s ease,
+    color 0.45s ease;
 
   &:hover {
     color: var(--color-brown-dark);
@@ -232,8 +232,8 @@
   cursor: pointer;
   white-space: nowrap;
   transition:
-    background-color 0.3s ease,
-    color 0.3s ease;
+    background-color 0.45s ease,
+    color 0.45s ease;
 
   // hover (макет 258-3788, index/secondary): тёмная заливка, текст brown-light
   &:hover {
@@ -293,7 +293,7 @@
   svg {
     width: fluid(20);
     height: fluid(20);
-    transition: transform 0.3s ease;
+    transition: transform 0.45s ease;
   }
 
   &[aria-expanded="true"] svg {
@@ -325,7 +325,7 @@
   background: var(--color-white);
   border: 1px solid var(--color-brown-medium);
   scrollbar-width: none;
-  animation: dropdownIn 0.3s ease both;
+  animation: dropdownIn 0.45s ease both;
 
   &::-webkit-scrollbar {
     display: none;
@@ -360,8 +360,8 @@
   text-align: left;
   cursor: pointer;
   transition:
-    background-color 0.3s ease,
-    color 0.3s ease;
+    background-color 0.45s ease,
+    color 0.45s ease;
 
   &:hover {
     color: var(--color-brown-medium);
@@ -518,8 +518,8 @@
   color: var(--color-brown-medium);
   cursor: pointer;
   transition:
-    background-color 0.3s ease,
-    color 0.3s ease;
+    background-color 0.45s ease,
+    color 0.45s ease;
 
   svg {
     width: 100%;

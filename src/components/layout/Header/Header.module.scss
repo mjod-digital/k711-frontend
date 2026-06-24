@@ -102,7 +102,7 @@
   background: none;
   border: 0;
   cursor: pointer;
-  transition: color 0.3s ease;
+  transition: color 0.45s ease;
 
   &:hover {
     color: var(--color-brown-medium);
@@ -152,6 +152,14 @@
   text-transform: uppercase;
   color: var(--color-brown-dark);
   white-space: nowrap;
+  transition:
+    color 0.45s ease,
+    -webkit-text-stroke-color 0.45s ease;
+
+  &:hover {
+    color: var(--color-brown-medium);
+    -webkit-text-stroke-color: var(--color-brown-medium);
+  }
 
   @include mobile {
     display: none;
@@ -175,7 +183,6 @@
   height: fluid(48);
   padding-inline: fluid(20);
   -webkit-text-stroke-width: fluid(0.3);
-  -webkit-text-stroke-color: var(--color-brown-dark);
   font-family: var(--font-display);
   font-size: var(--fs-button);
   line-height: var(--lh-button);
