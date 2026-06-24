@@ -134,7 +134,7 @@
   max-width: fluid(320);
 }
 
-// CTA — залитая тёмная кнопка
+// CTA — контурная кнопка с тем же ховером, что у остальных (Header/Showcase).
 .cta {
   align-self: flex-start;
   display: inline-flex;
@@ -148,7 +148,7 @@
   letter-spacing: var(--ls-button);
   white-space: nowrap;
   cursor: pointer;
-  @include ctaPrimary;
+  @include ctaSecondary;
 
   height: fluid(48);
   padding-block: fluid(13);

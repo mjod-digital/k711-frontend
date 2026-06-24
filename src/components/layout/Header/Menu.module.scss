@@ -67,16 +67,13 @@
   }
 }
 
+// Обёртка-вьюпорт: скролл + тонкий тёмно-коричневый скроллбар (темнее фона панели).
 .scroll {
-  display: flex;
-  flex-direction: column;
-  gap: fluid(60);
   width: 100%;
   // верх — ниже шапки; контент начинается на уровне макета (top 137 = 68 + 69)
   padding: calc(var(--header-h) + fluid(69)) fluid(55) fluid(40) fluid(23);
   overflow-y: auto;
   overscroll-behavior: contain;
-  // Тонкий тёмно-коричневый скроллбар (темнее фона панели).
   scrollbar-width: thin;
   scrollbar-color: var(--color-brown-dark-2) transparent;
 
@@ -89,11 +86,22 @@
   }
   &::-webkit-scrollbar-track {
     background: transparent;
+    margin-block: fluid(24); // паддинги сверху/снизу — бегунок не упирается в края
   }
 
   @include mobile {
-    gap: fluid(28);
     padding: calc(var(--header-h) + fluid(39)) fluid(16) fluid(32);
+  }
+}
+
+// Контент (для вложенного Lenis он = scrollable content).
+.scrollInner {
+  display: flex;
+  flex-direction: column;
+  gap: fluid(60);
+
+  @include mobile {
+    gap: fluid(28);
   }
 }
 

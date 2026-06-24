@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import type { CSSProperties } from "react";
+import Lenis from "lenis";
 import { siteConfig } from "@/config/site";
 import { cn } from "@/lib/utils";
 import styles from "./Menu.module.scss";
@@ -29,6 +30,31 @@ const PICK = ["Выбор по параметрам", "Визуальный вы
 type MenuProps = { open: boolean; onClose: () => void };
 
 export function Menu({ open, onClose }: MenuProps) {
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  // Инерционный скролл самой панели меню (вложенный Lenis на .scroll). Глобальный
+  // Lenis игнорирует колесо над [data-menu-scroll] (см. SmoothScroll), поэтому
+  // конфликта нет. reduced-motion → нативный скролл.
+  useEffect(() => {
+    if (!open) return;
+    const wrapper = scrollRef.current;
+    const content = wrapper?.firstElementChild as HTMLElement | null;
+    if (!wrapper || !content) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+    const lenis = new Lenis({ wrapper, content, lerp: 0.1, smoothWheel: true });
+    let raf = 0;
+    const loop = (t: number) => {
+      lenis.raf(t);
+      raf = requestAnimationFrame(loop);
+    };
+    raf = requestAnimationFrame(loop);
+    return () => {
+      cancelAnimationFrame(raf);
+      lenis.destroy();
+    };
+  }, [open]);
+
   // Esc закрывает, body не скроллится пока меню открыто.
   useEffect(() => {
     if (!open) return;
@@ -67,51 +93,53 @@ export function Menu({ open, onClose }: MenuProps) {
       />
 
       <nav className={styles.panel} style={FROST} aria-label="Главное меню">
-        {/* data-lenis-prevent: Lenis не перехватывает колесо над меню → нативный скролл панели */}
-        <div className={styles.scroll} data-lenis-prevent>
-          <div className={styles.group}>
-            <p className={styles.label}>Меню</p>
-            <ul className={styles.list}>
-              {NAV.map((l) => (
-                <li key={l}>
-                  <a href="#" className={styles.link} tabIndex={tab} onClick={onClose}>
-                    {l}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </div>
+        {/* data-menu-scroll: глобальный Lenis игнорирует колесо здесь; скроллит вложенный */}
+        <div className={styles.scroll} data-menu-scroll ref={scrollRef}>
+          <div className={styles.scrollInner}>
+            <div className={styles.group}>
+              <p className={styles.label}>Меню</p>
+              <ul className={styles.list}>
+                {NAV.map((l) => (
+                  <li key={l}>
+                    <a href="#" className={styles.link} tabIndex={tab} onClick={onClose}>
+                      {l}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
 
-          <div className={styles.group}>
-            <p className={styles.label}>Выбрать квартиру</p>
-            <ul className={styles.list}>
-              {PICK.map((l) => (
-                <li key={l}>
-                  <a href="#" className={styles.link} tabIndex={tab} onClick={onClose}>
-                    {l}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </div>
+            <div className={styles.group}>
+              <p className={styles.label}>Выбрать квартиру</p>
+              <ul className={styles.list}>
+                {PICK.map((l) => (
+                  <li key={l}>
+                    <a href="#" className={styles.link} tabIndex={tab} onClick={onClose}>
+                      {l}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
 
-          {/* Телефон в панели — только на мобайле (на десктопе он в шапке) */}
-          <div className={cn(styles.group, styles.contacts)}>
-            <p className={styles.label}>Офис продаж</p>
-            <a href={siteConfig.phone.href} className={styles.phone} tabIndex={tab}>
-              {siteConfig.phone.display}
-            </a>
-          </div>
+            {/* Телефон в панели — только на мобайле (на десктопе он в шапке) */}
+            <div className={cn(styles.group, styles.contacts)}>
+              <p className={styles.label}>Офис продаж</p>
+              <a href={siteConfig.phone.href} className={styles.phone} tabIndex={tab}>
+                {siteConfig.phone.display}
+              </a>
+            </div>
 
-          {/* Логотип MR Private (макет 373-10156 «logo second») */}
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src="/logo-mr-private.svg"
-            alt="MR Private"
-            className={styles.brand}
-            width={134}
-            height={20}
-          />
+            {/* Логотип MR Private (макет 373-10156 «logo second») */}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/logo-mr-private.svg"
+              alt="MR Private"
+              className={styles.brand}
+              width={134}
+              height={20}
+            />
+          </div>
         </div>
       </nav>
     </div>

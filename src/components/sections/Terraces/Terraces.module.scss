@@ -57,7 +57,7 @@
   flex-direction: row;
   align-items: center; // текст — в нижней зоне, мимо опустившегося заголовка
   gap: fluid(197);
-  margin-top: fluid(164); // макет 449-11491: верх фото на y≈164 (заголовок «наезжает» сверху)
+  margin-top: fluid(330); // отступ из макета (заголовок «наезжает» сверху)
 
   @include mobile {
     flex-direction: column;
@@ -71,10 +71,11 @@
   position: relative;
   width: 100%;
   flex: 0 0 37%;
-  aspect-ratio: 513 / 659;
-  height: fluid(659); // макет 449-11491: полная высота фото
-  border-radius: var(--radius);
+  aspect-ratio: 513 / 620;
+  height: fluid(620); // макет 449-11491: полная высота фото
   overflow: hidden;
+  // Тот же срез верхне-правого угла, что у картинок Showcase.
+  clip-path: polygon(0 0, 72% 0, 100% 15%, 100% 100%, 0 100%);
 
   @include mobile {
     flex: 0 1 auto;

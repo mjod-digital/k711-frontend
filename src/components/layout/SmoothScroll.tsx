@@ -14,7 +14,14 @@ export function SmoothScroll() {
   useEffect(() => {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
-    const lenis = new Lenis({ lerp: 0.1, smoothWheel: true });
+    const lenis = new Lenis({
+      lerp: 0.1,
+      smoothWheel: true,
+      // мягче «разгон» при быстрой прокрутке колесом (не улетаем сразу в самый низ)
+      wheelMultiplier: 0.8,
+      // меню скроллит свой вложенный Lenis — глобальный игнорирует колесо над ним
+      prevent: (node) => !!node?.closest?.("[data-menu-scroll]"),
+    });
 
     let raf = 0;
     const loop = (time: number) => {
