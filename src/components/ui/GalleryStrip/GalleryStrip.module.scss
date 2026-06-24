@@ -9,9 +9,11 @@
 .section {
   position: relative;
   background: var(--color-bg);
+  margin-bottom: fluid(200);
 
   @include mobile {
-    margin-top: fluid(110);
+    margin-top: fluid(70);
+    margin-bottom: unset;
   }
 }
 

@@ -28,7 +28,11 @@
   padding: 0 fluid(20);
 
   @include mobile {
-    padding: fluid(17) fluid(8);
+    padding: fluid(17) fluid(8) fluid(17) fluid(52);
+
+    .heading span {
+      font-size: var(--fs-h2);
+    }
   }
 }
 
@@ -85,8 +89,7 @@
   color: var(--color-fg);
   font-family: var(--font-body);
   font-size: var(--fs-body); // 14 → 20
-  line-height: 1.4;
-  letter-spacing: 0.01em;
+  line-height: normal;
   flex: 1;
   max-width: fluid(512);
   width: 100%;

@@ -71,7 +71,8 @@
 .scroll {
   width: 100%;
   // верх — ниже шапки; контент начинается на уровне макета (top 137 = 68 + 69)
-  padding: calc(var(--header-h) + fluid(69)) fluid(55) fluid(40) fluid(23);
+  padding: fluid(10) fluid(55) fluid(10) fluid(23);
+  margin: calc(var(--header-h) + fluid(60)) 0 fluid(30);
   overflow-y: auto;
   overscroll-behavior: contain;
   scrollbar-width: thin;

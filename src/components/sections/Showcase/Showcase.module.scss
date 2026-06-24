@@ -48,7 +48,7 @@
   justify-self: start;
   height: min(fluid(768), 82vh); // всегда влезает по высоте
   aspect-ratio: 690 / 768;
-  clip-path: polygon(0 0, 72% 0, 100% 15%, 100% 100%, 0 100%);
+  clip-path: polygon(0 0, 90% 0, 100% 25%, 100% 100%, 0 100%);
 }
 
 // Разворот СНИЗУ ВВЕРХ, scrubbed по --intro (0 — скрыт, 1 — раскрыт). Плавность

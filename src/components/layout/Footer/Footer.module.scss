@@ -113,6 +113,7 @@
   text-decoration-skip-ink: none;
   text-underline-position: from-font;
   transition: opacity 0.3s ease;
+  font-size: fluid(12);
 
   &:hover {
     opacity: 0.7;
