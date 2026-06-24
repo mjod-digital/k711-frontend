@@ -53,25 +53,26 @@
 
   span {
     position: absolute;
-    left: 12%;
-    right: 12%;
-    height: 1.5px;
+    // макет 373-10118: линия 20px в иконке 28px → инсет 4/28 ≈ 14.29% с каждой стороны
+    left: 14.29%;
+    right: 14.29%;
+    height: fluid(1);
     background: currentColor;
-    border-radius: 1px;
     transition:
       top 0.3s cubic-bezier(0.22, 1, 0.36, 1),
       transform 0.3s cubic-bezier(0.22, 1, 0.36, 1),
       opacity 0.2s ease;
   }
 
+  // макет: линии на 6/14/22 px из 28 → равные промежутки 8px
   span:nth-child(1) {
-    top: 32%;
+    top: 21.43%;
   }
   span:nth-child(2) {
     top: 50%;
   }
   span:nth-child(3) {
-    top: 68%;
+    top: 78.57%;
   }
 }
 
@@ -101,7 +102,7 @@
   background: none;
   border: 0;
   cursor: pointer;
-  transition: color 0.2s ease;
+  transition: color 0.45s ease;
 
   &:hover {
     color: var(--color-brown-medium);
@@ -145,10 +146,20 @@
   font-family: var(--font-display);
   font-size: var(--fs-h4);
   line-height: var(--lh-h4);
+  -webkit-text-stroke-width: fluid(0.3);
+  -webkit-text-stroke-color: var(--color-brown-dark);
   letter-spacing: var(--ls-h4);
   text-transform: uppercase;
   color: var(--color-brown-dark);
   white-space: nowrap;
+  transition:
+    color 0.45s ease,
+    -webkit-text-stroke-color 0.45s ease;
+
+  &:hover {
+    color: var(--color-brown-medium);
+    -webkit-text-stroke-color: var(--color-brown-medium);
+  }
 
   @include mobile {
     display: none;
@@ -171,6 +182,7 @@
   justify-content: center;
   height: fluid(48);
   padding-inline: fluid(20);
+  -webkit-text-stroke-width: fluid(0.3);
   font-family: var(--font-display);
   font-size: var(--fs-button);
   line-height: var(--lh-button);

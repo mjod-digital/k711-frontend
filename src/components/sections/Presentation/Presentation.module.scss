@@ -35,17 +35,37 @@
     width: 100%;
     height: auto;
     aspect-ratio: 360 / 220;
-    clip-path: polygon(0 0, 100% 0, 100% 84%, 0 100%); // мобайл: срез снизу
+    // мобайл: срез снизу И сверху, ПАРАЛЛЕЛЬНО (наклон низ-лево → верх-право) —
+    // верхняя кромка повторяет угол нижней (как нарисовал дизайнер).
+    clip-path: polygon(0 16%, 100% 0, 100% 84%, 0 100%);
   }
 }
 
 // Разворот слева направо (clip), scrubbed по --intro. Плавность даёт
-// демпфирование --intro в JS (lerp), а не CSS-transition.
+// демпфирование --intro в JS (lerp). Ведущая кромка ВСЕГДА под финальным углом
+// (срез .media: 100%→72% = −28% ширины на высоту), просто едет слева направо.
+// (Раньше масштабировали полигон → угол кромки менялся и совпадал с финалом
+// лишь в конце.)
 .unfold {
   position: absolute;
   inset: 0;
-  clip-path: inset(0 calc((1 - var(--intro, 0)) * 100%) 0 0);
+  clip-path: polygon(
+    0 0,
+    calc(var(--intro, 0) * 100%) 0,
+    calc(var(--intro, 0) * 100% - 28%) 100%,
+    0 100%
+  );
   will-change: clip-path;
+
+  @include mobile {
+    // мобайл — срез снизу, как у .media
+    clip-path: polygon(
+      0 0,
+      calc(var(--intro, 0) * 100%) 0,
+      calc(var(--intro, 0) * 100%) 84%,
+      0 100%
+    );
+  }
 }
 
 .image {
@@ -112,25 +132,25 @@
   color: var(--color-fg);
   font-family: var(--font-body);
   font-size: var(--fs-body); // 14 → 20
-  line-height: 1.4;
-  letter-spacing: 0.01em;
+  line-height: normal;
   max-width: fluid(320);
 }
 
-// CTA — залитая тёмная кнопка
+// CTA — контурная кнопка с тем же ховером, что у остальных (Header/Showcase).
 .cta {
   align-self: flex-start;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   padding: fluid(13) fluid(20) fluid(12);
+  -webkit-text-stroke-width: fluid(0.3);
   font-family: var(--font-display);
   font-size: var(--fs-button);
   line-height: var(--lh-button);
   letter-spacing: var(--ls-button);
   white-space: nowrap;
   cursor: pointer;
-  @include ctaPrimary;
+  @include ctaSecondary;
 
   height: fluid(48);
   padding-block: fluid(13);
@@ -138,5 +158,14 @@
   @include mobile {
     height: auto;
     padding-block: fluid(13) fluid(12);
+    // мобайл: цвет как у Showcase — залитая тёмная, ховер прозрачная
+    background: var(--color-brown-dark);
+    border-color: var(--color-brown-dark);
+    color: var(--color-badge-light);
+
+    &:hover {
+      background: transparent;
+      color: var(--color-brown-dark);
+    }
   }
 }

@@ -7,7 +7,7 @@
 // ============================================================
 .terraces {
   margin-top: 0;
-  padding: fluid(40) fluid(20) 0;
+  padding: 0 fluid(20) 0;
   position: relative;
 
   @include mobile {
@@ -19,12 +19,14 @@
 // Заголовок абсолютный, опускается вниз НА фото по --p (0 — выше, 1 — на месте).
 .headingWrap {
   position: absolute;
-  top: fluid(40);
+  top: 0; // макет 449-11491: финал заголовка у верхней кромки
   left: 0;
   right: 0;
   z-index: 2;
   padding-left: fluid(20); // выравниваем заголовок с контентом ниже (десктоп)
-  transform: translate3d(0, calc((var(--p, 1) - 1) * fluid(200)), 0);
+  // Едет вниз ВМЕСТЕ с разворотом фото (--pu), а не раньше (запрос дизайнера):
+  // старт y≈-82 (449-11469), финал y≈0 (449-11491).
+  transform: translate3d(0, calc((var(--pu, 1) - 1) * fluid(82)), 0);
   will-change: transform;
 
   // Мобайл (макет 373-12537): заголовок в потоке, но с z-index — «наезжает»
@@ -53,14 +55,15 @@
 .row {
   display: flex;
   flex-direction: row;
-  align-items: flex-end; // текст — в нижней зоне, мимо опустившегося заголовка
+  align-items: center; // текст — в нижней зоне, мимо опустившегося заголовка
   gap: fluid(197);
-  margin-top: fluid(150); // фото стартует ниже первой строки заголовка
+  padding-top: fluid(188); // отступ из макета (заголовок «наезжает» сверху)
 
   @include mobile {
     flex-direction: column;
     align-items: normal;
     gap: fluid(40);
+    padding-top: unset;
     margin-top: fluid(-14); // фото наезжает под последнюю строку заголовка
   }
 }
@@ -70,8 +73,10 @@
   width: 100%;
   flex: 0 0 37%;
   aspect-ratio: 513 / 620;
-  border-radius: var(--radius);
+  height: fluid(620); // макет 449-11491: полная высота фото
   overflow: hidden;
+  // Тот же срез верхне-правого угла, что у картинок Showcase.
+  clip-path: polygon(0 0, 90% 0, 100% 25%, 100% 100%, 0 100%);
 
   @include mobile {
     flex: 0 1 auto;
@@ -82,11 +87,12 @@
   }
 }
 
-// Разворот фото СВЕРХУ ВНИЗ по --p: окно у верхней кромки растёт вниз.
+// Разворот фото СВЕРХУ ВНИЗ по --pu: окно у верхней кромки растёт вниз.
+// Старт — уже показан верх ~21% (макет 449-11469: 138 из 659), финал — 100%.
 .unfold {
   position: absolute;
   inset: 0;
-  clip-path: inset(0 0 calc((1 - var(--pu, 1)) * 100%) 0);
+  clip-path: inset(0 0 calc((1 - var(--pu, 1)) * 79%) 0);
   will-change: clip-path;
 }
 
@@ -116,8 +122,7 @@
   color: var(--color-fg);
   font-family: var(--font-body);
   font-size: var(--fs-body); // 14 → 20
-  line-height: 1.4;
-  letter-spacing: 0.01em;
+  line-height: normal;
   flex: 1;
   transform: translate3d(0, calc((1 - var(--pr)) * fluid(50)), 0);
   opacity: var(--pr);

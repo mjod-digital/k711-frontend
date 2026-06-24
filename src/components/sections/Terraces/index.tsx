@@ -31,6 +31,9 @@ export function Terraces() {
       el.style.setProperty("--p", "1");
       return;
     }
+    // мобайл — разворот фото/текста (--pu) стартует чуть раньше (ниже порог)
+    const puStart = mobile ? 0.2 : 0.4;
+    const puSpan = 1 - puStart;
     let v = 0;
     let raf = 0;
     let ticking = false;
@@ -43,7 +46,7 @@ export function Terraces() {
       if (settled) v = target;
       el.style.setProperty("--p", String(v));
       // фото разворачивается ПОЗЖЕ — когда заголовок/текст уже наезжает на него
-      el.style.setProperty("--pu", String(clamp01((v - 0.4) / 0.6)));
+      el.style.setProperty("--pu", String(clamp01((v - puStart) / puSpan)));
       if (!settled) raf = requestAnimationFrame(tick);
       else ticking = false;
     };
@@ -62,7 +65,7 @@ export function Terraces() {
       cancelAnimationFrame(raf);
       ticking = false;
     };
-  }, []);
+  }, [mobile]);
 
   return (
     <section ref={ref} className={styles.terraces}>

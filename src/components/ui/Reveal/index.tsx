@@ -27,6 +27,9 @@ export type RevealProps = {
   panelColor?: string;
   /** true — сыграть один раз; false — переигрывать при каждом входе в вид. По умолчанию true. */
   once?: boolean;
+  /** rootMargin для IO. По умолчанию запуск ближе к центру; можно переопределить
+   *  на секцию (напр. Scenario — чуть раньше). */
+  rootMargin?: string;
 };
 
 export function Reveal({
@@ -39,6 +42,7 @@ export function Reveal({
   variant = "clip",
   panelColor,
   once = true,
+  rootMargin,
 }: RevealProps) {
   // ВАЖНО: IntersectionObserver наблюдает за ВНЕШНЕЙ обёрткой (.reveal), которая
   // НЕ клипается. Если наблюдать за самим клипнутым элементом, clip-path обнуляет
@@ -57,8 +61,7 @@ export function Reveal({
     if (!el) return;
 
     // Reduced-motion: не вооружаем — контент остаётся полностью видимым.
-    const mql = window.matchMedia("(prefers-reduced-motion: reduce)");
-    if (mql.matches) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
     el.style.setProperty("--reveal-delay", `${delay}ms`);
     if (duration) el.style.setProperty("--reveal-duration", `${duration}ms`);
@@ -66,22 +69,43 @@ export function Reveal({
     // Вооружаем синхронно до первой отрисовки — без вспышки.
     el.dataset.reveal = "hidden";
 
-    const io = new IntersectionObserver(
-      ([entry], obs) => {
-        if (entry.isIntersecting) {
-          el.dataset.reveal = "visible";
-          if (once) obs.disconnect();
-        } else if (!once) {
-          // Переигрываемый режим: ушли из вида — снова прячем под шторку.
-          el.dataset.reveal = "hidden";
-        }
-      },
-      { threshold: 0.2, rootMargin: "0px 0px -10% 0px" },
-    );
-    io.observe(el);
+    // По умолчанию запуск ближе к центру (десктоп), на мобилке — чуть раньше
+    // (нижние 15% вместо 35%). Явно переданный rootMargin приоритетнее.
+    // observer пересобираем при смене брейкпоинта (поворот/resize), пока ревил
+    // ещё не сыграл — иначе rootMargin «застывает» на значении момента загрузки.
+    const mqMobile = window.matchMedia("(max-width: 767.98px)");
+    let io: IntersectionObserver | null = null;
+    let revealed = false;
 
-    return () => io.disconnect();
-  }, [delay, duration, once, isLines]);
+    const arm = () => {
+      io?.disconnect();
+      if (once && revealed) return; // уже сыграл — не пересобираем (без мигания)
+      const margin =
+        rootMargin ?? (mqMobile.matches ? "0px 0px -15% 0px" : "0px 0px -35% 0px");
+      io = new IntersectionObserver(
+        ([entry], obs) => {
+          if (entry.isIntersecting) {
+            el.dataset.reveal = "visible";
+            revealed = true;
+            if (once) obs.disconnect();
+          } else if (!once) {
+            // Переигрываемый режим: ушли из вида — снова прячем под шторку.
+            el.dataset.reveal = "hidden";
+          }
+        },
+        { threshold: 0.2, rootMargin: margin },
+      );
+      io.observe(el);
+    };
+
+    arm();
+    mqMobile.addEventListener("change", arm);
+
+    return () => {
+      io?.disconnect();
+      mqMobile.removeEventListener("change", arm);
+    };
+  }, [delay, duration, once, isLines, rootMargin]);
 
   const style = panelColor
     ? ({ "--reveal-panel-color": panelColor } as CSSProperties)

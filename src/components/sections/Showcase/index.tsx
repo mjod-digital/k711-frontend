@@ -152,6 +152,29 @@ export function Showcase({ steps }: { steps: ShowcaseStep[] }) {
       return;
     }
 
+    // ---- МОБАЙЛ: построчная шторка заголовков при входе в вид ----
+    // На мобайле .textClip не клипает, поэтому каскадные заголовки оживляем
+    // штатным механизмом [data-reveal] .reveal-line (CascadeHeading уже ставит
+    // .reveal-line/--i). Счётчик-число анимируется отдельно (CountUp).
+    const headings = stepRefs.current
+      .map((el) => el?.querySelector("h2") as HTMLElement | null)
+      .filter((h): h is HTMLElement => !!h);
+    headings.forEach((h) => {
+      h.dataset.reveal = "hidden";
+    });
+    const revealIO = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((e) => {
+          if (e.isIntersecting) {
+            (e.target as HTMLElement).dataset.reveal = "visible";
+            revealIO.unobserve(e.target);
+          }
+        });
+      },
+      { threshold: 0.2, rootMargin: "0px 0px -20% 0px" },
+    );
+    headings.forEach((h) => revealIO.observe(h));
+
     // ---- МОБАЙЛ: у каждой картинки свой параллакс (центрированный -0.5..0.5) ----
     let raf = 0;
     const apply = () => {
@@ -174,6 +197,10 @@ export function Showcase({ steps }: { steps: ShowcaseStep[] }) {
       window.removeEventListener("scroll", onScroll);
       window.removeEventListener("resize", onScroll);
       cancelAnimationFrame(raf);
+      revealIO.disconnect();
+      headings.forEach((h) => {
+        delete h.dataset.reveal;
+      });
     };
   }, [pinned, steps.length]);
 

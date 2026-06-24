@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import localFont from "next/font/local";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
+import { SmoothScroll } from "@/components/layout/SmoothScroll";
 import { siteConfig } from "@/config/site";
 import "./globals.scss";
 
@@ -38,6 +39,7 @@ export default function RootLayout({
   return (
     <html lang="ru" className={`${ricordi.variable} ${cofo.variable}`}>
       <body>
+        <SmoothScroll />
         <Header />
         <main>{children}</main>
         <Footer />

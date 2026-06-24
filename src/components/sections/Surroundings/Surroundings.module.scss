@@ -12,8 +12,8 @@
   margin: 0 auto;
 
   @include mobile {
-    margin-top: fluid(60);
-    padding-block: fluid(17);
+    margin-top: fluid(70);
+    padding-block: unset;
     padding-inline: fluid(8);
   }
 }

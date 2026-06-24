@@ -101,13 +101,35 @@ export function GalleryStrip({ items, className }: GalleryStripProps) {
     boxRefs.current.forEach((el) => el?.style.removeProperty("--par"));
     let travel = 0;
     let topOffset = 0;
+    let curX = 0; // сглаженный сдвиг ленты (px)
+    let started = false;
     let raf = 0;
+    let ticking = false;
 
-    const apply = () => {
+    // целевой сдвиг по текущему положению секции
+    const targetX = () => {
       const top = section.getBoundingClientRect().top;
       // прогресс закрепления: 0 в момент центрирования полосы, 1 — лента доехала
       const p = travel > 0 ? clamp((topOffset - top) / travel) : 0;
-      track.style.transform = `translate3d(${-(p * travel)}px, 0, 0)`;
+      return -(p * travel);
+    };
+
+    // Лента едет к цели с демпфированием (lerp) → инерция, без рывков по колесу.
+    const tick = () => {
+      const target = targetX();
+      curX += (target - curX) * 0.12;
+      const settled = Math.abs(target - curX) < 0.5;
+      if (settled) curX = target;
+      track.style.transform = `translate3d(${curX}px, 0, 0)`;
+      if (!settled) raf = requestAnimationFrame(tick);
+      else ticking = false;
+    };
+
+    const wake = () => {
+      if (!ticking) {
+        ticking = true;
+        raf = requestAnimationFrame(tick);
+      }
     };
 
     const measure = () => {
@@ -120,21 +142,21 @@ export function GalleryStrip({ items, className }: GalleryStripProps) {
       travel = Math.max(0, track.scrollWidth - window.innerWidth);
       // высота секции = высота полосы + путь: ровно столько секция «залипает»
       section.style.height = `${stickyH + travel}px`;
-      apply();
-    };
-
-    const onScroll = () => {
-      cancelAnimationFrame(raf);
-      raf = requestAnimationFrame(apply);
+      if (!started) {
+        curX = targetX(); // первый кадр — без «доезда» из нуля
+        started = true;
+      }
+      wake();
     };
 
     measure();
-    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("scroll", wake, { passive: true });
     window.addEventListener("resize", measure);
     return () => {
-      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("scroll", wake);
       window.removeEventListener("resize", measure);
       cancelAnimationFrame(raf);
+      ticking = false;
     };
   }, [pinned, items.length]);
 

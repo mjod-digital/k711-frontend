@@ -11,7 +11,7 @@
   padding-bottom: fluid(55);
 
   @include mobile {
-    margin-block: fluid(80);
+    margin-block: fluid(60);
     padding-inline: 0; // мобайл: слайд во всю ширину, без боковых отступов
     padding-bottom: unset;
   }
@@ -139,8 +139,8 @@
   color: var(--color-brown-medium);
   cursor: pointer;
   transition:
-    background-color 0.2s ease,
-    color 0.2s ease;
+    background-color 0.45s ease,
+    color 0.45s ease;
 
   svg {
     width: 100%;

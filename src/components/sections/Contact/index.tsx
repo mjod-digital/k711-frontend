@@ -42,7 +42,7 @@ export function Contact() {
 
             <div className={styles.checks}>
               <label className={styles.check}>
-                <input type="checkbox" defaultChecked />
+                <input type="checkbox" />
                 <span>
                   Соглашаюсь с{" "}
                   <a href="#" className={styles.link}>

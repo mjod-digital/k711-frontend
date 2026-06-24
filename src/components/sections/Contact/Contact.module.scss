@@ -43,7 +43,7 @@
 .panel {
   display: flex;
   flex-direction: column;
-  gap: fluid(40);
+  gap: fluid(22);
   flex: 1;
   justify-content: space-between;
   min-height: fluid(538);
@@ -54,7 +54,8 @@
     flex: 0 1 auto;
     justify-content: normal;
     min-height: 0;
-    padding: fluid(32) fluid(24);
+    padding: fluid(20);
+    gap: fluid(18);
   }
 }
 
@@ -158,6 +159,8 @@
   text-decoration: underline;
 }
 
+// Светлая кнопка (как было): def — крем + контур; hover — заливка brown-light;
+// active(нажатие) — заливка темнее (brown-medium), чтобы отличаться от hover.
 .submit {
   align-self: flex-end;
   display: inline-flex;
@@ -167,6 +170,7 @@
   padding-inline: fluid(34);
   background: var(--color-badge-light);
   border: fluid(1) solid var(--color-brown-dark);
+  -webkit-text-stroke-width: fluid(0.3);
   color: var(--color-brown-dark);
   font-family: var(--font-display);
   font-size: var(--fs-button);
@@ -175,15 +179,22 @@
   white-space: nowrap;
   cursor: pointer;
   transition:
-    background-color 0.2s ease,
-    color 0.2s ease;
+    background-color 0.45s ease,
+    color 0.45s ease;
 
   &:hover {
     background: var(--color-brown-light);
     color: var(--color-badge-light);
   }
 
+  &:active {
+    background: var(--color-brown-medium); // темнее hover — отдельное состояние нажатия
+    color: var(--color-badge-light);
+  }
+
   @include mobile {
     align-self: flex-start;
+    padding-inline: fluid(34);
+    margin-left: auto;
   }
 }
