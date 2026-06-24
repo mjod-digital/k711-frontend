@@ -92,6 +92,7 @@
 
   @include mobile {
     padding: calc(var(--header-h) + fluid(39)) fluid(16) fluid(32);
+    margin: unset;
   }
 }
 
