@@ -1,0 +1,100 @@
+@use "breakpoints" as *;
+
+// ============================================================
+//   SpaceSplit — «Пространство по вашим правилам» (Figma 397-11233).
+//   Десктоп: слева заголовок + вертикальное фото, справа — два абзаца.
+//   Мобайл: заголовок → фото (слева) → абзацы под ним.
+// ============================================================
+.section {
+  margin-top: fluid(128);
+  padding-inline: fluid(20);
+
+  @include mobile {
+    margin-top: fluid(60);
+    padding-inline: fluid(8);
+  }
+}
+
+.inner {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  column-gap: fluid(80);
+  align-items: end;
+
+  @include mobile {
+    display: block;
+  }
+}
+
+// ----- Левая колонка: заголовок над фото -----
+.left {
+  display: flex;
+  flex-direction: column;
+  gap: fluid(40);
+
+  @include mobile {
+    gap: fluid(20);
+  }
+}
+
+.headingWrap {
+  width: 100%;
+}
+
+.heading {
+  display: flex;
+  flex-direction: column;
+  color: var(--color-brown-medium);
+  font-family: var(--font-display);
+  text-transform: uppercase;
+}
+
+.hLine {
+  font-size: var(--fs-h2); // 68 → 36
+  line-height: var(--lh-h2); // 88 → 40
+  letter-spacing: 0;
+
+  &:first-child {
+    align-self: flex-start;
+  }
+}
+
+.media {
+  position: relative;
+  width: fluid(420);
+  max-width: 100%;
+  aspect-ratio: 212 / 280;
+  border-radius: var(--radius);
+  overflow: hidden;
+
+  @include mobile {
+    width: fluid(212);
+  }
+}
+
+.image {
+  object-fit: cover;
+  object-position: center;
+}
+
+// ----- Правая колонка: два абзаца -----
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: fluid(20);
+  max-width: fluid(512);
+  margin-inline-start: auto;
+
+  @include mobile {
+    margin-top: fluid(24);
+    max-width: none;
+  }
+}
+
+.paragraph {
+  color: var(--color-fg);
+  font-family: var(--font-body);
+  font-size: var(--fs-body); // 20 → 14
+  line-height: 1.4;
+  letter-spacing: 0.01em;
+}

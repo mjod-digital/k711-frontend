@@ -1,0 +1,135 @@
+@use "breakpoints" as *;
+
+// ============================================================
+//   ResidenceStats — три фото-карточки со статистикой (Figma 397-11242).
+//   Десктоп: ряд из трёх карточек «лесенкой» по вертикали.
+//   Мобайл: друг под другом со сдвигом (левая / правая / левая).
+// ============================================================
+.section {
+  margin-top: fluid(128);
+  padding-inline: fluid(20);
+
+  @include mobile {
+    margin-top: fluid(60);
+    padding-inline: fluid(8);
+  }
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  align-items: start;
+  column-gap: fluid(20);
+
+  @include mobile {
+    display: flex;
+    flex-direction: column;
+    column-gap: 0;
+    row-gap: fluid(16);
+  }
+}
+
+// ----- Карточка -----
+.card {
+  position: relative;
+  margin: 0;
+  width: 100%;
+  aspect-ratio: 440 / 540;
+  border-radius: var(--radius);
+  overflow: hidden;
+  isolation: isolate;
+
+  @include mobile {
+    width: fluid(300);
+    aspect-ratio: 300 / 340;
+  }
+}
+
+// Десктоп «лесенка» по вертикали: центральная ниже, правая — между ними.
+.left {
+  @include mobile {
+    align-self: flex-start;
+    margin-left: fluid(8);
+  }
+}
+
+.center {
+  margin-top: fluid(120);
+
+  @include mobile {
+    margin-top: 0;
+    align-self: flex-end;
+    margin-right: fluid(8);
+  }
+}
+
+.right {
+  margin-top: fluid(56);
+
+  @include mobile {
+    margin-top: 0;
+    align-self: flex-start;
+    margin-left: fluid(52);
+  }
+}
+
+.image {
+  object-fit: cover;
+  object-position: center;
+}
+
+// затемнение снизу — подпись читается поверх фото
+.scrim {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: linear-gradient(
+    to top,
+    rgba(33, 3, 3, 0.7) 0%,
+    rgba(33, 3, 3, 0) 45%
+  );
+}
+
+// ----- Подпись (число + строки) -----
+.label {
+  position: absolute;
+  left: fluid(28);
+  bottom: fluid(24);
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  color: var(--color-white);
+  font-family: var(--font-display);
+  text-transform: uppercase;
+
+  @include mobile {
+    left: fluid(20);
+    bottom: fluid(20);
+  }
+}
+
+.value {
+  display: block;
+  font-size: fluid(80); // десктоп — крупно, но влезает в карточку
+  line-height: 1;
+  letter-spacing: -0.02em;
+  white-space: nowrap;
+
+  @include mobile {
+    font-size: var(--fs-h1); // 44
+  }
+
+  sup {
+    font-size: 0.45em;
+    vertical-align: super;
+  }
+}
+
+.caption {
+  display: block;
+  font-size: var(--fs-h3); // 36 → 28
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+}

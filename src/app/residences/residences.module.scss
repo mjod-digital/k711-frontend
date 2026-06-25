@@ -1,0 +1,93 @@
+@use "breakpoints" as *;
+
+// ============================================================
+//   Скаттер-заголовок hero «редкость клубного формата»
+//   (Figma 415-13767 desktop / 397-11208 mobile). Слова позиционируются
+//   абсолютно внутри фото (.title в PageHero — position:absolute; inset:0).
+//   Доли от фото — резина держит композицию на любой ширине.
+// ============================================================
+.word {
+  position: absolute;
+  white-space: nowrap;
+}
+
+// «клубного» — крупное слово (H1-шкала)
+.klubnogo {
+  font-size: fluid(110);
+}
+
+// ----- Десктоп (фото 1400×720): композиция по центру-низу -----
+.redkost {
+  left: 33%;
+  top: 56%;
+}
+.klubnogo {
+  left: 38.5%;
+  top: 64%;
+}
+.formata {
+  left: 50%;
+  top: 78%;
+}
+
+@include mobile {
+  .klubnogo {
+    font-size: fluid(44);
+  }
+
+  .redkost {
+    left: 9.6%;
+    top: 74.3%;
+  }
+  .klubnogo {
+    left: 20.3%;
+    top: 80.2%;
+  }
+  .formata {
+    left: 53.8%;
+    top: 86.6%;
+  }
+}
+
+// ============================================================
+//   Заголовок «квартиры / с вашим / сценарием / жизни» (Figma 397-11375)
+//   поверх вертикального фото (ImageHeading shell). Лесенка вправо,
+//   «сценарием» крупное (H1) у левого края.
+// ============================================================
+.scenarioHeading {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  color: var(--color-white);
+  font-family: var(--font-display);
+  text-transform: uppercase;
+}
+
+.sKvartiry {
+  align-self: flex-start;
+  font-size: var(--fs-h2); // 68 → 36
+  line-height: var(--lh-h2);
+}
+.sSvashim {
+  margin-left: fluid(180);
+  font-size: var(--fs-h2);
+  line-height: var(--lh-h2);
+
+  @include mobile {
+    margin-left: fluid(74);
+  }
+}
+.sScenariem {
+  font-size: var(--fs-h1); // 120 → 44
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+.sZhizni {
+  margin-left: fluid(420);
+  font-size: var(--fs-h2);
+  line-height: var(--lh-h2);
+
+  @include mobile {
+    margin-left: fluid(185);
+  }
+}
