@@ -71,8 +71,8 @@
 .scroll {
   width: 100%;
   // верх — ниже шапки; контент начинается на уровне макета (top 137 = 68 + 69)
-  padding: fluid(10) fluid(55) fluid(10) fluid(23);
-  margin: calc(var(--header-h) + fluid(60)) 0 fluid(30);
+  padding: fluid(120) fluid(55) fluid(30) fluid(23);
+  // margin: calc(var(--header-h) + fluid(60)) 0 fluid(30);
   overflow-y: auto;
   overscroll-behavior: contain;
   scrollbar-width: thin;
@@ -173,9 +173,13 @@
   color: var(--color-badge-light);
 }
 
-// Логотип MR Private — картинка, прижат к низу панели (макет 373-10156).
+// Логотип MR Private — последний элемент scrollInner: масштабируется ВМЕСТЕ с
+// меню (zoom) и прижат к низу. margin-top:auto прижимает к низу, а нужную высоту
+// scrollInner (чтобы было куда прижимать) добивает JS. padding-top — гарантированный
+// отступ от контента выше, чтобы лого не липло к пунктам (макет 373-10156).
 .brand {
   display: block;
+  flex-shrink: 0;
   width: fluid(134);
   height: auto;
   margin-top: auto;

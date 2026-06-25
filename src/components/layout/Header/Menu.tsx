@@ -49,9 +49,12 @@ export function Menu({ open, onClose }: MenuProps) {
     const applyScale = () => {
       if (mqMobile.matches) {
         content.style.removeProperty("zoom");
+        content.style.removeProperty("min-height");
         return;
       }
-      content.style.setProperty("zoom", "1"); // меряем натуральную высоту
+      // меряем НАТУРАЛЬНУЮ высоту контента — без зума и без заливки высоты
+      content.style.setProperty("zoom", "1");
+      content.style.setProperty("min-height", "0");
       const natural = content.offsetHeight;
       // паддинги .scroll НЕ зумятся (они на обёртке) → вычитаем их из доступной высоты
       const cs = getComputedStyle(wrapper);
@@ -60,6 +63,10 @@ export function Menu({ open, onClose }: MenuProps) {
       const chrome = window.innerHeight - avail; // хром вокруг (по высоте — константа)
       const avail600 = Math.max(0, 600 - chrome); // доступное при окне 600px
       const scale = Math.min(1, Math.max(avail, avail600) / Math.max(1, natural));
+      // Заливаем высоту так, чтобы ПОСЛЕ зума контент занял всю доступную область →
+      // margin-top:auto у логотипа прижимает его к самому низу даже на высоких окнах
+      // (а на низких окнах контент длиннее avail → скролл, лого в самом низу прокрутки).
+      content.style.setProperty("min-height", `${avail / scale}px`);
       content.style.setProperty("zoom", String(scale));
     };
     applyScale();
@@ -87,6 +94,7 @@ export function Menu({ open, onClose }: MenuProps) {
       window.removeEventListener("resize", onResize);
       mqMobile.removeEventListener("change", onResize);
       content.style.removeProperty("zoom");
+      content.style.removeProperty("min-height");
     };
   }, [open]);
 
@@ -165,7 +173,8 @@ export function Menu({ open, onClose }: MenuProps) {
               </a>
             </div>
 
-            {/* Логотип MR Private (макет 373-10156 «logo second») */}
+            {/* Логотип MR Private — последний элемент scrollInner: масштабируется
+                вместе с меню (zoom) и прижат к низу (макет 373-10156 «logo second»). */}
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src="/logo-mr-private.svg"

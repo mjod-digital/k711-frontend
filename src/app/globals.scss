@@ -33,6 +33,12 @@ main {
   overflow-x: clip;
 }
 
+/* Прелоудер: пока контент первого экрана грузится — скролл залочен на hero. */
+html.is-loading,
+html.is-loading body {
+  overflow: hidden;
+}
+
 a {
   color: inherit;
 }

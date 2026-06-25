@@ -47,23 +47,29 @@ export function Statement() {
   return (
     <section className={styles.statement}>
       <div className={styles.inner} ref={innerRef}>
+        {/* Каждая ВИЗУАЛЬНАЯ строка — отдельный reveal-line: иначе длинная вторая
+            строка переносится и из-за шторки снизу-вверх её нижняя часть
+            появляется раньше верхней (последовательность ломается 1→3→2). */}
         <Reveal as="h2" variant="lines" active={revealed} className={styles.heading}>
           <span className="reveal-line" style={{ "--i": 0 } as CSSProperties}>
             В центре
           </span>
           <span className="reveal-line" style={{ "--i": 1 } as CSSProperties}>
-            культурной Москвы, вдали от шума
+            культурной Москвы,
+          </span>
+          <span className="reveal-line" style={{ "--i": 2 } as CSSProperties}>
+            вдали от шума
           </span>
         </Reveal>
 
         {/* Абзацы — мягкий «выезд» снизу вверх (как тексты Elyse), от ТОГО ЖЕ
-            триггера, что и заголовок. delay ≈ время анимации заголовка (2 строки:
-            старт 2-й в +220мс + клип) → абзацы стартуют сразу ПОСЛЕ заголовка. */}
+            триггера, что и заголовок. delay ≈ время анимации заголовка (3 строки:
+            старт 3-й в +440мс + клип) → абзацы стартуют сразу ПОСЛЕ заголовка. */}
         <Reveal
           variant="fade"
           active={revealed}
           className={styles.body}
-          delay={900}
+          delay={1150}
           duration={1000}
         >
           <p className={styles.paragraph}>

@@ -89,28 +89,14 @@
   max-width: fluid(512);
 }
 
+// Текст блока проявляется ОДНОЙ шторкой снизу-вверх (как изначально): весь блок
+// (заголовок + описание + кнопка) клипается по --introText.
 .textClip {
   display: flex;
   flex-direction: column;
   gap: fluid(80);
-}
-
-// Заголовок и описание клипаются СИНХРОННО по одному --introText → появляются
-// ОДНОВРЕМЕННО. Раньше одна общая шторка на .textClip шла по всему блоку.
-.heading,
-.count,
-.desc {
   clip-path: inset(calc((1 - var(--introText, 0)) * 100%) 0 0 0);
   will-change: clip-path;
-}
-
-// CTA — НЕ шторкой (как заголовок/описание), а мягким «выездом» снизу (opacity +
-// сдвиг), и ПОСЛЕ описания: сдвинутый диапазон скраба (последняя треть прохода).
-.cta {
-  --ctaReveal: clamp(0, calc((var(--introText, 0) - 0.55) / 0.45), 1);
-  opacity: var(--ctaReveal);
-  transform: translate3d(0, calc((1 - var(--ctaReveal)) * #{fluid(50)}), 0);
-  will-change: opacity, transform;
 }
 
 // ----- Счётчик «46 / резиденций» -----
@@ -195,17 +181,10 @@
 
 // .static .parallax — параллакс оставлен включённым (мобайл): сдвиг по --par из JS.
 
-.static .heading,
-.static .count,
-.static .desc {
+// Мобайл / reduced-motion (.static): без шторки — текст статичен, заголовки
+// оживляет построчная шторка (data-reveal на h2).
+.static .textClip {
   clip-path: none;
-}
-
-// CTA на мобайле / reduced-motion (.static) — без скраба, всегда видна
-// (иначе при неустановленном --introText opacity ушла бы в 0).
-.static .cta {
-  opacity: 1;
-  transform: none;
 }
 
 // ----- Мобайл-раскладка (всегда .static на мобайле): фото сверху, текст ниже -----
