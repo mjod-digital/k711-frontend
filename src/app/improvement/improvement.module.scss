@@ -1,0 +1,42 @@
+@use "breakpoints" as *;
+
+// ============================================================
+//   Скаттер-заголовок hero «Ландшафт как природная среда»
+//   (Figma 373-9334 / 397-10220). Слова позиционируются абсолютно
+//   внутри фото (.title в PageHero — position:absolute; inset:0).
+//   Доли от фото — резина держит композицию на любой ширине.
+// ============================================================
+.word {
+  position: absolute;
+  white-space: nowrap;
+}
+
+.landshaft {
+  left: 25.3%;
+  top: 58.1%;
+}
+.kakPrirodnaya {
+  left: 30.1%;
+  top: 67.8%;
+}
+.sreda {
+  left: 51.5%;
+  top: 77.8%;
+  font-size: fluid(120);
+}
+
+@include mobile {
+  .landshaft {
+    left: 7.6%;
+    top: 73.8%;
+  }
+  .kakPrirodnaya {
+    left: 21.5%;
+    top: 79.1%;
+  }
+  .sreda {
+    left: 55.5%;
+    top: 85.5%;
+    font-size: fluid(44);
+  }
+}
