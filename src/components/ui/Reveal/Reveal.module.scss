@@ -49,6 +49,46 @@
   --reveal-inset: 0 100% 0 0; // открывается справа налево
 }
 
+// ----- FADE (opt-in: мягкое проявление + сдвиг, без клип-занавеса) -----
+// Текст не «открывается шторкой», а проявляется со сдвигом (как в реф-анимации
+// Elyse). Направление задаёт класс направления (up = снизу вверх, по умолчанию).
+.fade {
+  // Заметный «выезд» как в реф-анимации Elyse (~4rem). up: стартует ниже, едет вверх.
+  --fade-shift: translateY(#{fluid(64)});
+  opacity: 0;
+  transform: var(--fade-shift);
+}
+.fade.up {
+  --fade-shift: translateY(#{fluid(64)});
+}
+.fade.down {
+  --fade-shift: translateY(#{fluid(-64)});
+}
+.fade.left {
+  --fade-shift: translateX(#{fluid(64)});
+}
+.fade.right {
+  --fade-shift: translateX(#{fluid(-64)});
+}
+.reveal:not([data-reveal]) .fade {
+  opacity: 1; // SSR / no-JS / до arming — видно полностью
+  transform: none;
+}
+.reveal[data-reveal="hidden"] .fade {
+  opacity: 0;
+  transform: var(--fade-shift);
+  will-change: opacity, transform;
+}
+.reveal[data-reveal="visible"] .fade {
+  opacity: 1;
+  transform: none;
+  // НЕ expo-out (как у клипа) — он «выстреливает» прозрачность в первые 30%.
+  // Для текста нужен плавный равномерный ease-out на всю длительность.
+  transition:
+    opacity var(--reveal-duration) var(--fade-ease, ease-out) var(--reveal-delay),
+    transform var(--reveal-duration) var(--fade-ease, ease-out) var(--reveal-delay);
+}
+
 // ----- PANEL (opt-in: кремовая шторка съезжает) -----
 .panel {
   position: relative;
@@ -117,8 +157,10 @@
   .sheet {
     display: none !important;
   }
-  .content {
+  .content,
+  .fade {
     opacity: 1 !important;
     transform: none !important;
+    transition: none !important;
   }
 }
