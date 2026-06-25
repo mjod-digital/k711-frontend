@@ -1,0 +1,59 @@
+@use "breakpoints" as *;
+
+// Тонкий индикатор загрузки у верхней кромки (поверх шапки). Сам hero виден —
+// он и есть «прелоудер»; полоса лишь сообщает, что контент догружается.
+.root {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 200; // выше шапки (z 100)
+  pointer-events: none;
+  transition: opacity 0.5s ease;
+}
+
+.closing {
+  opacity: 0;
+}
+
+.bar {
+  display: block;
+  width: 100%;
+  height: fluid(2);
+  background: rgb(117 59 41 / 12%); // едва заметная дорожка
+  overflow: hidden;
+}
+
+.fill {
+  display: block;
+  width: 0;
+  height: 100%;
+  background: var(--color-brown-medium);
+  // «фейковый» прогресс: быстро вперёд, у ~90% замедляется и ждёт window.load
+  animation: preloadFill 2.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.closing .fill {
+  width: 100%;
+  transition: width 0.3s ease;
+  animation: none;
+}
+
+@keyframes preloadFill {
+  0% {
+    width: 0;
+  }
+  55% {
+    width: 65%;
+  }
+  100% {
+    width: 90%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fill {
+    animation: none;
+    width: 90%;
+  }
+}

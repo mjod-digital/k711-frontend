@@ -61,16 +61,15 @@
   will-change: clip-path;
 }
 
-// Слой параллакса (запас сверху/снизу), сдвиг по --par текущего шага.
+// Слой параллакса. Десктоп — БЕЗ параллакса (по просьбе): слой ровно по медиа,
+// картинка статична. Параллакс оставлен только на мобайле (сдвиг по --par).
 .parallax {
   position: absolute;
-  inset: -8% 0;
-  will-change: transform;
-  transform: translate3d(0, calc(var(--par, 0) * 8%), 0);
+  inset: 0;
 
-  // Мобайл — параллакс чуть заметнее (больше амплитуда сдвига).
   @include mobile {
     inset: -12% 0;
+    will-change: transform;
     transform: translate3d(0, calc(var(--par, 0) * 12%), 0);
   }
 }
@@ -90,7 +89,8 @@
   max-width: fluid(512);
 }
 
-// Шторка текста снизу вверх, scrubbed по --introText.
+// Текст блока проявляется ОДНОЙ шторкой снизу-вверх (как изначально): весь блок
+// (заголовок + описание + кнопка) клипается по --introText.
 .textClip {
   display: flex;
   flex-direction: column;
@@ -181,6 +181,8 @@
 
 // .static .parallax — параллакс оставлен включённым (мобайл): сдвиг по --par из JS.
 
+// Мобайл / reduced-motion (.static): без шторки — текст статичен, заголовки
+// оживляет построчная шторка (data-reveal на h2).
 .static .textClip {
   clip-path: none;
 }

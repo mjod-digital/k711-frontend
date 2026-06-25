@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils";
 import styles from "./Reveal.module.scss";
 
 type Direction = "up" | "down" | "left" | "right";
-type Variant = "clip" | "panel" | "lines";
+type Variant = "clip" | "panel" | "lines" | "fade";
 
 export type RevealProps = {
   children: ReactNode;
@@ -21,7 +21,9 @@ export type RevealProps = {
   /** Длительность в мс (override CSS-переменной, по умолчанию 720). */
   duration?: number;
   /** clip — clip-path wipe всего блока (default); panel — кремовая шторка;
-   *  lines — построчная каскадная шторка (дети с классом `reveal-line` + style `--i`). */
+   *  lines — построчная каскадная шторка (дети с классом `reveal-line` + style `--i`);
+   *  fade — мягкое проявление со сдвигом (opacity + translate), без «занавеса»
+   *  (как тексты в реф-анимации Elyse). Направление задаёт `direction`. */
   variant?: Variant;
   /** Цвет шторки (только variant="panel"); по умолчанию var(--color-badge-light). */
   panelColor?: string;
@@ -30,6 +32,11 @@ export type RevealProps = {
   /** rootMargin для IO. По умолчанию запуск ближе к центру; можно переопределить
    *  на секцию (напр. Scenario — чуть раньше). */
   rootMargin?: string;
+  /** Управляемый режим: если задан (true/false), Reveal НЕ создаёт свой
+   *  IntersectionObserver, а ведёт data-reveal по этому флагу. Нужно, чтобы
+   *  несколько Reveal стартовали от ОДНОГО триггера в строгом порядке
+   *  (заголовок → абзацы), без гонки независимых наблюдателей. */
+  active?: boolean;
 };
 
 export function Reveal({
@@ -43,6 +50,7 @@ export function Reveal({
   panelColor,
   once = true,
   rootMargin,
+  active,
 }: RevealProps) {
   // ВАЖНО: IntersectionObserver наблюдает за ВНЕШНЕЙ обёрткой (.reveal), которая
   // НЕ клипается. Если наблюдать за самим клипнутым элементом, clip-path обнуляет
@@ -68,6 +76,9 @@ export function Reveal({
 
     // Вооружаем синхронно до первой отрисовки — без вспышки.
     el.dataset.reveal = "hidden";
+
+    // Управляемый режим — не создаём свой наблюдатель (см. эффект ниже).
+    if (active !== undefined) return;
 
     // По умолчанию запуск ближе к центру (десктоп), на мобилке — чуть раньше
     // (нижние 15% вместо 35%). Явно переданный rootMargin приоритетнее.
@@ -105,7 +116,19 @@ export function Reveal({
       io?.disconnect();
       mqMobile.removeEventListener("change", arm);
     };
-  }, [delay, duration, once, isLines, rootMargin]);
+  }, [delay, duration, once, isLines, rootMargin, active]);
+
+  // Управляемый режим: data-reveal ведём извне через prop active (синхронный
+  // запуск нескольких Reveal от одного триггера). reduced-motion — не трогаем.
+  useIsomorphicLayoutEffect(() => {
+    if (active === undefined) return;
+    const host = hostRef.current;
+    if (!host) return;
+    const el = (isLines ? host.firstElementChild : host) as HTMLElement | null;
+    if (!el) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    el.dataset.reveal = active ? "visible" : "hidden";
+  }, [active, isLines]);
 
   const style = panelColor
     ? ({ "--reveal-panel-color": panelColor } as CSSProperties)

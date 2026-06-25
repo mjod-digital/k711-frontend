@@ -3,6 +3,7 @@ import localFont from "next/font/local";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { SmoothScroll } from "@/components/layout/SmoothScroll";
+import { Preloader } from "@/components/layout/Preloader";
 import { siteConfig } from "@/config/site";
 import "./globals.scss";
 
@@ -40,6 +41,7 @@ export default function RootLayout({
     <html lang="ru" className={`${ricordi.variable} ${cofo.variable}`}>
       <body>
         <SmoothScroll />
+        <Preloader />
         <Header />
         <main>{children}</main>
         <Footer />
