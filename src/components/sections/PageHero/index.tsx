@@ -117,8 +117,10 @@ export function PageHero({
           <Reveal
             as="h1"
             variant="lines"
-            // первый экран — запускаем шторку сразу, без сдвига к центру
+            // запускаем шторку, когда ВЕСЬ h1 попал в видимую область (threshold>=1),
+            // без сдвига рамки — считаем от чистого вьюпорта.
             rootMargin="0px 0px 0px 0px"
+            threshold={1}
             className={styles.title}
           >
             {children}

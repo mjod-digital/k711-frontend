@@ -104,7 +104,7 @@ export function Reveal({
             el.dataset.reveal = "hidden";
           }
         },
-        { threshold: 0.2, rootMargin: margin },
+        { threshold: threshold ?? 0.2, rootMargin: margin },
       );
       io.observe(el);
     };
