@@ -10,7 +10,42 @@ const clamp01 = (v: number) => Math.min(1, Math.max(0, v));
 
 export function Terraces() {
   const ref = useRef<HTMLElement>(null);
+  const colsRef = useRef<HTMLDivElement>(null);
   const [mobile, setMobile] = useState(false);
+
+  // Абзацы — триггерный «выезд» снизу (как в Statement), один раз при входе в вид
+  // (вместо скраб-привязки к --pu): мягко, ровно, не зависит от скорости скролла.
+  // data-reveal ставим императивно (не через state) — иначе он попал бы в SSR-HTML
+  // как "hidden" и текст моргал бы / был скрыт без JS.
+  useIsomorphicLayoutEffect(() => {
+    const el = colsRef.current;
+    if (!el) return;
+    // reduced-motion: не вооружаем — без data-reveal абзацы сразу видны.
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    el.dataset.reveal = "hidden"; // прячем синхронно до отрисовки
+    const mqMobile = window.matchMedia("(max-width: 767.98px)");
+    let io: IntersectionObserver | null = null;
+    const arm = () => {
+      io?.disconnect();
+      const margin = mqMobile.matches ? "0px 0px -10% 0px" : "0px 0px -20% 0px";
+      io = new IntersectionObserver(
+        ([entry], obs) => {
+          if (entry.isIntersecting) {
+            el.dataset.reveal = "visible";
+            obs.disconnect();
+          }
+        },
+        { threshold: 0.2, rootMargin: margin },
+      );
+      io.observe(el);
+    };
+    arm();
+    mqMobile.addEventListener("change", arm);
+    return () => {
+      io?.disconnect();
+      mqMobile.removeEventListener("change", arm);
+    };
+  }, []);
 
   // Мобайл (макет 373-12537): заголовок в 3 строки и уже; десктоп — 2 строки.
   useIsomorphicLayoutEffect(() => {
@@ -101,7 +136,7 @@ export function Terraces() {
           </div>
         </div>
 
-        <div className={styles.cols}>
+        <div className={styles.cols} ref={colsRef}>
           <p className={styles.paragraph}>
             В основании k 7/11 — стена первого московского «тучереза», построенного
             Эрнстом-Рихардом Нирнзее в 1905 году. Она бережно сохранена и стала

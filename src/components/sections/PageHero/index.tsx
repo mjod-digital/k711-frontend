@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useRef } from "react";
-import type { ReactNode } from "react";
+import type { CSSProperties, ReactNode } from "react";
 import { Reveal } from "@/components/ui/Reveal";
 import { useIsomorphicLayoutEffect } from "@/lib/useIsomorphicLayoutEffect";
 import styles from "./PageHero.module.scss";
@@ -23,12 +23,22 @@ type PageHeroProps = {
   /** Скаттер-заголовок: спаны с классом `reveal-line` + style `--i`, позиции
    *  задаёт модуль страницы (они абсолютно позиционируются внутри фото). */
   children: ReactNode;
+  /** Пропорции фото (CSS aspect-ratio). По умолчанию 1400/720 (десктоп), 344/580 (мобайл). */
+  aspectDesktop?: string;
+  aspectMobile?: string;
 };
 
 // Хедер внутренних страниц: скруглённое фото с рамкой, хлебные крошки сверху,
 // «разбросанный» заголовок поверх фото. Переиспользуется всеми внутренними
 // страницами — уникален только сам заголовок (передаётся как children).
-export function PageHero({ image, imageAlt, breadcrumb, children }: PageHeroProps) {
+export function PageHero({
+  image,
+  imageAlt,
+  breadcrumb,
+  children,
+  aspectDesktop,
+  aspectMobile,
+}: PageHeroProps) {
   const mediaRef = useRef<HTMLDivElement>(null);
   const parallaxRef = useRef<HTMLDivElement>(null);
 
@@ -82,7 +92,16 @@ export function PageHero({ image, imageAlt, breadcrumb, children }: PageHeroProp
         </ol>
       </nav>
 
-      <div className={styles.media} ref={mediaRef}>
+      <div
+        className={styles.media}
+        ref={mediaRef}
+        style={
+          {
+            "--hero-aspect": aspectDesktop,
+            "--hero-aspect-mobile": aspectMobile,
+          } as CSSProperties
+        }
+      >
         <div className={styles.parallax} ref={parallaxRef}>
           <Image
             src={image}

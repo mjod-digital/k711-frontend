@@ -1,0 +1,110 @@
+@use "breakpoints" as *;
+
+.group {
+  display: flex;
+  flex-direction: column;
+  gap: fluid(4);
+  width: 100%;
+}
+
+.label {
+  padding-block: fluid(8);
+  color: var(--color-badge-light);
+  font-family: var(--font-body);
+  font-size: fluid(20);
+  line-height: normal;
+
+  sup {
+    font-size: 0.65em;
+    vertical-align: super;
+  }
+
+  @include mobile {
+    font-size: fluid(16);
+  }
+}
+
+// Дорожка + два наложенных нативных range (ползунки draggable, трек прозрачный).
+.slider {
+  position: relative;
+  height: fluid(24);
+  display: flex;
+  align-items: center;
+}
+
+.track {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: var(--color-badge-light); // полная дорожка
+}
+
+.fill {
+  position: absolute;
+  height: 1px;
+  background: var(--color-brown-light); // активный отрезок между ползунками
+}
+
+// Оба input занимают всю ширину; кликабельны только сами ползунки.
+.input {
+  position: absolute;
+  left: 0;
+  right: 0;
+  width: 100%;
+  height: fluid(24);
+  margin: 0;
+  background: transparent;
+  pointer-events: none;
+  -webkit-appearance: none;
+  appearance: none;
+
+  &::-webkit-slider-runnable-track {
+    background: transparent;
+    border: none;
+  }
+  &::-moz-range-track {
+    background: transparent;
+    border: none;
+  }
+
+  &::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    pointer-events: auto;
+    width: fluid(20);
+    height: fluid(20);
+    border: none;
+    border-radius: 50%;
+    background: var(--color-brown-light);
+    cursor: pointer;
+  }
+  &::-moz-range-thumb {
+    pointer-events: auto;
+    width: fluid(20);
+    height: fluid(20);
+    border: none;
+    border-radius: 50%;
+    background: var(--color-brown-light);
+    cursor: pointer;
+  }
+
+  &:focus-visible::-webkit-slider-thumb {
+    outline: 2px solid var(--color-badge-light);
+    outline-offset: 2px;
+  }
+}
+
+// Второй ползунок (макс) поверх — чтобы можно было взять при наложении.
+.input:last-of-type {
+  z-index: 1;
+}
+
+.values {
+  display: flex;
+  justify-content: space-between;
+  color: var(--color-brown-light);
+  font-family: var(--font-body);
+  font-size: fluid(14);
+  line-height: fluid(16);
+  letter-spacing: 0.01em;
+}

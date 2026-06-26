@@ -1,0 +1,38 @@
+@use "breakpoints" as *;
+
+// Скаттер-заголовок hero «каталог ВАШИХ резиденций» (Figma 373-9584 / 399-12688),
+// в долях от фото (резина держит композицию).
+.word {
+  position: absolute;
+  white-space: nowrap;
+}
+
+.katalog {
+  left: 25.3%;
+  top: 45.8%;
+}
+.vashih {
+  left: 31.9%;
+  top: 55.8%;
+  font-size: fluid(110);
+}
+.rezidentsiy {
+  left: 42.7%;
+  top: 77.7%;
+}
+
+@include mobile {
+  .katalog {
+    left: 12.2%;
+    top: 64%;
+  }
+  .vashih {
+    left: 12.2%;
+    top: 72.9%;
+    font-size: fluid(40);
+  }
+  .rezidentsiy {
+    left: 12.2%;
+    top: 83.1%;
+  }
+}

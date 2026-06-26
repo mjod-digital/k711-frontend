@@ -62,12 +62,13 @@
 // ----- Фото-сцена -----
 .media {
   position: relative;
-  aspect-ratio: 1400 / 720;
+  aspect-ratio: var(--hero-aspect, 1400 / 720);
   overflow: hidden;
   isolation: isolate;
+  margin-bottom: fluid(25);
 
   @include mobile {
-    aspect-ratio: 344 / 580; // вертикальное фото на мобайле
+    aspect-ratio: var(--hero-aspect-mobile, 344 / 580); // вертикальное фото на мобайле
   }
 }
 
