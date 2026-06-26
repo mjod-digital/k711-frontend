@@ -209,14 +209,17 @@ export function ApartmentCatalog() {
         </div>
       </div>
 
-      {/* Мобайл: кнопка «Фильтры» закреплена внизу экрана + выезжающий оверлей. */}
-      <button
-        type="button"
-        className={styles.filtersTrigger}
-        onClick={() => setFiltersOpen(true)}
-      >
-        Фильтры
-      </button>
+      {/* Мобайл: кнопка «Фильтры» закреплена внизу экрана + выезжающий оверлей.
+          Пока оверлей открыт — кнопку убираем (в макете её нет). */}
+      {!filtersOpen && (
+        <button
+          type="button"
+          className={styles.filtersTrigger}
+          onClick={() => setFiltersOpen(true)}
+        >
+          Фильтры
+        </button>
+      )}
 
       <div
         className={cn(styles.overlay, filtersOpen && styles.overlayOpen)}

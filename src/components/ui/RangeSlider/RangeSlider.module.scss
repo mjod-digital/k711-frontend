@@ -18,6 +18,10 @@
     font-size: 0.65em;
     vertical-align: super;
   }
+
+  @include mobile {
+    font-size: fluid(16);
+  }
 }
 
 // Дорожка + два наложенных нативных range (ползунки draggable, трек прозрачный).

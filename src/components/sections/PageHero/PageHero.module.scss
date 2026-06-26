@@ -63,9 +63,9 @@
 .media {
   position: relative;
   aspect-ratio: var(--hero-aspect, 1400 / 720);
-  border-radius: var(--radius);
   overflow: hidden;
   isolation: isolate;
+  margin-bottom: fluid(25);
 
   @include mobile {
     aspect-ratio: var(--hero-aspect-mobile, 344 / 580); // вертикальное фото на мобайле

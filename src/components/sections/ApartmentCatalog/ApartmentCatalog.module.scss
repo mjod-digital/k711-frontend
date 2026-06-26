@@ -40,7 +40,8 @@
 
   @include mobile {
     position: static;
-    padding: fluid(24) fluid(16) fluid(28);
+    // верхний отступ очищает фиксированную шапку (она видна над панелью)
+    padding: calc(var(--header-h) + #{fluid(24)}) fluid(16) fluid(28);
   }
 }
 
@@ -61,6 +62,7 @@
 
   @include mobile {
     display: block;
+    top: calc(var(--header-h) + #{fluid(16)}); // X под шапкой, в правом верхнем углу панели
   }
 }
 
@@ -108,9 +110,12 @@
 .reset {
   align-self: flex-start;
   margin-top: fluid(20);
+
+  // в мобильном оверлее кнопка сброса по центру (Figma 399-13142)
   height: fluid(48);
   padding-inline: fluid(20);
-  border: 1px solid var(--color-badge-light);
+  -webkit-text-stroke-width: fluid(0.3);
+  border: fluid(1) solid var(--color-badge-light);
   background: transparent;
   color: var(--color-badge-light);
   font-family: var(--font-display);
@@ -125,6 +130,11 @@
   &:hover {
     background: var(--color-badge-light);
     color: var(--color-brown-dark-2);
+  }
+
+  @include mobile {
+    align-self: center;
+    font-size: fluid(14);
   }
 }
 
@@ -151,21 +161,18 @@
 .thead {
   padding: 0 0 fluid(20);
   color: var(--color-brown-medium);
-  font-family: var(--font-body);
+  font-family: var(--font-display);
   font-size: fluid(16);
-
-  span {
-    padding-left: fluid(20);
-  }
+  -webkit-text-stroke-width: 0.3px;
+  text-align: center; // десктоп: заголовок ровно по центру колонки, над значением (Figma)
 
   @include mobile {
-    padding-bottom: fluid(12);
-    font-size: fluid(11);
+    // тот же горизонтальный padding, что и у строки-карточки, — колонки шапки и значений совпадают
+    padding: 0 fluid(6) fluid(12) fluid(0);
+    font-size: fluid(8);
     letter-spacing: 0.01em;
-
-    span {
-      padding-left: fluid(8);
-    }
+    color: var(--color-brown-dark);
+    text-align: center;
   }
 }
 
@@ -193,9 +200,10 @@
   }
 
   @include mobile {
+    background: var(--color-apt-mob); // #e6d6cb
     min-height: fluid(40);
-    background: transparent;
     font-size: fluid(13);
+    padding: fluid(12) fluid(6) fluid(12) fluid(0);
 
     &:hover {
       background: transparent;
@@ -216,17 +224,9 @@
 }
 
 .cell {
-  padding-left: fluid(20);
+  // значение по центру колонки — заголовок ровно над ним (десктоп и мобайл, Figma)
+  text-align: center;
   white-space: nowrap;
-
-  @include mobile {
-    padding-left: fluid(5);
-  }
-}
-
-.floor,
-.bed {
-  text-align: left;
 }
 
 .fav {
@@ -308,7 +308,7 @@
     display: block;
     position: fixed;
     inset: 0;
-    z-index: 95;
+    z-index: 95; // под фиксированной шапкой (z 100) — она видна над панелью (Figma)
     visibility: hidden;
     pointer-events: none;
     transition: visibility 0s linear 0.45s;
@@ -326,21 +326,14 @@
   inset: 0;
   border: 0;
   padding: 0;
-  background: rgb(38 17 19 / 35%);
-  opacity: 0;
-  transition: opacity 0.45s ease;
+  background: transparent; // без затемнения — таблица под панелью видна чисто, как в макете
   cursor: pointer;
-}
-
-.overlayOpen .overlayBackdrop {
-  opacity: 1;
 }
 
 .overlayPanel {
   position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
+  inset: 0; // панель закрывает весь экран — контент за фильтром не виден
+  overflow-y: auto;
   background: var(--color-brown-dark-2);
   transform: translateY(-100%);
   transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
