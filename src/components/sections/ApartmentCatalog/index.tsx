@@ -143,7 +143,7 @@ function ApartmentRow({
       <span className={cn(styles.cell, styles.floor)}>{a.floor}</span>
       <span className={cn(styles.cell, styles.bed)}>{a.bedrooms}</span>
       <span className={styles.cell}>{ru(a.area)} м²</span>
-      <span className={styles.cell}>{ru(a.pricePerM2)} тыс</span>
+      <span className={styles.cell}>{ru(a.pricePerM2 * 1000)}</span>
       <span className={styles.cell}>{ru(a.cost * 1_000_000)}</span>
       <button
         type="button"
