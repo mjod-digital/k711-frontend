@@ -1,0 +1,78 @@
+@use "breakpoints" as *;
+
+.section {
+  padding: fluid(20);
+
+  @include mobile {
+    padding: fluid(8);
+  }
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: fluid(20);
+
+  @include mobile {
+    grid-template-columns: 1fr;
+    gap: fluid(16);
+  }
+}
+
+.card {
+  position: relative;
+  aspect-ratio: 690 / 720;
+  border-radius: var(--radius);
+  overflow: hidden;
+
+  @include mobile {
+    aspect-ratio: 300 / 340;
+    width: fluid(300); // «лесенка» — карточка уже колонки
+  }
+}
+
+// мобайл: первая карточка прижата влево, вторая — вправо (Figma 373-13372)
+.top {
+  @include mobile {
+    margin-right: auto;
+    @include cornerFade(26, 78);
+  }
+}
+
+.bottom {
+  @include mobile {
+    margin-left: auto;
+    @include cornerFade(26, 78);
+  }
+}
+
+.image {
+  object-fit: cover;
+  object-position: center;
+}
+
+.label {
+  position: absolute;
+  left: fluid(40);
+  z-index: 2;
+
+  @include mobile {
+    left: fluid(20);
+  }
+}
+
+.top .label {
+  top: fluid(40);
+
+  @include mobile {
+    top: fluid(20);
+  }
+}
+
+.bottom .label {
+  bottom: fluid(40);
+
+  @include mobile {
+    bottom: fluid(20);
+  }
+}

@@ -1,0 +1,179 @@
+@use "breakpoints" as *;
+
+.section {
+  position: relative;
+  aspect-ratio: 1440 / 901;
+
+  @include mobile {
+    // мобайл: высота по контенту — портрет/заголовок в .stage, текст течёт ниже
+    aspect-ratio: auto;
+    display: flex;
+    flex-direction: column;
+  }
+}
+
+// .stage — область портрета и «разбросанного» заголовка.
+.stage {
+  position: absolute;
+  inset: 0;
+
+  @include mobile {
+    position: relative;
+    inset: auto;
+    aspect-ratio: 360 / 392; // портрет (h280@top106) + запас под заголовок
+  }
+}
+
+// ----- Портрет -----
+.photo {
+  position: absolute;
+  left: 1.39%; // 20 / 1440
+  top: 23.1%; // 208 / 901
+  width: 39.86%; // 574 / 1440
+  height: 73.7%; // 664 / 901
+  border-radius: var(--radius);
+  overflow: hidden;
+  @include cornerFade(50.6, 151);
+
+  @include mobile {
+    left: 2.2%; // 8 / 360
+    top: 27%; // 106 / 392
+    width: 58.9%; // 212 / 360
+    height: 71.4%; // 280 / 392
+
+    &::after {
+      width: fluid(27);
+      height: fluid(84);
+    }
+  }
+}
+
+.image {
+  object-fit: cover;
+  object-position: center;
+}
+
+// ----- Скаттер-заголовок «Автор проекта Сергей Чобан» -----
+.heading {
+  position: absolute;
+  inset: 0;
+  color: var(--color-brown-medium);
+  font-family: var(--font-display);
+  font-size: var(--fs-h2); // 68 / 36
+  line-height: 1;
+  text-transform: uppercase;
+
+  span {
+    position: absolute;
+    white-space: nowrap;
+  }
+}
+
+.avtor {
+  left: 14.9%;
+  top: 9.1%;
+} // 215, 82
+.proekta {
+  left: 27.2%;
+  top: 16.5%;
+} // 391, 149
+.sergey {
+  left: 49.4%;
+  top: 16.5%;
+} // 712, 149
+.choban {
+  left: 48.7%;
+  top: 24.6%;
+  font-size: fluid(110);
+} // 701, 222
+
+@include mobile {
+  // позиции — в долях от .stage (высота 392)
+  .avtor {
+    left: 2.2%;
+    top: 14.5%;
+  } // 8, 57
+  .proekta {
+    left: 14.4%;
+    top: 21.9%;
+  } // 52, 86
+  .sergey {
+    left: 50.6%;
+    top: 21.9%;
+  } // 182, 86
+  .choban {
+    left: 55%;
+    top: 30.6%;
+    font-size: fluid(44);
+  } // 198, 120
+}
+
+// ----- Текст -----
+.col1,
+.col2 {
+  position: absolute;
+  color: var(--color-fg);
+  font-family: var(--font-body);
+  font-size: var(--fs-body);
+  line-height: 1.4;
+}
+
+.col1 {
+  left: 50.6%; // 728 / 1440
+  top: 53.5%; // 482 / 901
+  width: 23.4%; // 337 / 1440
+}
+
+.col2 {
+  left: 75.1%; // 1082 / 1440
+  top: 53.5%;
+  width: 23.4%;
+  display: flex;
+  flex-direction: column;
+  gap: fluid(40);
+}
+
+.para {
+  margin: 0;
+}
+
+.cta {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: fluid(48);
+  padding-inline: fluid(20);
+  font-family: var(--font-display);
+  font-size: var(--fs-button);
+  line-height: var(--lh-button);
+  letter-spacing: var(--ls-button);
+  white-space: nowrap;
+  @include ctaSecondary;
+
+  &:focus-visible {
+    outline: 2px solid var(--color-brown-dark);
+    outline-offset: 2px;
+  }
+
+  @include mobile {
+    height: fluid(40);
+  }
+}
+
+@include mobile {
+  // одна колонка текста под .stage (нормальный поток — без переполнения)
+  .col1,
+  .col2 {
+    position: static;
+    width: auto;
+    inset: auto;
+  }
+  .col1 {
+    margin: fluid(32) fluid(8) 0 fluid(52); // отступ слева как в макете (x52)
+  }
+  .col2 {
+    margin: fluid(20) fluid(8) fluid(40) fluid(52);
+    gap: fluid(20);
+  }
+}

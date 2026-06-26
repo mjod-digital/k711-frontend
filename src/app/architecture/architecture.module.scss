@@ -1,0 +1,50 @@
+@use "breakpoints" as *;
+
+// ============================================================
+//   Скаттер-заголовок hero «гармония прошлого и настоящего»
+//   (Figma 373-9268 / 397-10177). Слова позиционируются абсолютно
+//   внутри фото (.title в PageHero — position:absolute; inset:0).
+//   Доли от фото — резина держит композицию на любой ширине.
+// ============================================================
+.word {
+  position: absolute;
+  white-space: nowrap;
+}
+
+.garmonia {
+  left: 25.3%;
+  top: 57.8%;
+}
+.proshlogo {
+  left: 42.7%;
+  top: 67.5%;
+}
+.nastoyashchego {
+  left: 25.6%;
+  top: 75.3%;
+  font-size: fluid(110);
+}
+.i {
+  left: 19.2%;
+  top: 81.4%;
+}
+
+@include mobile {
+  .garmonia {
+    left: 6.4%;
+    top: 73.4%;
+  }
+  .proshlogo {
+    left: 27.9%;
+    top: 78.8%;
+  }
+  .nastoyashchego {
+    left: 11.3%;
+    top: 85.2%;
+    font-size: fluid(40);
+  }
+  .i {
+    left: 1.7%;
+    top: 86.6%;
+  }
+}

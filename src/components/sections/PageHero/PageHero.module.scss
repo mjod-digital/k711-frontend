@@ -1,0 +1,117 @@
+@use "breakpoints" as *;
+
+// ============================================================
+//   PageHero — хедер внутренней страницы (Figma 373-9266 / 397-10177).
+//   Кремовое поле, хлебные крошки, скруглённое фото с рамкой,
+//   «разбросанный» заголовок поверх (позиции — в модуле страницы).
+// ============================================================
+.hero {
+  background: var(--color-badge-light);
+  padding-inline: fluid(20);
+
+  @include mobile {
+    padding-inline: fluid(8);
+  }
+}
+
+.breadcrumb {
+  padding: fluid(24) 0 fluid(16);
+  color: var(--color-brown-dark);
+  font-family: var(--font-body);
+  font-size: fluid(14);
+  letter-spacing: 0.01em;
+
+  @include mobile {
+    padding: fluid(13) 0;
+    font-size: fluid(12);
+  }
+}
+
+.crumbs {
+  display: flex;
+  align-items: center;
+  gap: fluid(6);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.crumb {
+  display: inline-flex;
+  align-items: center;
+  gap: fluid(6);
+
+  a {
+    transition: color 0.45s ease;
+
+    &:hover {
+      color: var(--color-brown-medium);
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--color-brown-dark);
+      outline-offset: 2px;
+    }
+  }
+}
+
+.sep {
+  color: var(--color-brown-light);
+}
+
+// ----- Фото-сцена -----
+.media {
+  position: relative;
+  aspect-ratio: var(--hero-aspect, 1400 / 720);
+  overflow: hidden;
+  isolation: isolate;
+  margin-bottom: fluid(25);
+
+  @include mobile {
+    aspect-ratio: var(--hero-aspect-mobile, 344 / 580); // вертикальное фото на мобайле
+  }
+}
+
+.parallax {
+  position: absolute;
+  inset: -12% 0;
+  z-index: 0;
+  will-change: transform;
+  transform: translate3d(0, var(--py, 0%), 0);
+}
+
+.image {
+  object-fit: cover;
+  object-position: center;
+}
+
+// затемнение снизу — белый заголовок читается поверх фото
+.media::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: linear-gradient(
+    to top,
+    rgba(33, 3, 3, 0.5) 0%,
+    rgba(33, 3, 3, 0) 65%
+  );
+  pointer-events: none;
+}
+
+// ----- Заголовок поверх фото -----
+.overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+}
+
+.title {
+  position: absolute;
+  inset: 0;
+  color: var(--color-white);
+  font-family: var(--font-display);
+  font-size: var(--fs-h2); // 68 / 36 — крупное слово переопределит модуль страницы
+  line-height: 1;
+  text-transform: uppercase;
+}

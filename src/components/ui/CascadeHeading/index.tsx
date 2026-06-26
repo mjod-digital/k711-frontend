@@ -1,4 +1,4 @@
-import type { CSSProperties, ElementType, ReactNode } from "react";
+import type { CSSProperties, ElementType } from "react";
 import { cn } from "@/lib/utils";
 import styles from "./CascadeHeading.module.scss";
 
@@ -11,7 +11,6 @@ type CascadeHeadingProps = {
   tone?: "brown" | "white";
   as?: ElementType;
   className?: string;
-  children?: ReactNode;
 };
 
 const alignClass = { start: "alignStart", center: "alignCenter", end: "alignEnd", custom: "alignCustom" } as const;
