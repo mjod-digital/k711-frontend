@@ -22,7 +22,6 @@
 .card {
   position: relative;
   aspect-ratio: 690 / 720;
-  border-radius: var(--radius);
   overflow: hidden;
 
   @include mobile {

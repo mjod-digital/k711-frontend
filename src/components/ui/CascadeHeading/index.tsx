@@ -1,8 +1,8 @@
-import type { CSSProperties, ElementType } from "react";
+import type { CSSProperties, ElementType, ReactNode } from "react";
 import { cn } from "@/lib/utils";
 import styles from "./CascadeHeading.module.scss";
 
-export type CascadePart = { text: string; big?: boolean };
+export type CascadePart = { text: ReactNode; big?: boolean };
 export type CascadeLine = { parts: CascadePart[]; align?: "start" | "center" | "end" | "custom" };
 
 type CascadeHeadingProps = {

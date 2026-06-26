@@ -30,6 +30,10 @@ export type RevealProps = {
   /** rootMargin для IO. По умолчанию запуск ближе к центру; можно переопределить
    *  на секцию (напр. Scenario — чуть раньше). */
   rootMargin?: string;
+  /** Доля видимости для запуска (по умолчанию 0.2). threshold >= 1 — ждём, пока
+   *  элемент ЦЕЛИКОМ попадёт в кадр (или, если он выше вьюпорта, полностью его
+   *  покроет). Используется в PageHero — запуск, когда весь h1 в видимой области. */
+  threshold?: number;
 };
 
 export function Reveal({
@@ -43,6 +47,7 @@ export function Reveal({
   panelColor,
   once = true,
   rootMargin,
+  threshold,
 }: RevealProps) {
   // ВАЖНО: IntersectionObserver наблюдает за ВНЕШНЕЙ обёрткой (.reveal), которая
   // НЕ клипается. Если наблюдать за самим клипнутым элементом, clip-path обнуляет
@@ -69,6 +74,45 @@ export function Reveal({
     // Вооружаем синхронно до первой отрисовки — без вспышки.
     el.dataset.reveal = "hidden";
 
+    // threshold >= 1 — запуск, когда элемент ЦЕЛИКОМ в кадре (или, если он выше
+    // вьюпорта, полностью его покрывает). IntersectionObserver по порогам тут
+    // ненадёжен (порог 1 у высокого элемента недостижим, а доля пересечения
+    // «застывает» без срабатывания) — считаем по rect на скролле.
+    if ((threshold ?? 0) >= 1) {
+      let raf = 0;
+      const check = () => {
+        cancelAnimationFrame(raf);
+        raf = requestAnimationFrame(() => {
+          const r = el.getBoundingClientRect();
+          const vh = window.innerHeight || 0;
+          // Помещается во вьюпорт — ждём, пока весь окажется в кадре. Выше вьюпорта
+          // (целиком влезть не может) — запуск, когда заполнил ~весь экран; широкое
+          // окно, чтобы быстрый скролл его не «перепрыгнул».
+          const whole =
+            r.height > vh
+              ? Math.min(r.bottom, vh) - Math.max(r.top, 0) >= vh * 0.9
+              : r.top >= -1 && r.bottom <= vh + 1;
+          if (whole) {
+            el.dataset.reveal = "visible";
+            if (once) {
+              window.removeEventListener("scroll", check);
+              window.removeEventListener("resize", check);
+            }
+          } else if (!once) {
+            el.dataset.reveal = "hidden";
+          }
+        });
+      };
+      check();
+      window.addEventListener("scroll", check, { passive: true });
+      window.addEventListener("resize", check);
+      return () => {
+        window.removeEventListener("scroll", check);
+        window.removeEventListener("resize", check);
+        cancelAnimationFrame(raf);
+      };
+    }
+
     // По умолчанию запуск ближе к центру (десктоп), на мобилке — чуть раньше
     // (нижние 15% вместо 35%). Явно переданный rootMargin приоритетнее.
     // observer пересобираем при смене брейкпоинта (поворот/resize), пока ревил
@@ -93,7 +137,7 @@ export function Reveal({
             el.dataset.reveal = "hidden";
           }
         },
-        { threshold: 0.2, rootMargin: margin },
+        { threshold: threshold ?? 0.2, rootMargin: margin },
       );
       io.observe(el);
     };
@@ -105,7 +149,7 @@ export function Reveal({
       io?.disconnect();
       mqMobile.removeEventListener("change", arm);
     };
-  }, [delay, duration, once, isLines, rootMargin]);
+  }, [delay, duration, once, isLines, rootMargin, threshold]);
 
   const style = panelColor
     ? ({ "--reveal-panel-color": panelColor } as CSSProperties)
