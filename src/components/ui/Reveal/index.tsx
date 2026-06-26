@@ -32,6 +32,10 @@ export type RevealProps = {
   /** rootMargin для IO. По умолчанию запуск ближе к центру; можно переопределить
    *  на секцию (напр. Scenario — чуть раньше). */
   rootMargin?: string;
+  /** Доля видимости для запуска (по умолчанию 0.2). threshold >= 1 — ждём, пока
+   *  элемент ЦЕЛИКОМ попадёт в кадр (или, если он выше вьюпорта, заполнит ~весь
+   *  экран). Используется в PageHero — запуск, когда весь h1 в видимой области. */
+  threshold?: number;
   /** Управляемый режим: если задан (true/false), Reveal НЕ создаёт свой
    *  IntersectionObserver, а ведёт data-reveal по этому флагу. Нужно, чтобы
    *  несколько Reveal стартовали от ОДНОГО триггера в строгом порядке
@@ -50,6 +54,7 @@ export function Reveal({
   panelColor,
   once = true,
   rootMargin,
+  threshold,
   active,
 }: RevealProps) {
   // ВАЖНО: IntersectionObserver наблюдает за ВНЕШНЕЙ обёрткой (.reveal), которая
@@ -79,6 +84,44 @@ export function Reveal({
 
     // Управляемый режим — не создаём свой наблюдатель (см. эффект ниже).
     if (active !== undefined) return;
+
+    // threshold >= 1 — запуск, когда элемент ЦЕЛИКОМ в кадре (или, если он выше
+    // вьюпорта и влезть не может, заполнил ~весь экран). IntersectionObserver по
+    // порогам тут ненадёжен (порог 1 у высокого элемента недостижим, доля
+    // пересечения «застывает») — считаем по rect на скролле.
+    if ((threshold ?? 0) >= 1) {
+      let raf = 0;
+      const check = () => {
+        cancelAnimationFrame(raf);
+        raf = requestAnimationFrame(() => {
+          const r = el.getBoundingClientRect();
+          const vh = window.innerHeight || 0;
+          // Помещается во вьюпорт — ждём весь в кадре; выше вьюпорта — когда
+          // заполнил ~весь экран (широкое окно, чтобы быстрый скролл не «перепрыгнул»).
+          const whole =
+            r.height > vh
+              ? Math.min(r.bottom, vh) - Math.max(r.top, 0) >= vh * 0.9
+              : r.top >= -1 && r.bottom <= vh + 1;
+          if (whole) {
+            el.dataset.reveal = "visible";
+            if (once) {
+              window.removeEventListener("scroll", check);
+              window.removeEventListener("resize", check);
+            }
+          } else if (!once) {
+            el.dataset.reveal = "hidden";
+          }
+        });
+      };
+      check();
+      window.addEventListener("scroll", check, { passive: true });
+      window.addEventListener("resize", check);
+      return () => {
+        window.removeEventListener("scroll", check);
+        window.removeEventListener("resize", check);
+        cancelAnimationFrame(raf);
+      };
+    }
 
     // По умолчанию запуск ближе к центру (десктоп), на мобилке — чуть раньше
     // (нижние 15% вместо 35%). Явно переданный rootMargin приоритетнее.
@@ -116,7 +159,7 @@ export function Reveal({
       io?.disconnect();
       mqMobile.removeEventListener("change", arm);
     };
-  }, [delay, duration, once, isLines, rootMargin, active]);
+  }, [delay, duration, once, isLines, rootMargin, threshold, active]);
 
   // Управляемый режим: data-reveal ведём извне через prop active (синхронный
   // запуск нескольких Reveal от одного триггера). reduced-motion — не трогаем.
