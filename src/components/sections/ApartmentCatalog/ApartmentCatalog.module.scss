@@ -1,0 +1,359 @@
+@use "breakpoints" as *;
+
+// ============================================================
+//   ApartmentCatalog — каталог квартир (Figma 373-9580 / 397-12496).
+//   Десктоп: тёмный сайдбар-фильтр слева + таблица справа.
+//   Мобайл: таблица + закреплённая внизу кнопка «Фильтры» + оверлей.
+// ============================================================
+.catalog {
+  display: grid;
+  grid-template-columns: fluid(355) minmax(0, 1fr);
+  padding-right: fluid(20);
+  // каталог упирается в футер без зазора — гасим его верхний отступ (fluid(80)/(60))
+  margin-bottom: calc(-1 * #{fluid(80)});
+
+  @include mobile {
+    display: block;
+    padding-right: 0;
+    margin-bottom: calc(-1 * #{fluid(60)});
+  }
+}
+
+// ----- Сайдбар (десктоп) -----
+.sidebar {
+  background: var(--color-brown-dark-2); // #261113
+  align-self: stretch;
+
+  @include mobile {
+    display: none;
+  }
+}
+
+// ----- Панель фильтров (общая для сайдбара и оверлея) -----
+.filters {
+  position: sticky;
+  top: calc(var(--header-h) + fluid(20));
+  display: flex;
+  flex-direction: column;
+  gap: fluid(20);
+  padding: fluid(40) fluid(20);
+
+  @include mobile {
+    position: static;
+    padding: fluid(24) fluid(16) fluid(28);
+  }
+}
+
+.close {
+  position: absolute;
+  top: fluid(16);
+  right: fluid(16);
+  display: none;
+  width: fluid(28);
+  height: fluid(28);
+  color: var(--color-badge-light);
+  cursor: pointer;
+
+  svg {
+    width: 100%;
+    height: 100%;
+  }
+
+  @include mobile {
+    display: block;
+  }
+}
+
+.bedGroup {
+  display: flex;
+  flex-direction: column;
+  gap: fluid(8);
+}
+
+.bedLabel {
+  padding-block: fluid(8);
+  color: var(--color-badge-light);
+  font-family: var(--font-body);
+  font-size: fluid(20);
+  line-height: normal;
+}
+
+.tabs {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.tab {
+  flex: 1 0 auto;
+  min-width: fluid(76);
+  padding: fluid(8) fluid(20) fluid(10);
+  background: var(--color-brown-dark); // #3e2022
+  color: var(--color-brown-medium); // #753b29
+  font-family: var(--font-display);
+  font-size: fluid(16);
+  line-height: 1;
+  letter-spacing: 0.05em;
+  text-align: center;
+  cursor: pointer;
+  transition:
+    background-color 0.3s ease,
+    color 0.3s ease;
+}
+
+.tabActive {
+  background: var(--color-badge-light);
+  color: var(--color-brown-dark-2);
+}
+
+.reset {
+  align-self: flex-start;
+  margin-top: fluid(20);
+  height: fluid(48);
+  padding-inline: fluid(20);
+  border: 1px solid var(--color-badge-light);
+  background: transparent;
+  color: var(--color-badge-light);
+  font-family: var(--font-display);
+  font-size: fluid(16);
+  line-height: 1;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  transition:
+    background-color 0.45s ease,
+    color 0.45s ease;
+
+  &:hover {
+    background: var(--color-badge-light);
+    color: var(--color-brown-dark-2);
+  }
+}
+
+// ----- Таблица -----
+.list {
+  padding: fluid(40) fluid(24) fluid(60);
+
+  @include mobile {
+    padding: fluid(20) fluid(8) 0;
+  }
+}
+
+.thead,
+.row {
+  display: grid;
+  grid-template-columns: fluid(80) fluid(140) minmax(0, 1fr) minmax(0, 1fr) fluid(220) fluid(80);
+  align-items: center;
+
+  @include mobile {
+    grid-template-columns: fluid(48) fluid(30) minmax(0, 1fr) fluid(70) fluid(90) fluid(26);
+  }
+}
+
+.thead {
+  padding: 0 0 fluid(20);
+  color: var(--color-brown-medium);
+  font-family: var(--font-body);
+  font-size: fluid(16);
+
+  span {
+    padding-left: fluid(20);
+  }
+
+  @include mobile {
+    padding-bottom: fluid(12);
+    font-size: fluid(11);
+    letter-spacing: 0.01em;
+
+    span {
+      padding-left: fluid(8);
+    }
+  }
+}
+
+.tbody {
+  display: flex;
+  flex-direction: column;
+  gap: fluid(20);
+
+  @include mobile {
+    gap: fluid(12);
+  }
+}
+
+.row {
+  position: relative;
+  min-height: fluid(60);
+  background: #ece7de;
+  color: #8b5b4c;
+  font-family: var(--font-body);
+  font-size: fluid(20);
+  transition: background-color 0.3s ease;
+
+  &:hover {
+    background: var(--color-badge-light-2); // #e6d6cb
+  }
+
+  @include mobile {
+    min-height: fluid(40);
+    background: transparent;
+    font-size: fluid(13);
+
+    &:hover {
+      background: transparent;
+    }
+  }
+}
+
+// Прозрачная ссылка-оверлей: клик по строке ведёт на карточку квартиры.
+.rowLink {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+
+  &:focus-visible {
+    outline: 2px solid var(--color-brown-medium);
+    outline-offset: -2px;
+  }
+}
+
+.cell {
+  padding-left: fluid(20);
+  white-space: nowrap;
+
+  @include mobile {
+    padding-left: fluid(5);
+  }
+}
+
+.floor,
+.bed {
+  text-align: left;
+}
+
+.fav {
+  position: relative;
+  z-index: 2;
+  justify-self: center;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: fluid(28);
+  height: fluid(28);
+  color: var(--color-brown-light);
+  cursor: pointer;
+  transition: color 0.3s ease;
+
+  svg {
+    width: 100%;
+    height: 100%;
+  }
+
+  &:hover {
+    color: var(--color-brown-medium);
+  }
+
+  @include mobile {
+    width: fluid(20);
+    height: fluid(20);
+  }
+}
+
+.favActive {
+  color: var(--color-brown-medium);
+
+  svg path {
+    fill: currentColor;
+  }
+}
+
+.empty {
+  padding: fluid(40) fluid(20);
+  color: var(--color-brown-medium);
+  font-family: var(--font-body);
+  font-size: var(--fs-body);
+}
+
+// ----- Мобайл: закреплённая внизу кнопка «Фильтры» -----
+.filtersTrigger {
+  display: none;
+
+  @include mobile {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    position: fixed;
+    left: 50%;
+    bottom: fluid(24);
+    transform: translateX(-50%);
+    z-index: 80;
+    height: fluid(48);
+    padding-inline: fluid(40);
+    background: var(--color-brown-dark);
+    color: var(--color-badge-light);
+    font-family: var(--font-display);
+    font-size: fluid(16);
+    line-height: 1;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    border-radius: fluid(2);
+    box-shadow: 0 fluid(8) fluid(28) rgb(38 17 19 / 35%);
+    cursor: pointer;
+  }
+}
+
+// ----- Мобайл: оверлей фильтров (выезжает сверху) -----
+.overlay {
+  display: none;
+
+  @include mobile {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 95;
+    visibility: hidden;
+    pointer-events: none;
+    transition: visibility 0s linear 0.45s;
+  }
+}
+
+.overlayOpen {
+  visibility: visible;
+  pointer-events: auto;
+  transition: visibility 0s linear 0s;
+}
+
+.overlayBackdrop {
+  position: absolute;
+  inset: 0;
+  border: 0;
+  padding: 0;
+  background: rgb(38 17 19 / 35%);
+  opacity: 0;
+  transition: opacity 0.45s ease;
+  cursor: pointer;
+}
+
+.overlayOpen .overlayBackdrop {
+  opacity: 1;
+}
+
+.overlayPanel {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  background: var(--color-brown-dark-2);
+  transform: translateY(-100%);
+  transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.overlayOpen .overlayPanel {
+  transform: translateY(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .overlay,
+  .overlayBackdrop,
+  .overlayPanel {
+    transition: none;
+  }
+}
