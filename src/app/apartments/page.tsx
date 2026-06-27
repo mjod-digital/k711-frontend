@@ -22,6 +22,8 @@ export default function ApartmentsPage() {
         ]}
         aspectDesktop="1400 / 520"
         aspectMobile="344 / 350"
+        heightDesktop={520}
+        heightMobile={350}
       >
         <span className={`${styles.word} ${styles.katalog} reveal-line`} style={{ "--i": 0 } as CSSProperties}>
           каталог

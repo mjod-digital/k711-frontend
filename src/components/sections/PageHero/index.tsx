@@ -26,6 +26,11 @@ type PageHeroProps = {
   /** Пропорции фото (CSS aspect-ratio). По умолчанию 1400/720 (десктоп), 344/580 (мобайл). */
   aspectDesktop?: string;
   aspectMobile?: string;
+  /** Высота фото из макета (px). На 1440+ замораживается (max-height) — фото
+   *  тянется по ширине, но не растёт по высоте (как в макете 1920). По умолчанию
+   *  720 (десктоп) / 580 (мобайл). aspect-ratio задаёт высоту ниже 1440. */
+  heightDesktop?: number;
+  heightMobile?: number;
 };
 
 // Хедер внутренних страниц: скруглённое фото с рамкой, хлебные крошки сверху,
@@ -38,6 +43,8 @@ export function PageHero({
   children,
   aspectDesktop,
   aspectMobile,
+  heightDesktop,
+  heightMobile,
 }: PageHeroProps) {
   const mediaRef = useRef<HTMLDivElement>(null);
   const parallaxRef = useRef<HTMLDivElement>(null);
@@ -99,6 +106,8 @@ export function PageHero({
           {
             "--hero-aspect": aspectDesktop,
             "--hero-aspect-mobile": aspectMobile,
+            "--hero-h": heightDesktop,
+            "--hero-h-mobile": heightMobile,
           } as CSSProperties
         }
       >
