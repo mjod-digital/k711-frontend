@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import type { CSSProperties } from "react";
 import { PageHero } from "@/components/sections/PageHero";
 import { TextDuo } from "@/components/sections/TextDuo";
-import { CenterHeading } from "@/components/sections/CenterHeading";
+import { SilenceHeading } from "@/components/sections/SilenceHeading";
 import { PhotoCards } from "@/components/sections/PhotoCards";
 import { Location } from "@/components/sections/Location";
 import { ConnectBlock } from "@/components/sections/ConnectBlock";
@@ -54,12 +54,13 @@ export default function LocationPage() {
 
       <TextDuo
         variant="right"
+        className={styles.textDuoWide}
         lines={[
           { parts: [{ text: "время в хорошей" }] },
           { parts: [{ text: "компании" }] },
         ]}
         paragraphs={[
-          "Здесь много парков и скверов: «Красная Пресня», Патриаршие и Красногвардейские пруды, парк Декабрьского восстания.",
+          "Здесь много парков и скверов: «Красная Пресня», Патриаршие и Красногвардейские пруды, парк Декабрьского восстания.",
           "Культурное наследие рядом: собор Непорочного Зачатия, мастерская Зураба Церетели, храм Георгия Победоносца.",
         ]}
       />
@@ -92,12 +93,9 @@ export default function LocationPage() {
         ]}
       />
 
-      <CenterHeading
-        lines={[
-          { parts: [{ text: "пространство" }], align: "center" },
-          { parts: [{ text: "тишины", big: true }], align: "center" },
-          { parts: [{ text: "в центре москвы" }], align: "center" },
-        ]}
+      <SilenceHeading
+        lines={["пространство", "тишины", "в центре москвы"]}
+        className={styles.silenceTop}
       />
 
       <ConnectBlock />

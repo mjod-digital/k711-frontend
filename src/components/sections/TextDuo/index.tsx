@@ -9,11 +9,13 @@ type TextDuoProps = {
   paragraphs: [ReactNode, ReactNode];
   /** right — правая колонка (как Statement); full — заголовок и текст на всю ширину. */
   variant?: "right" | "full";
+  /** Доп. класс на секцию (напр. переопределить --inner-mobile-width на странице). */
+  className?: string;
 };
 
-export function TextDuo({ lines, paragraphs, variant = "right" }: TextDuoProps) {
+export function TextDuo({ lines, paragraphs, variant = "right", className }: TextDuoProps) {
   return (
-    <section className={cn(styles.section, variant === "full" ? styles.full : styles.right)}>
+    <section className={cn(styles.section, variant === "full" ? styles.full : styles.right, className)}>
       <div className={styles.inner}>
         <Reveal variant="lines" className={styles.headingWrap}>
           <CascadeHeading as="h2" lines={lines} className={styles.heading} />

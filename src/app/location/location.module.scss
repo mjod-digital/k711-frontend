@@ -39,3 +39,15 @@
     top: 86.6%;
   }
 }
+
+// TextDuo на /location: правая колонка на мобайле чуть шире (75% вместо 71%).
+.textDuoWide {
+  @include mobile {
+    --inner-mobile-width: 75%;
+  }
+}
+
+// SilenceHeading на /location: отступ сверху 60 (десктоп и мобайл).
+.silenceTop {
+  margin-top: fluid(60);
+}
