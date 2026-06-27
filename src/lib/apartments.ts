@@ -42,5 +42,53 @@ export const APARTMENTS: Apartment[] = [
 export const getApartment = (id: string) =>
   APARTMENTS.find((a) => a.id === id);
 
+// ============================================================
+//   Карточка квартиры (страница /apartments/[id], макет 481-12150 / 433-15174).
+//   Детальные поля — пока сэмпл/производные (UI-каркас). TODO: реальный API.
+// ============================================================
+export type ApartmentDetail = Apartment & {
+  number: number; // № квартиры
+  totalFloors: number; // этажей в доме (для «8 из 11»)
+  finish: string; // отделка
+  completion: string; // ввод в эксплуатацию
+  ceiling: string; // высота потолков
+  view: string; // вид из окна
+  planType: string; // тип планировки
+  totalPrice: number; // полная стоимость, ₽
+  oldPrice: number; // старая (зачёркнутая) цена, ₽
+  tags: string[]; // фичи-теги (Пентхаус, Терраса…)
+  plan: string; // изображение планировки квартиры
+  keyPlan: string; // мини-план этажа (расположение квартиры)
+};
+
+const TOTAL_FLOORS = 13;
+const VIEWS = ["3-я Рыбинская", "Пресненский Вал", "внутренний двор", "Большая Грузинская"];
+
+export function getApartmentDetail(id: string): ApartmentDetail | undefined {
+  const a = getApartment(id);
+  if (!a) return undefined;
+  const totalPrice = a.cost * 1_000_000;
+  const tags = [
+    a.floor >= 11 && "Пентхаус",
+    a.bedrooms >= 3 && "Терраса",
+    "Антресольный этаж",
+  ].filter(Boolean) as string[];
+  return {
+    ...a,
+    number: Number(id.replace(/\D/g, "")) || a.floor,
+    totalFloors: TOTAL_FLOORS,
+    finish: "White Box",
+    completion: "III кв. 2028",
+    ceiling: "2.9 м",
+    view: VIEWS[a.floor % VIEWS.length],
+    planType: "Линейная (вид на 1 сторону)",
+    totalPrice,
+    oldPrice: Math.round((totalPrice * 1.23) / 1000) * 1000,
+    tags,
+    plan: "/images/apartment/plan-sample.png",
+    keyPlan: "/images/apartment/keyplan-sample.png",
+  };
+}
+
 // Форматирование чисел в ru-локали (неразрывные пробелы как разделители тысяч).
 export const ru = (n: number) => n.toLocaleString("ru-RU");
