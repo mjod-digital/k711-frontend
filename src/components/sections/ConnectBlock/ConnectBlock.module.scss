@@ -2,6 +2,7 @@
 
 .section {
   padding-inline: fluid(20);
+  margin-top: fluid(60);
 
   @include mobile {
     padding-inline: fluid(8);

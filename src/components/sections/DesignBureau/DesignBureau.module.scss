@@ -34,6 +34,7 @@
   left: 1.39%; // 20 / 1440
   top: 23.1%; // 208 / 901
   width: 39.86%; // 574 / 1440
+  clip-path: polygon(0 0, 90% 0, 100% 25%, 100% 100%, 0 100%);
   height: 73.7%; // 664 / 901
   border-radius: var(--radius);
   overflow: hidden;
@@ -75,19 +76,19 @@
 
 .avtory {
   left: 26.8%;
-  top: 10.1%;
+  top: 11.1%;
 } // 386, 91
 .koncepcii {
   left: 2.2%;
-  top: 17.6%;
+  top: 18.6%;
 } // 32, 159
 .blagoustroystva {
   left: 26.8%;
-  top: 25.3%;
+  top: 26.3%;
 } // 386, 228
 .lburo {
   left: 50.7%;
-  top: 33.5%;
+  top: 34.5%;
   font-size: fluid(120);
 } // 730, 302
 
@@ -139,6 +140,7 @@
   height: fluid(48);
   padding-inline: fluid(20);
   font-family: var(--font-display);
+  -webkit-text-stroke-width: fluid(0.3);
   font-size: var(--fs-button);
   line-height: var(--lh-button);
   letter-spacing: var(--ls-button);

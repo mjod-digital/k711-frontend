@@ -1,12 +1,12 @@
 import type { Metadata } from "next";
 import type { CSSProperties } from "react";
 import { PageHero } from "@/components/sections/PageHero";
-import { TextDuo } from "@/components/sections/TextDuo";
-import { CenterHeading } from "@/components/sections/CenterHeading";
 import { PhotoCards } from "@/components/sections/PhotoCards";
 import { DesignBureau } from "@/components/sections/DesignBureau";
 import { ConnectBlock } from "@/components/sections/ConnectBlock";
 import { Slider, type Slide } from "@/components/ui/Slider";
+import { SilenceHeading } from "./SilenceHeading";
+import { GardenText } from "./GardenText";
 import styles from "./improvement.module.scss";
 
 export const metadata: Metadata = {
@@ -52,27 +52,11 @@ export default function ImprovementPage() {
         </span>
       </PageHero>
 
-      <TextDuo
-        variant="right"
-        lines={[
-          { parts: [{ text: "Скандинавский" }] },
-          { parts: [{ text: "сад в центре Москвы" }] },
-        ]}
-        paragraphs={[
-          "Закрытый двор клубного дома «Климашкина 7/11» — это камерное пространство, скрытое от города и полностью подчинённое идее приватного сада. Здесь архитектура уходит на второй план, уступая место ландшафту, свету и тишине.",
-          "Внутренний двор спроектирован как цельная природная композиция, где каждый элемент работает на ощущение уединённого городского оазиса.",
-        ]}
-      />
+      <GardenText />
 
       <Slider slides={slides} />
 
-      <CenterHeading
-        lines={[
-          { parts: [{ text: "Пространство" }], align: "center" },
-          { parts: [{ text: "тишины", big: true }], align: "center" },
-          { parts: [{ text: "и приватности" }], align: "center" },
-        ]}
-      />
+      <SilenceHeading />
 
       <PhotoCards
         items={[
