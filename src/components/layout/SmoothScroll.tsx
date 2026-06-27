@@ -23,6 +23,9 @@ export function SmoothScroll() {
       prevent: (node) => !!node?.closest?.("[data-menu-scroll]"),
     });
 
+    // Доступ к инстансу для прелоудера (он лочит/разлочивает скролл первого экрана).
+    (window as Window & { __lenis?: Lenis }).__lenis = lenis;
+
     let raf = 0;
     const loop = (time: number) => {
       lenis.raf(time);
@@ -48,6 +51,7 @@ export function SmoothScroll() {
       cancelAnimationFrame(raf);
       document.removeEventListener("click", onClick);
       lenis.destroy();
+      delete (window as Window & { __lenis?: Lenis }).__lenis;
     };
   }, []);
 

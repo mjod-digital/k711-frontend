@@ -3,10 +3,10 @@
 .section {
   display: flex;
   justify-content: center;
-  padding: fluid(40) fluid(20);
+  padding: 0 fluid(20) fluid(60) fluid(20);
 
   @include mobile {
-    padding: fluid(30) fluid(8);
+    padding: fluid(8) fluid(8) fluid(60) fluid(8);
   }
 }
 

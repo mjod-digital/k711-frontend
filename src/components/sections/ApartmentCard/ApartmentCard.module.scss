@@ -1,0 +1,350 @@
+@use "breakpoints" as *;
+
+// ============================================================
+//   ApartmentCard — карточка квартиры (Figma 481-12150 / 433-15174).
+//   Десктоп: 3 столбца — характеристики | планировка | мини-план+компас.
+//   Мобайл: планировка (с оверлеем мини-плана) → действия → характеристики →
+//   цена → теги.
+// ============================================================
+.wrap {
+  @include contentMax; // 1440+ — карточка замирает на 1440 и центрируется
+  padding: fluid(20) fluid(20) 0;
+  // упирается в футер без зазора — гасим его margin-top
+  margin-bottom: calc(-1 * #{fluid(80)});
+
+  @include mobile {
+    padding: fluid(12) fluid(8) 0;
+    margin-bottom: calc(-1 * #{fluid(60)});
+  }
+}
+
+// ----- Хлебные крошки -----
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: fluid(6);
+  padding-block: fluid(4) fluid(16);
+  color: var(--color-brown-medium);
+  font-family: var(--font-body);
+  font-size: fluid(13);
+
+  a:hover {
+    color: var(--color-brown-dark-2);
+  }
+
+  @include mobile {
+    font-size: fluid(11);
+  }
+}
+
+.sep {
+  opacity: 0.6;
+}
+
+// ----- Карточка -----
+.card {
+  position: relative;
+  display: grid;
+  grid-template-columns: fluid(333) minmax(0, 1fr) fluid(246);
+  grid-template-rows: auto minmax(fluid(600), 1fr);
+  grid-template-areas:
+    "title title  title"
+    "info  plan   aside";
+  column-gap: fluid(20);
+  padding-bottom: fluid(40);
+
+  @include mobile {
+    display: flex;
+    flex-direction: column;
+    padding-bottom: fluid(28);
+  }
+}
+
+.title {
+  grid-area: title;
+  text-align: center;
+  color: var(--color-brown-dark-2);
+  font-family: var(--font-display);
+  font-size: fluid(28);
+  line-height: 1;
+  letter-spacing: 0.02em;
+  padding-block: fluid(20) fluid(10);
+
+  @include mobile {
+    order: 0;
+    font-size: fluid(22);
+    padding-block: fluid(10) fluid(16);
+  }
+}
+
+// ----- Левый столбец: характеристики / цена / теги / действия -----
+.info {
+  grid-area: info;
+  align-self: center;
+  display: flex;
+  flex-direction: column;
+
+  @include mobile {
+    order: 3;
+    align-self: stretch;
+  }
+}
+
+.specs {
+  margin: 0;
+  border-block: 1px solid var(--color-badge-light-2);
+  padding-block: fluid(16);
+  display: flex;
+  flex-direction: column;
+  gap: fluid(16);
+
+  @include mobile {
+    gap: fluid(14);
+    padding-block: fluid(14);
+  }
+}
+
+.specRow {
+  display: flex;
+  justify-content: space-between;
+  gap: fluid(16);
+  color: var(--color-brown-dark-2);
+  font-family: var(--font-body);
+  font-size: fluid(16);
+  line-height: 1;
+
+  dt {
+    color: var(--color-brown-medium);
+  }
+  dd {
+    margin: 0;
+    text-align: right;
+  }
+
+  @include mobile {
+    font-size: fluid(13);
+  }
+}
+
+.price {
+  margin: fluid(24) 0 0;
+  display: flex;
+  align-items: baseline;
+  gap: fluid(16);
+  color: var(--color-brown-dark-2);
+  font-family: var(--font-display);
+  font-size: fluid(28);
+  line-height: 1;
+
+  @include mobile {
+    margin-top: fluid(16);
+    font-size: fluid(24);
+  }
+}
+
+.oldPrice {
+  display: none; // в макете десктопа старой цены нет — только на мобайле
+  color: var(--color-brown-light);
+  font-family: var(--font-body);
+  font-size: fluid(16);
+  text-decoration: line-through;
+
+  @include mobile {
+    display: inline;
+    font-size: fluid(13);
+  }
+}
+
+// ----- Теги (фичи) — в макете десктопа скрыты, на мобайле под ценой -----
+.tags {
+  display: none;
+  list-style: none;
+  margin: fluid(16) 0 0;
+  padding: 0;
+  flex-wrap: wrap;
+  gap: fluid(8);
+
+  li {
+    padding: fluid(8) fluid(14);
+    border: 1px solid var(--color-badge-light-2);
+    border-radius: fluid(2);
+    color: var(--color-brown-medium);
+    font-family: var(--font-body);
+    font-size: fluid(13);
+    line-height: 1;
+  }
+
+  @include mobile {
+    display: flex;
+  }
+}
+
+// ----- Действия -----
+.cta {
+  display: flex;
+  align-items: center;
+  gap: fluid(12);
+  margin-top: fluid(40);
+
+  @include mobile {
+    order: -1; // на мобайле кнопки сразу под планировкой (до характеристик)
+    margin-top: fluid(20);
+    margin-bottom: fluid(8);
+  }
+}
+
+.iconBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: fluid(48);
+  height: fluid(48);
+  border: 1px solid var(--color-brown-medium);
+  border-radius: 50%;
+  background: transparent;
+  color: var(--color-brown-medium);
+  cursor: pointer;
+  transition:
+    background-color 0.3s ease,
+    color 0.3s ease;
+
+  svg {
+    width: fluid(20);
+    height: fluid(20);
+  }
+
+  &:hover {
+    background: var(--color-brown-medium);
+    color: var(--color-badge-light);
+  }
+}
+
+.book {
+  flex: 1 1 auto;
+  height: fluid(48);
+  padding-inline: fluid(24);
+  background: var(--color-brown-dark);
+  color: var(--color-badge-light);
+  font-family: var(--font-display);
+  font-size: fluid(16);
+  line-height: 1;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  border-radius: fluid(2);
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+
+  &:hover {
+    background: var(--color-brown-dark-2);
+  }
+}
+
+// ----- Планировка -----
+.plan {
+  grid-area: plan;
+  position: relative;
+  align-self: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-block: fluid(40);
+
+  @include mobile {
+    order: 2;
+    padding-block: fluid(36) fluid(28);
+  }
+}
+
+.planImg {
+  width: auto;
+  height: fluid(470);
+  max-width: 100%;
+  object-fit: contain;
+
+  @include mobile {
+    height: fluid(420);
+  }
+}
+
+.street {
+  position: absolute;
+  color: var(--color-brown-medium);
+  font-family: var(--font-display);
+  font-size: fluid(16);
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+
+  @include mobile {
+    font-size: fluid(11);
+  }
+}
+
+.streetTop {
+  top: fluid(8);
+  left: 50%;
+  transform: translateX(-50%);
+}
+.streetBottom {
+  bottom: fluid(8);
+  left: 50%;
+  transform: translateX(-50%);
+}
+.streetLeft {
+  left: fluid(20);
+  top: 50%;
+  transform: translateY(-50%) rotate(-90deg);
+
+  @include mobile {
+    left: fluid(2);
+  }
+}
+.streetRight {
+  right: fluid(20);
+  top: 50%;
+  transform: translateY(-50%) rotate(-90deg);
+
+  @include mobile {
+    right: fluid(2);
+  }
+}
+
+// ----- Мини-план этажа + компас -----
+.aside {
+  grid-area: aside;
+  align-self: stretch;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: space-between;
+  padding-block: fluid(40);
+
+  @include mobile {
+    // оверлей в правом верхнем углу плана
+    position: absolute;
+    top: fluid(46);
+    right: fluid(4);
+    z-index: 1;
+    padding: 0;
+    gap: fluid(8);
+  }
+}
+
+.keyplan {
+  width: fluid(246);
+  height: auto;
+
+  @include mobile {
+    width: fluid(96);
+  }
+}
+
+.compass {
+  width: fluid(96);
+  height: fluid(96);
+
+  @include mobile {
+    width: fluid(54);
+    height: fluid(54);
+  }
+}

@@ -80,26 +80,44 @@ export function Showcase({ steps }: { steps: ShowcaseStep[] }) {
       let raf = 0;
       let ticking = false;
 
-      // Первый шаг ВСЕГДА отрисован (без разворота) — у него только параллакс.
+      // Картинка каждого шага «въезжает» шторкой снизу-вверх поверх предыдущего
+      // (--intro). Текст — ОДНОЙ шторкой снизу-вверх (как изначально): весь блок
+      // клипается по --introText (у прошлого шага текст убран). Первый шаг (счётчик)
+      // держится короткую паузу HOLD (идёт CountUp), затем переходы.
+      const HOLD = 0.1;
       const render = () => {
-        const sf = p * N;
-        const idx = Math.min(N - 1, Math.floor(sf));
-        const sub = clamp01(sf - idx);
+        let idx: number;
+        let sub: number;
+        if (p <= HOLD) {
+          idx = 0;
+          sub = 0;
+        } else {
+          const seg = ((p - HOLD) / (1 - HOLD)) * (N - 1);
+          idx = Math.min(N - 1, Math.floor(seg) + 1);
+          sub = clamp01(seg - (idx - 1));
+        }
         for (let i = 0; i < N; i++) {
+          let intro: number;
+          let introText: number;
+          let par: number;
           if (i === 0) {
-            setStep(stepRefs.current[0], 1, idx === 0 ? 1 : 0, clamp01(p * N));
+            intro = 1; // счётчик показан всегда (его накрывает следующий)
+            introText = idx === 0 ? 1 : 0; // текст счётчика виден только на старте
+            par = clamp01(p * N);
           } else if (i < idx) {
-            setStep(stepRefs.current[i], 1, 0, 1);
+            intro = 1;
+            introText = 0; // прошлый: фото показано, текст убран (шторка закрыта)
+            par = 1;
           } else if (i > idx) {
-            setStep(stepRefs.current[i], 0, 0, 0);
+            intro = 0;
+            introText = 0;
+            par = 0;
           } else {
-            setStep(
-              stepRefs.current[i],
-              clamp01(sub / 0.5),
-              clamp01((sub - 0.12) / 0.4),
-              clamp01((sub - 0.5) / 0.5),
-            );
+            intro = sub; // картинка въезжает шторкой
+            introText = clamp01((sub - 0.12) / 0.4); // текст — одной шторкой, чуть позже
+            par = sub;
           }
+          setStep(stepRefs.current[i], intro, introText, par);
         }
         return idx;
       };
@@ -110,7 +128,7 @@ export function Showcase({ steps }: { steps: ShowcaseStep[] }) {
         const armed = rect.top <= vh * 0.85 && rect.bottom > 0;
         const dist = section.offsetHeight - vh;
         const target = dist > 0 ? clamp01(-rect.top / dist) : 0;
-        p += (target - p) * 0.085;
+        p += (target - p) * 0.07; // плавнее (было 0.085)
         const settled = Math.abs(target - p) < 0.0004;
         if (settled) p = target;
         const idx = render();
