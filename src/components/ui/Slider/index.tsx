@@ -29,6 +29,16 @@ export function Slider({ slides, className, mobileGallery = false }: SliderProps
   const viewportRef = useRef<HTMLDivElement>(null);
   const [mobileGalleryMode, setMobileGalleryMode] = useState(false);
 
+  // Swiper loop при slidesPerView:auto + широких слайдах требует достаточно
+  // слайдов, иначе соседи не выглядывают по краям и Swiper ругается «not enough
+  // slides for loop». Дублируем набор до ≥6 — это та же бесконечная лента
+  // (визуально неотличимо), но соседи выглядывают с ОБЕИХ сторон на любом слайде.
+  const wantsLoop = slides.length > 2;
+  const loopSlides =
+    wantsLoop && slides.length < 6
+      ? Array.from({ length: Math.ceil(6 / slides.length) }).flatMap(() => slides)
+      : slides;
+
   // Решаем, показывать ли «шахматку» вместо карусели (только если mobileGallery).
   useIsomorphicLayoutEffect(() => {
     if (!mobileGallery) return;
@@ -107,12 +117,13 @@ export function Slider({ slides, className, mobileGallery = false }: SliderProps
           navigation={{ prevEl, nextEl }}
           slidesPerView="auto"
           centeredSlides
-          loop={slides.length > 2}
+          loop={wantsLoop}
+          loopAdditionalSlides={2}
           spaceBetween={spaceBetween}
           speed={700}
           className={styles.swiper}
         >
-          {slides.map((slide, i) => (
+          {loopSlides.map((slide, i) => (
             <SwiperSlide key={i} className={styles.slide}>
               <div className={styles.imageBox}>
                 <div className={styles.parallax}>
