@@ -1,0 +1,170 @@
+@use "breakpoints" as *;
+
+// ============================================================
+//   DesignBureau — «Авторы концепции благоустройства L.BURO».
+//   Figma 373-9364 (1440 / h901) и 397-10276 (360).
+//   Десктоп — абсолютная раскладка в долях от артборда.
+//   Мобайл — портрет+заголовок в .stage, текст течёт ниже.
+// ============================================================
+.section {
+  position: relative;
+  aspect-ratio: 1440 / 901;
+
+  @include mobile {
+    aspect-ratio: auto;
+    display: flex;
+    flex-direction: column;
+  }
+}
+
+.stage {
+  position: absolute;
+  inset: 0;
+
+  @include mobile {
+    position: relative;
+    inset: auto;
+    aspect-ratio: 360 / 410; // портрет (h280@top106) + запас под текст-блок ниже
+  }
+}
+
+// ----- Портрет -----
+.photo {
+  position: absolute;
+  left: 1.39%; // 20 / 1440
+  top: 23.1%; // 208 / 901
+  width: 39.86%; // 574 / 1440
+  clip-path: polygon(0 0, 90% 0, 100% 25%, 100% 100%, 0 100%);
+  height: 73.7%; // 664 / 901
+  border-radius: var(--radius);
+  overflow: hidden;
+  @include cornerFade(50.6, 151);
+
+  @include mobile {
+    left: 2.2%; // 8 / 360
+    top: 25.9%; // 106 / 410
+    width: 58.9%; // 212 / 360
+    height: 68.3%; // 280 / 410
+
+    &::after {
+      width: fluid(26);
+      height: fluid(77);
+    }
+  }
+}
+
+.image {
+  object-fit: cover;
+  object-position: center;
+}
+
+// ----- Скаттер-заголовок «Авторы концепции благоустройства L.BURO» -----
+.heading {
+  position: absolute;
+  inset: 0;
+  color: var(--color-brown-medium);
+  font-family: var(--font-display);
+  font-size: var(--fs-h2); // 68 / 36
+  line-height: 1;
+  text-transform: uppercase;
+
+  span {
+    position: absolute;
+    white-space: nowrap;
+  }
+}
+
+.avtory {
+  left: 26.8%;
+  top: 11.1%;
+} // 386, 91
+.koncepcii {
+  left: 2.2%;
+  top: 18.6%;
+} // 32, 159
+.blagoustroystva {
+  left: 26.8%;
+  top: 26.3%;
+} // 386, 228
+.lburo {
+  left: 50.7%;
+  top: 34.5%;
+  font-size: fluid(120);
+} // 730, 302
+
+@include mobile {
+  // позиции — в долях от .stage (высота 410)
+  .avtory {
+    left: 2.2%;
+    top: 13.9%;
+  } // 8, 57
+  .koncepcii {
+    left: 14.4%;
+    top: 21%;
+  } // 52, 86
+  .blagoustroystva {
+    left: 14.2%;
+    top: 28.8%;
+  } // 51, 118
+  .lburo {
+    left: 60%;
+    top: 36.8%;
+    font-size: fluid(44);
+  } // 216, 151
+}
+
+// ----- Текст + CTA -----
+.body {
+  position: absolute;
+  left: 50.7%; // 730 / 1440
+  top: 53.5%; // 482 / 901
+  width: 35.6%; // 513 / 1440
+  display: flex;
+  flex-direction: column;
+  gap: fluid(40);
+}
+
+.para {
+  margin: 0;
+  color: var(--color-fg);
+  font-family: var(--font-body);
+  font-size: var(--fs-body);
+  line-height: 1.4;
+}
+
+.cta {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: fluid(48);
+  padding-inline: fluid(20);
+  font-family: var(--font-display);
+  -webkit-text-stroke-width: fluid(0.3);
+  font-size: var(--fs-button);
+  line-height: var(--lh-button);
+  letter-spacing: var(--ls-button);
+  white-space: nowrap;
+  @include ctaSecondary;
+
+  &:focus-visible {
+    outline: 2px solid var(--color-brown-dark);
+    outline-offset: 2px;
+  }
+
+  @include mobile {
+    height: fluid(40);
+  }
+}
+
+@include mobile {
+  // текст-блок под .stage (нормальный поток)
+  .body {
+    position: static;
+    left: auto;
+    top: auto;
+    width: auto;
+    margin: fluid(20) fluid(8) fluid(40) fluid(52); // отступ слева как в макете (x52)
+    gap: fluid(20);
+  }
+}

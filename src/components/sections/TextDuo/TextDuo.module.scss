@@ -6,6 +6,7 @@
 //   variant=full — на всю ширину.
 // ============================================================
 .section {
+  @include contentMax; // 1440+: колонка замирает на 1440 и центрируется
   margin-top: 0;
 
   @include mobile {
@@ -39,7 +40,7 @@
 .inner {
   display: flex;
   flex-direction: column;
-  gap: fluid(60);
+  gap: fluid(40);
 
   @include mobile {
     gap: fluid(28);

@@ -2,6 +2,7 @@
 
 .section {
   padding-inline: fluid(20);
+  margin-top: fluid(60);
 
   @include mobile {
     padding-inline: fluid(8);
@@ -12,7 +13,6 @@
   position: relative;
   display: block;
   aspect-ratio: 1400 / 400;
-  border-radius: var(--radius);
   overflow: hidden;
 
   // overflow:hidden + main{overflow-x:clip} обрежет тонкий контур —

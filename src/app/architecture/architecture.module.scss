@@ -32,19 +32,32 @@
 @include mobile {
   .garmonia {
     left: 6.4%;
-    top: 73.4%;
+    top: 74.4%;
+    font-size: fluid(28);
   }
   .proshlogo {
     left: 27.9%;
-    top: 78.8%;
+    top: 79.8%;
+    font-size: fluid(28);
   }
   .nastoyashchego {
-    left: 11.3%;
+    left: 9.3%;
     top: 85.2%;
-    font-size: fluid(40);
+    font-size: fluid(44);
   }
   .i {
-    left: 1.7%;
-    top: 86.6%;
+    left: 1%;
+    top: 87.6%;
+    font-size: fluid(28);
+  }
+}
+
+// Перенос внутри слова «историческим» только на мобиле (историчес- / ким).
+// На десктопе span скрыт, и «историчес»+«ким» сливаются в цельное слово.
+.mobBreak {
+  display: none;
+
+  @include mobile {
+    display: inline;
   }
 }

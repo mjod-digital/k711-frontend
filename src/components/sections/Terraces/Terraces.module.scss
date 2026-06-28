@@ -6,6 +6,7 @@
 //   («Дом, где история не замолкает».)
 // ============================================================
 .terraces {
+  @include contentMax; // 1440+: колонка замирает на 1440 и центрируется
   margin-top: 0;
   padding: 0 fluid(20) 0;
   position: relative;
@@ -115,21 +116,24 @@
   }
 }
 
-// Параграфы всплывают снизу вверх (движение + прозрачность, БЕЗ шторки),
-// вместе с разворотом фото (--pu); второй — чуть позже (стаггер).
+// Параграфы — триггерный «выезд» снизу (opacity + сдвиг, как абзацы Statement),
+// один раз при входе .cols в вид; второй абзац — с лёгким стаггером.
 .paragraph {
-  --pr: var(--pu, 1);
   color: var(--color-fg);
   font-family: var(--font-body);
   font-size: var(--fs-body); // 14 → 20
   line-height: normal;
   flex: 1;
-  transform: translate3d(0, calc((1 - var(--pr)) * fluid(50)), 0);
-  opacity: var(--pr);
+
+  opacity: 0;
+  transform: translate3d(0, fluid(64), 0);
   will-change: transform, opacity;
+  transition:
+    opacity 1000ms ease-out var(--fd, 0ms),
+    transform 1000ms ease-out var(--fd, 0ms);
 
   &:last-child {
-    --pr: clamp(0, calc((var(--pu, 1) - 0.15) / 0.85), 1);
+    --fd: 150ms; // лёгкий стаггер 2-го абзаца
   }
 
   @include mobile {
@@ -137,6 +141,13 @@
     max-width: fluid(300);
     margin-left: auto;
   }
+}
+
+// До arming (SSR / no-JS) — текст виден сразу; при показе — «выезжает» снизу.
+.cols:not([data-reveal]) .paragraph,
+.cols[data-reveal="visible"] .paragraph {
+  opacity: 1;
+  transform: none;
 }
 
 @media (prefers-reduced-motion: reduce) {

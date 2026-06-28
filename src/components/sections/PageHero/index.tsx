@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useRef } from "react";
-import type { ReactNode } from "react";
+import type { CSSProperties, ReactNode } from "react";
 import { Reveal } from "@/components/ui/Reveal";
 import { useIsomorphicLayoutEffect } from "@/lib/useIsomorphicLayoutEffect";
 import styles from "./PageHero.module.scss";
@@ -23,12 +23,29 @@ type PageHeroProps = {
   /** Скаттер-заголовок: спаны с классом `reveal-line` + style `--i`, позиции
    *  задаёт модуль страницы (они абсолютно позиционируются внутри фото). */
   children: ReactNode;
+  /** Пропорции фото (CSS aspect-ratio). По умолчанию 1400/720 (десктоп), 344/580 (мобайл). */
+  aspectDesktop?: string;
+  aspectMobile?: string;
+  /** Высота фото из макета (px). На 1440+ замораживается (max-height) — фото
+   *  тянется по ширине, но не растёт по высоте (как в макете 1920). По умолчанию
+   *  720 (десктоп) / 580 (мобайл). aspect-ratio задаёт высоту ниже 1440. */
+  heightDesktop?: number;
+  heightMobile?: number;
 };
 
 // Хедер внутренних страниц: скруглённое фото с рамкой, хлебные крошки сверху,
 // «разбросанный» заголовок поверх фото. Переиспользуется всеми внутренними
 // страницами — уникален только сам заголовок (передаётся как children).
-export function PageHero({ image, imageAlt, breadcrumb, children }: PageHeroProps) {
+export function PageHero({
+  image,
+  imageAlt,
+  breadcrumb,
+  children,
+  aspectDesktop,
+  aspectMobile,
+  heightDesktop,
+  heightMobile,
+}: PageHeroProps) {
   const mediaRef = useRef<HTMLDivElement>(null);
   const parallaxRef = useRef<HTMLDivElement>(null);
 
@@ -82,7 +99,18 @@ export function PageHero({ image, imageAlt, breadcrumb, children }: PageHeroProp
         </ol>
       </nav>
 
-      <div className={styles.media} ref={mediaRef}>
+      <div
+        className={styles.media}
+        ref={mediaRef}
+        style={
+          {
+            "--hero-aspect": aspectDesktop,
+            "--hero-aspect-mobile": aspectMobile,
+            "--hero-h": heightDesktop,
+            "--hero-h-mobile": heightMobile,
+          } as CSSProperties
+        }
+      >
         <div className={styles.parallax} ref={parallaxRef}>
           <Image
             src={image}
@@ -98,8 +126,10 @@ export function PageHero({ image, imageAlt, breadcrumb, children }: PageHeroProp
           <Reveal
             as="h1"
             variant="lines"
-            // первый экран — запускаем шторку сразу, без сдвига к центру
+            // запускаем шторку, когда ВЕСЬ h1 попал в видимую область (threshold>=1),
+            // без сдвига рамки — считаем от чистого вьюпорта.
             rootMargin="0px 0px 0px 0px"
+            threshold={1}
             className={styles.title}
           >
             {children}

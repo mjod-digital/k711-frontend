@@ -62,13 +62,16 @@
 // ----- Фото-сцена -----
 .media {
   position: relative;
-  aspect-ratio: 1400 / 720;
-  border-radius: var(--radius);
+  width: 100%;
+  // Высота из макета через fluid: ниже 1440 тянется как aspect-ratio (fluid ≈ ширине),
+  // на 1440+ заморожена (--fvw) — фото растягивается по ширине, высота держится.
+  height: fluid(var(--hero-h, 720));
   overflow: hidden;
   isolation: isolate;
+  margin-bottom: fluid(25);
 
   @include mobile {
-    aspect-ratio: 344 / 580; // вертикальное фото на мобайле
+    height: fluid(var(--hero-h-mobile, 580)); // вертикальное фото на мобайле
   }
 }
 

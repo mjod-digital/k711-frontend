@@ -1,6 +1,9 @@
 @use "breakpoints" as *;
 
 .section {
+  // ≥1440 — блок замирает на 1440 и центрируется; размеры контента (в т.ч.
+  // заголовок) не растут шире макета и не обрезаются на широких экранах.
+  @include contentMax;
   position: relative;
   aspect-ratio: 1440 / 901;
 
@@ -31,7 +34,7 @@
   top: 23.1%; // 208 / 901
   width: 39.86%; // 574 / 1440
   height: 73.7%; // 664 / 901
-  border-radius: var(--radius);
+  clip-path: polygon(0 0, 90% 0, 100% 25%, 100% 100%, 0 100%);
   overflow: hidden;
   @include cornerFade(50.6, 151);
 
@@ -67,23 +70,27 @@
     position: absolute;
     white-space: nowrap;
   }
+
+  @include mobile {
+    font-size: var(--fs-h3); // 36 / 28
+  }
 }
 
 .avtor {
   left: 14.9%;
-  top: 9.1%;
+  top: 12.1%;
 } // 215, 82
 .proekta {
   left: 27.2%;
-  top: 16.5%;
+  top: 19.5%;
 } // 391, 149
 .sergey {
   left: 49.4%;
-  top: 16.5%;
+  top: 19.5%;
 } // 712, 149
 .choban {
   left: 48.7%;
-  top: 24.6%;
+  top: 27.6%;
   font-size: fluid(110);
 } // 701, 222
 
@@ -91,15 +98,15 @@
   // позиции — в долях от .stage (высота 392)
   .avtor {
     left: 2.2%;
-    top: 14.5%;
+    top: 16.5%;
   } // 8, 57
   .proekta {
     left: 14.4%;
-    top: 21.9%;
+    top: 23.9%;
   } // 52, 86
   .sergey {
     left: 50.6%;
-    top: 21.9%;
+    top: 23.9%;
   } // 182, 86
   .choban {
     left: 55%;
@@ -145,6 +152,7 @@
   height: fluid(48);
   padding-inline: fluid(20);
   font-family: var(--font-display);
+  -webkit-text-stroke-width: fluid(0.3);
   font-size: var(--fs-button);
   line-height: var(--lh-button);
   letter-spacing: var(--ls-button);
