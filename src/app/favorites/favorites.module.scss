@@ -1,0 +1,229 @@
+@use "breakpoints" as *;
+
+.wrap {
+  @include contentMax(1440);
+  padding: fluid(40) fluid(20) fluid(120);
+  min-height: 70vh;
+
+  @include mobile {
+    padding: fluid(20) fluid(8) fluid(80);
+  }
+}
+
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: fluid(6);
+  padding-block: fluid(24) fluid(40);
+  color: var(--color-brown-medium);
+  font-family: var(--font-body);
+  font-size: fluid(14);
+
+  a:hover {
+    color: var(--color-brown-dark-2);
+  }
+
+  @include mobile {
+    padding-block: fluid(13) fluid(24);
+    font-size: fluid(12);
+  }
+}
+.sep {
+  opacity: 0.6;
+}
+
+.title {
+  margin: 0 0 fluid(32);
+  color: var(--color-brown-dark-2);
+  font-family: var(--font-display);
+  font-size: fluid(56);
+  line-height: 1;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  -webkit-text-stroke-width: fluid(0.3);
+
+  @include mobile {
+    margin-bottom: fluid(20);
+    font-size: fluid(32);
+  }
+}
+
+.placeholder {
+  min-height: fluid(300);
+}
+
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: fluid(20);
+  color: var(--color-brown-medium);
+  font-family: var(--font-body);
+}
+.emptyText {
+  margin: 0;
+  font-size: fluid(18);
+
+  @include mobile {
+    font-size: fluid(15);
+  }
+}
+.emptyCta {
+  @include ctaSecondary;
+  display: inline-flex;
+  align-items: center;
+  height: fluid(48);
+  padding-inline: fluid(24);
+  border-radius: fluid(2);
+  font-family: var(--font-body);
+  font-size: fluid(14);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: fluid(20);
+  font-family: var(--font-body);
+}
+.count {
+  color: var(--color-brown-medium);
+  font-size: fluid(16);
+}
+.clear {
+  border: 0;
+  background: none;
+  color: var(--color-brown-medium);
+  font-family: var(--font-body);
+  font-size: fluid(14);
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  transition: color 0.3s ease;
+
+  &:hover {
+    color: var(--color-brown-dark-2);
+  }
+}
+
+.list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: fluid(12);
+}
+
+.row {
+  position: relative;
+  display: grid;
+  grid-template-columns: fluid(260) 1fr auto fluid(48);
+  align-items: center;
+  gap: fluid(24);
+  padding: fluid(24) fluid(28);
+  border: 1px solid #d5d3cc;
+  border-radius: fluid(4);
+  transition: border-color 0.3s ease;
+
+  &:hover {
+    border-color: var(--color-brown-medium);
+  }
+
+  @include mobile {
+    grid-template-columns: 1fr fluid(40);
+    grid-template-areas:
+      "num    remove"
+      "specs  remove"
+      "price  remove";
+    gap: fluid(8) fluid(12);
+    padding: fluid(16);
+  }
+}
+
+.rowLink {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+
+.num {
+  z-index: 1;
+  color: var(--color-brown-dark-2);
+  font-family: var(--font-display);
+  font-size: fluid(22);
+  letter-spacing: 0.02em;
+
+  @include mobile {
+    grid-area: num;
+    font-size: fluid(18);
+  }
+}
+.specs {
+  z-index: 1;
+  color: var(--color-brown-medium);
+  font-family: var(--font-body);
+  font-size: fluid(14);
+
+  @include mobile {
+    grid-area: specs;
+    font-size: fluid(12);
+  }
+}
+.price {
+  z-index: 1;
+  justify-self: end;
+  color: var(--color-brown-dark-2);
+  font-family: var(--font-display);
+  font-size: fluid(20);
+  white-space: nowrap;
+
+  @include mobile {
+    grid-area: price;
+    justify-self: start;
+    font-size: fluid(16);
+  }
+}
+
+.remove {
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: fluid(48);
+  height: fluid(48);
+  border: 1px solid var(--color-brown-medium);
+  border-radius: 50%;
+  background: transparent;
+  color: var(--color-brown-medium);
+  cursor: pointer;
+  transition:
+    background-color 0.3s ease,
+    color 0.3s ease;
+
+  svg {
+    width: fluid(20);
+    height: fluid(20);
+  }
+
+  &:hover {
+    background: var(--color-brown-medium);
+    color: var(--color-badge-light);
+  }
+
+  @include mobile {
+    grid-area: remove;
+    align-self: center;
+    width: fluid(40);
+    height: fluid(40);
+
+    svg {
+      width: fluid(18);
+      height: fluid(18);
+    }
+  }
+}
+.removeActive {
+  color: var(--color-brown-dark-2);
+}

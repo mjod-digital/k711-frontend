@@ -1,11 +1,16 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { APARTMENTS, getApartmentDetail } from "@/lib/apartments";
+import { fetchApartmentById, fetchApartments, flatToDetail } from "@/lib/api";
 import { ApartmentCard } from "@/components/sections/ApartmentCard";
 
-// Статически пререндерим все квартиры каталога (UI-каркас; TODO: API).
-export function generateStaticParams() {
-  return APARTMENTS.map((a) => ({ id: a.id }));
+// Пререндерим все квартиры каталога (id = number из CRM).
+export async function generateStaticParams() {
+  try {
+    const flats = await fetchApartments();
+    return flats.map((f) => ({ id: f.number }));
+  } catch {
+    return [];
+  }
 }
 
 export async function generateMetadata({
@@ -14,11 +19,12 @@ export async function generateMetadata({
   params: Promise<{ id: string }>;
 }): Promise<Metadata> {
   const { id } = await params;
-  const apt = getApartmentDetail(id);
-  if (!apt) return { title: "Квартира не найдена" };
+  const data = await fetchApartmentById(id).catch(() => null);
+  if (!data) return { title: "Квартира не найдена" };
+  const { flat } = data;
   return {
-    title: `Квартира №${apt.number}`,
-    description: `Квартира №${apt.number} в клубном доме k 7/11 — ${apt.bedrooms}-комнатная, ${apt.area} м², ${apt.floor} этаж.`,
+    title: `Квартира №${flat.number}`,
+    description: `Квартира №${flat.number} в клубном доме k 7/11 — ${flat.numberOfBedrooms}-комнатная, ${flat.area} м², ${flat.floor} этаж.`,
   };
 }
 
@@ -28,7 +34,7 @@ export default async function ApartmentDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const apt = getApartmentDetail(id);
-  if (!apt) notFound();
-  return <ApartmentCard apt={apt} />;
+  const data = await fetchApartmentById(id).catch(() => null);
+  if (!data) notFound();
+  return <ApartmentCard apt={flatToDetail(data.flat)} />;
 }

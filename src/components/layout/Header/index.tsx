@@ -3,11 +3,14 @@
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { siteConfig } from "@/config/site";
+import { useFavorites, useHydrated } from "@/store/favorites";
 import { cn } from "@/lib/utils";
 import { Menu } from "./Menu";
 import styles from "./Header.module.scss";
 
 export function Header() {
+  const favCount = useFavorites((s) => s.ids.length);
+  const hydrated = useHydrated();
   const headerRef = useRef<HTMLElement>(null);
   const lastY = useRef(0);
   const [hidden, setHidden] = useState(false);
@@ -94,13 +97,16 @@ export function Header() {
             <PhoneIcon />
           </a>
 
-          <button
-            type="button"
-            className={styles.iconBtn}
+          <Link
+            href="/favorites"
+            className={cn(styles.iconBtn, styles.favLink)}
             aria-label="Избранное"
           >
             <HeartIcon />
-          </button>
+            {hydrated && favCount > 0 && (
+              <span className={styles.favBadge}>{favCount}</span>
+            )}
+          </Link>
 
           <Link href={siteConfig.cta.href} className={styles.cta}>
             {siteConfig.cta.label}

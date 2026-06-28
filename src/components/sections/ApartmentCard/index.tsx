@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { ru, type ApartmentDetail } from "@/lib/apartments";
+import { FavoriteButton } from "@/components/ui/FavoriteButton";
 import styles from "./ApartmentCard.module.scss";
 
 // Компас из макета (481-12214) — вектор, инлайним.
@@ -25,18 +26,6 @@ function ShareIcon() {
     <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
       <path
         d="M9 12a3 3 0 1 0 0 .01M18 6a3 3 0 1 0 0 .01M18 18a3 3 0 1 0 0 .01M11.6 10.5l4.8-3M11.6 13.5l4.8 3"
-        stroke="currentColor"
-        strokeWidth="1.4"
-      />
-    </svg>
-  );
-}
-
-function HeartIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-      <path
-        d="M12 20.3l-1.45-1.32C5.4 14.36 2 11.28 2 7.5 2 4.42 4.42 2 7.5 2c1.74 0 3.41.81 4.5 2.09C13.09 2.81 14.76 2 16.5 2 19.58 2 22 4.42 22 7.5c0 3.78-3.4 6.86-8.55 11.54L12 20.3z"
         stroke="currentColor"
         strokeWidth="1.4"
       />
@@ -120,7 +109,9 @@ export function ApartmentCard({ apt }: { apt: ApartmentDetail }) {
 
           <p className={styles.price}>
             {ru(apt.totalPrice)} ₽
-            <span className={styles.oldPrice}>{ru(apt.oldPrice)} ₽</span>
+            {apt.oldPrice > 0 && (
+              <span className={styles.oldPrice}>{ru(apt.oldPrice)} ₽</span>
+            )}
           </p>
 
           {apt.tags.length > 0 && (
@@ -135,9 +126,7 @@ export function ApartmentCard({ apt }: { apt: ApartmentDetail }) {
             <button type="button" className={styles.iconBtn} aria-label="Поделиться">
               <ShareIcon />
             </button>
-            <button type="button" className={styles.iconBtn} aria-label="В избранное">
-              <HeartIcon />
-            </button>
+            <FavoriteButton id={apt.id} className={styles.iconBtn} />
             <button type="button" className={styles.book}>
               Забронировать
             </button>

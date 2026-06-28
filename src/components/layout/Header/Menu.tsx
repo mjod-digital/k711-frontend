@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useRef } from "react";
 import type { CSSProperties } from "react";
 import Lenis from "lenis";
@@ -15,17 +16,22 @@ const FROST: CSSProperties = {
 };
 
 const NAV = [
-  "Главная",
-  "Локация",
-  "Архитектура",
-  "Аменитис",
-  "Благоустройство",
-  "Паркинг",
-  "Историческая справка",
-  "Офис продаж",
+  { label: "Главная", href: "/" },
+  { label: "Локация", href: "/location" },
+  { label: "Архитектура", href: "/architecture" },
+  { label: "Дизайн и искусство", href: "/design" },
+  { label: "Аменитис", href: "#" },
+  { label: "Благоустройство", href: "/improvement" },
+  { label: "Резиденции", href: "/residences" },
+  { label: "Паркинг", href: "/technologies" },
+  { label: "Историческая справка", href: "#" },
+  { label: "Офис продаж", href: "#" },
 ];
 
-const PICK = ["Выбор по параметрам", "Визуальный выбор"];
+const PICK = [
+  { label: "Выбор по параметрам", href: "/apartments" },
+  { label: "Визуальный выбор", href: "/apartments" },
+];
 
 type MenuProps = { open: boolean; onClose: () => void };
 
@@ -142,11 +148,16 @@ export function Menu({ open, onClose }: MenuProps) {
             <div className={styles.group}>
               <p className={styles.label}>Меню</p>
               <ul className={styles.list}>
-                {NAV.map((l) => (
-                  <li key={l}>
-                    <a href="#" className={styles.link} tabIndex={tab} onClick={onClose}>
-                      {l}
-                    </a>
+                {NAV.map((item) => (
+                  <li key={item.label}>
+                    <Link
+                      href={item.href}
+                      className={styles.link}
+                      tabIndex={tab}
+                      onClick={onClose}
+                    >
+                      {item.label}
+                    </Link>
                   </li>
                 ))}
               </ul>
@@ -155,11 +166,16 @@ export function Menu({ open, onClose }: MenuProps) {
             <div className={styles.group}>
               <p className={styles.label}>Выбрать квартиру</p>
               <ul className={styles.list}>
-                {PICK.map((l) => (
-                  <li key={l}>
-                    <a href="#" className={styles.link} tabIndex={tab} onClick={onClose}>
-                      {l}
-                    </a>
+                {PICK.map((item) => (
+                  <li key={item.label}>
+                    <Link
+                      href={item.href}
+                      className={styles.link}
+                      tabIndex={tab}
+                      onClick={onClose}
+                    >
+                      {item.label}
+                    </Link>
                   </li>
                 ))}
               </ul>

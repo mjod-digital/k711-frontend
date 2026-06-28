@@ -5,16 +5,17 @@ import { useMemo, useState } from "react";
 import type { Dispatch, ReactNode, SetStateAction } from "react";
 import { RangeSlider } from "@/components/ui/RangeSlider";
 import {
-  APARTMENTS,
-  BEDROOM_OPTIONS,
-  FILTER_RANGES,
+  bedroomOptions,
+  catalogRanges,
   ru,
   type Apartment,
+  type Range,
 } from "@/lib/apartments";
+import { useFavorites, useHydrated } from "@/store/favorites";
 import { cn } from "@/lib/utils";
 import styles from "./ApartmentCatalog.module.scss";
 
-type Range = [number, number];
+type Ranges = ReturnType<typeof catalogRanges>;
 type Filters = {
   bedrooms: number | null;
   floor: Range;
@@ -23,12 +24,12 @@ type Filters = {
   cost: Range;
 };
 
-const initialFilters = (): Filters => ({
+const initialFilters = (r: Ranges): Filters => ({
   bedrooms: null,
-  floor: [...FILTER_RANGES.floor],
-  area: [...FILTER_RANGES.area],
-  pricePerM2: [...FILTER_RANGES.pricePerM2],
-  cost: [...FILTER_RANGES.cost],
+  floor: [...r.floor],
+  area: [...r.area],
+  pricePerM2: [...r.pricePerM2],
+  cost: [...r.cost],
 });
 
 const within = (v: number, [lo, hi]: Range) => v >= lo && v <= hi;
@@ -49,19 +50,23 @@ function HeartIcon() {
 function FilterPanel({
   filters,
   setFilters,
+  ranges,
+  bedOptions,
   onReset,
   onClose,
 }: {
   filters: Filters;
   setFilters: Dispatch<SetStateAction<Filters>>;
+  ranges: Ranges;
+  bedOptions: number[];
   onReset: () => void;
   onClose?: () => void;
 }) {
   const slider = (key: "floor" | "area" | "pricePerM2" | "cost", label: ReactNode) => (
     <RangeSlider
       label={label}
-      min={FILTER_RANGES[key][0]}
-      max={FILTER_RANGES[key][1]}
+      min={ranges[key][0]}
+      max={ranges[key][1]}
       value={filters[key]}
       onChange={(v) => setFilters((f) => ({ ...f, [key]: v }))}
     />
@@ -85,7 +90,7 @@ function FilterPanel({
       <div className={styles.bedGroup}>
         <p className={styles.bedLabel}>Количество спален</p>
         <div className={styles.tabs}>
-          {BEDROOM_OPTIONS.map((n) => (
+          {bedOptions.map((n) => (
             <button
               key={n}
               type="button"
@@ -144,7 +149,7 @@ function ApartmentRow({
       <span className={cn(styles.cell, styles.bed)}>{a.bedrooms}</span>
       <span className={styles.cell}>{ru(a.area)} м²</span>
       <span className={styles.cell}>{ru(a.pricePerM2 * 1000)}</span>
-      <span className={styles.cell}>{ru(a.cost * 1_000_000)}</span>
+      <span className={styles.cell}>{ru(Math.round(a.cost * 1_000_000))}</span>
       <button
         type="button"
         className={cn(styles.fav, fav && styles.favActive)}
@@ -158,22 +163,23 @@ function ApartmentRow({
   );
 }
 
-export function ApartmentCatalog() {
-  const [filters, setFilters] = useState<Filters>(initialFilters);
-  const [favorites, setFavorites] = useState<Set<string>>(new Set());
+export function ApartmentCatalog({ apartments }: { apartments: Apartment[] }) {
+  const ranges = useMemo(() => catalogRanges(apartments), [apartments]);
+  const bedOptions = useMemo(() => bedroomOptions(apartments), [apartments]);
+
+  const [filters, setFilters] = useState<Filters>(() => initialFilters(ranges));
   const [filtersOpen, setFiltersOpen] = useState(false);
 
-  const reset = () => setFilters(initialFilters());
-  const toggleFav = (id: string) =>
-    setFavorites((prev) => {
-      const next = new Set(prev);
-      next.has(id) ? next.delete(id) : next.add(id);
-      return next;
-    });
+  // Избранное — глобально (zustand). До гидратации считаем пустым.
+  const favIds = useFavorites((s) => s.ids);
+  const toggleFav = useFavorites((s) => s.toggle);
+  const hydrated = useHydrated();
+
+  const reset = () => setFilters(initialFilters(ranges));
 
   const rows = useMemo(
     () =>
-      APARTMENTS.filter(
+      apartments.filter(
         (a) =>
           (filters.bedrooms === null || a.bedrooms === filters.bedrooms) &&
           within(a.floor, filters.floor) &&
@@ -181,13 +187,19 @@ export function ApartmentCatalog() {
           within(a.pricePerM2, filters.pricePerM2) &&
           within(a.cost, filters.cost),
       ),
-    [filters],
+    [apartments, filters],
   );
 
   return (
     <section className={styles.catalog}>
       <aside className={styles.sidebar}>
-        <FilterPanel filters={filters} setFilters={setFilters} onReset={reset} />
+        <FilterPanel
+          filters={filters}
+          setFilters={setFilters}
+          ranges={ranges}
+          bedOptions={bedOptions}
+          onReset={reset}
+        />
       </aside>
 
       <div className={styles.list}>
@@ -201,7 +213,12 @@ export function ApartmentCatalog() {
         </div>
         <div className={styles.tbody}>
           {rows.map((a) => (
-            <ApartmentRow key={a.id} a={a} fav={favorites.has(a.id)} onFav={toggleFav} />
+            <ApartmentRow
+              key={a.id}
+              a={a}
+              fav={hydrated && favIds.includes(a.id)}
+              onFav={toggleFav}
+            />
           ))}
           {rows.length === 0 && (
             <p className={styles.empty}>Нет квартир по заданным параметрам</p>
@@ -236,6 +253,8 @@ export function ApartmentCatalog() {
           <FilterPanel
             filters={filters}
             setFilters={setFilters}
+            ranges={ranges}
+            bedOptions={bedOptions}
             onReset={reset}
             onClose={() => setFiltersOpen(false)}
           />

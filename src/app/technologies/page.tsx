@@ -16,16 +16,16 @@ export const metadata: Metadata = {
 };
 
 const slides: Slide[] = [
-  { src: "/images/gallery-living-2.png", caption: "Инженерные системы скрыты в архитектуре" },
-  { src: "/images/lobby.png", caption: "Климат-контроль и тишина" },
-  { src: "/images/gallery-bedroom.png", caption: "Комфорт в каждой детали" },
+  { src: "/images/technologies/slider-spa.png", caption: "SPA, где забота о себе превращается в ритуал" },
+  { src: "/images/technologies/photo-right.png", caption: "Паркинг" },
+  { src: "/images/technologies/photo-left.png", caption: "Инженерия дома" },
 ];
 
 export default function TechnologiesPage() {
   return (
     <>
       <PageHero
-        image="/images/lobby.png"
+        image="/images/technologies/hero.png"
         imageAlt="Передовые технологии клубного дома k 7/11"
         breadcrumb={[
           { label: "…", href: "/", ariaLabel: "Главная" },
@@ -69,7 +69,8 @@ export default function TechnologiesPage() {
       <ResidenceStats
         items={[
           {
-            src: "/images/gallery-living-1.png",
+            src: "/images/technologies/parking.png",
+            objectPosition: "0% 50%",
             alt: "Паркинг с зарядками для электрокаров",
             place: "left",
             number: "5",
@@ -82,14 +83,16 @@ export default function TechnologiesPage() {
             ),
           },
           {
-            src: "/images/gallery-living-2.png",
+            src: "/images/technologies/parking.png",
+            objectPosition: "50% 50%",
             alt: "Подземный паркинг на 55 машиномест",
             place: "right",
             number: "55",
             caption: "машиномест",
           },
           {
-            src: "/images/gallery-bedroom.png",
+            src: "/images/technologies/parking.png",
+            objectPosition: "100% 50%",
             alt: "Двухуровневый паркинг",
             place: "center",
             number: "2",
@@ -102,8 +105,8 @@ export default function TechnologiesPage() {
 
       <PhotoCards
         items={[
-          { src: "/images/lobby.png", alt: "Инженерия дома", position: "top", lines: [] },
-          { src: "/images/gallery-living-1.png", alt: "Комфорт резиденций", position: "bottom", lines: [] },
+          { src: "/images/technologies/photo-left.png", alt: "Инженерия дома", position: "top", lines: [] },
+          { src: "/images/technologies/photo-right.png", alt: "Комфорт резиденций", position: "bottom", lines: [] },
         ]}
       />
 

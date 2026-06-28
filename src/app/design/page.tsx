@@ -17,16 +17,16 @@ export const metadata: Metadata = {
 };
 
 const slides: Slide[] = [
-  { src: "/images/gallery-living-1.png", caption: "Лобби в тёплых тонах" },
-  { src: "/images/gallery-living-2.png", caption: "Камерная зона отдыха" },
-  { src: "/images/lobby.png", caption: "Интерьерный манифест" },
+  { src: "/images/design/pair-soft-zone.png", caption: "SPA, где забота о себе превращается в ритуал" },
+  { src: "/images/design/slider-lobby.png", caption: "Лобби" },
+  { src: "/images/design/pair-lobby.png", caption: "Кухня-гостиная" },
 ];
 
 export default function DesignPage() {
   return (
     <>
       <PageHero
-        image="/images/lobby.png"
+        image="/images/design/hero.png"
         imageAlt="Дизайнерское лобби клубного дома k 7/11"
         breadcrumb={[
           { label: "…", href: "/", ariaLabel: "Главная" },
@@ -68,13 +68,13 @@ export default function DesignPage() {
       <PhotoPair
         items={[
           {
-            src: "/images/lobby.png",
+            src: "/images/design/pair-lobby.png",
             alt: "Лобби клубного дома",
             position: "top",
             caption: "Лобби",
           },
           {
-            src: "/images/gallery-living-1.png",
+            src: "/images/design/pair-soft-zone.png",
             alt: "Мягкая зона лобби",
             position: "bottom",
             caption: "Мягкая зона",
@@ -83,7 +83,7 @@ export default function DesignPage() {
       />
 
       <SpaceSplit
-        image="/images/garden.png"
+        image="/images/design/garden.png"
         imageAlt="Концепция благоустройства от L.BURO"
         headingLines={["концепция", "благо­устройства", "от EDXXKAT"]}
         paragraphs={[

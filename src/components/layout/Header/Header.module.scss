@@ -120,6 +120,37 @@
   }
 }
 
+// Сердце-ссылка на /избранное со счётчиком в углу.
+.favLink {
+  position: relative;
+  text-decoration: none;
+}
+.favBadge {
+  position: absolute;
+  top: fluid(2);
+  right: fluid(2);
+  min-width: fluid(16);
+  height: fluid(16);
+  padding-inline: fluid(4);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background: var(--color-brown-dark);
+  color: var(--color-badge-light);
+  font-family: var(--font-body);
+  font-size: fluid(10);
+  line-height: 1;
+
+  @include mobile {
+    top: 0;
+    right: 0;
+    min-width: fluid(14);
+    height: fluid(14);
+    font-size: fluid(9);
+  }
+}
+
 // ----- Логотип по центру (абсолютно отцентрован) -----
 .logo {
   position: absolute;

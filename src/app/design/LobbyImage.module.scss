@@ -15,10 +15,13 @@
 .media {
   position: relative;
   width: 100%;
-  aspect-ratio: 1400 / 1233;
+  // Фото на всю ширину секции; высота держит макет (1233, заморожена выше 1440),
+  // поэтому не растёт вместе с шириной на широких экранах.
+  height: fluid(1233);
   overflow: hidden;
 
   @include mobile {
+    height: auto;
     aspect-ratio: 344 / 580;
   }
 }
@@ -35,11 +38,14 @@
   pointer-events: none;
 }
 
+// Фото на всю ширину, но заголовок привязан к центрированной макетной области
+// 1400: левый край рамки на 178px от её левого края = центр − 522, ширина 1045.
+// Так лесенка держит макетную раскладку и не «разъезжается» на широких экранах.
 .headingWrap {
   position: absolute;
-  left: 12.7%; // 178/1400
+  left: calc(50% - #{fluid(522)}); // 700 (центр 1400) − 178
   bottom: 3.2%;
-  width: 74.6%; // 1045/1400
+  width: fluid(1045);
   z-index: 1;
 
   @include mobile {
@@ -80,6 +86,11 @@
   text-align: right;
   font-size: var(--fs-h1); // 120 / 44
   line-height: var(--lh-h1);
+
+  // шрифт Ricordi шире макетного — на узком фото «интерьерный» обрезался справа
+  @include mobile {
+    font-size: fluid(40);
+  }
 }
 .l3 {
   width: 100%;

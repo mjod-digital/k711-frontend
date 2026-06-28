@@ -12,7 +12,9 @@
 .banner {
   position: relative;
   display: block;
-  aspect-ratio: 1400 / 400;
+  width: 100%;
+  // Высота держит макет (400, заморожена выше 1440), ширина тянется на всю секцию.
+  height: fluid(400);
   overflow: hidden;
 
   // overflow:hidden + main{overflow-x:clip} обрежет тонкий контур —
@@ -23,6 +25,7 @@
   }
 
   @include mobile {
+    height: auto;
     aspect-ratio: 344 / 350;
   }
 }
