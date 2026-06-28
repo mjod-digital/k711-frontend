@@ -89,18 +89,21 @@ export function ApartmentCard({ apt }: { apt: ApartmentDetail }) {
           <Compass />
         </div>
 
-        {/* Планировка с подписями улиц/двора. */}
+        {/* Планировка с подписями улиц/двора. Вертикальные подписи лежат внутри
+            .planFrame (съёживается под картинку) → «обнимают» план на любой ширине. */}
         <div className={styles.plan}>
           <span className={`${styles.street} ${styles.streetTop}`}>ул. Климашкина</span>
-          <span className={`${styles.street} ${styles.streetLeft}`}>ул. Пресненский Вал</span>
-          <Image
-            className={styles.planImg}
-            src={apt.plan}
-            alt={`Планировка квартиры №${apt.number}`}
-            width={299}
-            height={528}
-          />
-          <span className={`${styles.street} ${styles.streetRight}`}>ул. Большая Грузинская</span>
+          <div className={styles.planFrame}>
+            <span className={`${styles.street} ${styles.streetLeft}`}>ул. Пресненский Вал</span>
+            <Image
+              className={styles.planImg}
+              src={apt.plan}
+              alt={`Планировка квартиры №${apt.number}`}
+              width={299}
+              height={528}
+            />
+            <span className={`${styles.street} ${styles.streetRight}`}>ул. Большая Грузинская</span>
+          </div>
           <span className={`${styles.street} ${styles.streetBottom}`}>Внутренний двор</span>
         </div>
 
