@@ -1,8 +1,21 @@
+import Link from "next/link";
 import { siteConfig } from "@/config/site";
 import styles from "./Footer.module.scss";
 
-const navCol1 = ["О проекте", "Окружение", "Архитектура", "Резиденции", "Дизайн и искусство"];
-const navCol2 = ["Благоустройство", "Аменитис", "Передовые технологии", "Выборщик квартир", "Контакты"];
+const navCol1 = [
+  { label: "О проекте", href: "/" },
+  { label: "Окружение", href: "/location" },
+  { label: "Архитектура", href: "/architecture" },
+  { label: "Резиденции", href: "/residences" },
+  { label: "Дизайн и искусство", href: "/design" },
+];
+const navCol2 = [
+  { label: "Благоустройство", href: "/improvement" },
+  { label: "Аменитис", href: "#" },
+  { label: "Передовые технологии", href: "/technologies" },
+  { label: "Выборщик квартир", href: "/apartments" },
+  { label: "Контакты", href: "#" },
+];
 
 export function Footer() {
   return (
@@ -13,20 +26,20 @@ export function Footer() {
 
         <nav className={styles.nav} aria-label="Подвал">
           <ul className={styles.col}>
-            {navCol1.map((label) => (
+            {navCol1.map(({ label, href }) => (
               <li key={label}>
-                <a href="#" className={styles.link}>
+                <Link href={href} className={styles.link}>
                   {label}
-                </a>
+                </Link>
               </li>
             ))}
           </ul>
           <ul className={styles.col}>
-            {navCol2.map((label) => (
+            {navCol2.map(({ label, href }) => (
               <li key={label}>
-                <a href="#" className={styles.link}>
+                <Link href={href} className={styles.link}>
                   {label}
-                </a>
+                </Link>
               </li>
             ))}
           </ul>
