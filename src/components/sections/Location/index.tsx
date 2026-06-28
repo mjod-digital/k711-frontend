@@ -56,7 +56,7 @@ const inCategory = (p: Place, active: "все" | Category) =>
 const clamp = (v: number, min: number, max: number) =>
   Math.min(max, Math.max(min, v));
 
-export function Location() {
+export function Location({ className }: { className?: string }) {
   const [active, setActive] = useState<"все" | Category>("все");
   const [openId, setOpenId] = useState<string | null>(null);
   const [dropped, setDropped] = useState(false);
@@ -193,7 +193,7 @@ export function Location() {
   };
 
   return (
-    <section className={styles.location}>
+    <section className={cn(styles.location, className)}>
       <div className={cn(styles.map, dropped && styles.dropped)} ref={mapRef}>
         {/* Перетаскиваемый слой карты: фото + пины. Может быть шире контейнера. */}
         <div

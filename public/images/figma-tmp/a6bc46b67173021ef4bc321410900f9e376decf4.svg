@@ -1,0 +1,25 @@
+<svg preserveAspectRatio="none" width="100%" height="100%" overflow="visible" style="display: block;" viewBox="0 0 96 96" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="compass">
+<circle id="Ellipse 7003" cx="48" cy="48" r="30" fill="var(--fill-0, #D5D3CC)"/>
+<path id="Ellipse 7004" d="M78 28.0932C81.7911 33.7951 84 40.6396 84 48C84 67.8823 67.8823 84 48 84C34.8824 84 23.4034 76.9841 17.1108 66.5" stroke="var(--stroke-0, #753B29)" stroke-width="0.5"/>
+<path id="Polygon 1" d="M39.1903 11.9266L54.2477 43.2136L41.7937 46.5507L39.1903 11.9266Z" fill="var(--fill-0, #753B29)"/>
+<path id="Polygon 2" d="M13.952 60.6789L20.215 65.7728L14.4735 68.735L13.952 60.6789Z" fill="var(--fill-0, #753B29)"/>
+<g id="Frame 2087326546" clip-path="url(#clip0_2010_13032)">
+<circle id="Ellipse 1" cx="62.0006" cy="81.0006" r="3.60901" fill="var(--fill-0, #F4F2EA)" stroke="var(--stroke-0, #753B29)" stroke-width="0.625"/>
+<path id="Vector 52" d="M62 85.5068C62 89.368 62 90.7757 62 90.997" stroke="var(--stroke-0, #753B29)" stroke-width="0.625"/>
+<path id="Vector 54" d="M66.5068 81C70.368 81 71.7757 81 71.997 81" stroke="var(--stroke-0, #753B29)" stroke-width="0.625"/>
+<path id="Vector 53" d="M62 71C62 74.8612 62 76.2689 62 76.4901" stroke="var(--stroke-0, #753B29)" stroke-width="0.625"/>
+<path id="Vector 55" d="M52 81C55.8612 81 57.2689 81 57.4901 81" stroke="var(--stroke-0, #753B29)" stroke-width="0.625"/>
+<path id="Vector 56" d="M65.2031 77.8042C67.9264 75.0809 68.9193 74.088 69.0753 73.932" stroke="var(--stroke-0, #753B29)" stroke-width="0.625"/>
+<path id="Vector 57" d="M54.9297 88.0703C57.653 85.347 58.6459 84.3541 58.8019 84.1981" stroke="var(--stroke-0, #753B29)" stroke-width="0.625"/>
+<path id="Vector 58" d="M58.8066 77.8042C56.0833 75.0809 55.0905 74.088 54.9344 73.932" stroke="var(--stroke-0, #753B29)" stroke-width="0.625"/>
+<path id="Vector 59" d="M69.0801 88.0703C66.3568 85.347 65.3639 84.3541 65.2079 84.1981" stroke="var(--stroke-0, #753B29)" stroke-width="0.625"/>
+</g>
+<circle id="Ellipse 7005" cx="79" cy="29" r="2" fill="var(--fill-0, #753B29)"/>
+</g>
+<defs>
+<clipPath id="clip0_2010_13032">
+<rect width="20" height="20" fill="white" transform="translate(52 71)"/>
+</clipPath>
+</defs>
+</svg>

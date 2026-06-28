@@ -9,6 +9,9 @@
 }
 
 .grid {
+  // 1440+: сетка замирает на макетной ширине (карточки держат размер 690) и
+  // центрируется; ниже 1440 fluid(1400) == ширине контента — без эффекта.
+  @include contentMax(1400);
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: fluid(20);
@@ -30,17 +33,26 @@
   }
 }
 
-// мобайл: первая карточка прижата влево, вторая — вправо (Figma 373-13372)
-.top {
+// мобайл: первая карточка — слева, вторая — справа (Figma 373-13372).
+// Сторона зависит от ПОРЯДКА карточки, а не от position (top/bottom управляет
+// только позицией подписи) — иначе «лесенка» ломается, если у первой карточки
+// position=bottom (как на /improvement).
+.card:nth-child(odd) {
   @include mobile {
-    margin-right: auto;
-    @include cornerFade(26, 78);
+    margin-right: auto; // нечётная (1-я, 3-я…) — слева
   }
 }
 
+.card:nth-child(even) {
+  @include mobile {
+    margin-left: auto; // чётная (2-я…) — справа
+  }
+}
+
+// угловой срез — у обеих карточек
+.top,
 .bottom {
   @include mobile {
-    margin-left: auto;
     @include cornerFade(26, 78);
   }
 }
@@ -48,6 +60,7 @@
 .image {
   object-fit: cover;
   object-position: center;
+  clip-path: polygon(0 0, 90% 0, 100% 25%, 100% 100%, 0 100%);
 }
 
 .label {

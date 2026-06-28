@@ -1,0 +1,72 @@
+@use "breakpoints" as *;
+
+// Page-local копия стилей TextDuo (variant=right): правая колонка — заголовок +
+// два текстовых столбца. Меняй под /improvement здесь — общий TextDuo не
+// затрагивается.
+.section {
+  margin-top: 0;
+  display: block;
+  padding: fluid(75) fluid(20) fluid(75) 0;
+
+  @include mobile {
+    margin-top: fluid(60);
+    display: flex;
+    padding: 0 fluid(8) 0 0;
+  }
+}
+
+.inner {
+  display: flex;
+  flex-direction: column;
+  gap: fluid(60);
+  width: 100%;
+  max-width: fluid(867);
+  margin-left: auto; // прижато вправо, слева — негативное пространство
+
+  @include mobile {
+    gap: fluid(20);
+    width: 74%;
+    max-width: none;
+    margin-left: auto;
+  }
+}
+
+.heading {
+  width: 100%;
+}
+
+.body {
+  display: flex;
+  flex-direction: row;
+  gap: fluid(20);
+  max-width: fluid(690);
+
+  @include mobile {
+    flex-direction: column;
+    gap: fluid(20);
+    max-width: none;
+  }
+}
+
+.paragraph {
+  flex: 1;
+  width: 100%;
+  max-width: fluid(512);
+  color: var(--color-fg);
+  font-family: var(--font-body);
+  font-size: var(--fs-body); // 14 → 20
+  line-height: normal;
+
+  @include mobile {
+    flex: 0 1 auto;
+  }
+
+  // вторая колонка фикс. ширины (как Statement)
+  &:last-child {
+    flex: 0 0 fluid(335);
+
+    @include mobile {
+      flex: 0 1 auto;
+    }
+  }
+}

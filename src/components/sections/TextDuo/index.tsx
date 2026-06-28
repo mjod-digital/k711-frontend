@@ -13,9 +13,11 @@ type TextDuoProps = {
   paragraphs: [ReactNode, ReactNode];
   /** right — правая колонка (как Statement); full — заголовок и текст на всю ширину. */
   variant?: "right" | "full";
+  /** Доп. класс на секцию (напр. переопределить --inner-mobile-width на странице). */
+  className?: string;
 };
 
-export function TextDuo({ lines, paragraphs, variant = "right" }: TextDuoProps) {
+export function TextDuo({ lines, paragraphs, variant = "right", className }: TextDuoProps) {
   const innerRef = useRef<HTMLDivElement>(null);
   const [revealed, setRevealed] = useState(false);
 
@@ -56,7 +58,7 @@ export function TextDuo({ lines, paragraphs, variant = "right" }: TextDuoProps) 
   const headingDelay = (lines.length - 1) * 220 + 780;
 
   return (
-    <section className={cn(styles.section, variant === "full" ? styles.full : styles.right)}>
+    <section className={cn(styles.section, variant === "full" ? styles.full : styles.right, className)}>
       <div className={styles.inner} ref={innerRef}>
         <Reveal variant="lines" active={revealed} className={styles.headingWrap}>
           <CascadeHeading as="h2" lines={lines} className={styles.heading} />

@@ -26,6 +26,10 @@
 }
 
 .pinned .step {
+  // ≥1440 — содержимое шага замирает на 1440 и центрируется в кадре (поля по
+  // бокам). inset:0 (left/right:0) + max-width + margin-inline:auto = центрирование
+  // абсолютного элемента.
+  @include contentMax;
   position: absolute;
   inset: 0;
   display: grid;

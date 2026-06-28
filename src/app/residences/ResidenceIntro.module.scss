@@ -1,0 +1,43 @@
+@use "breakpoints" as *;
+
+// Правый блок (как TextDuo variant=right): заголовок без крупного слова + один
+// абзац. Макет 373-9515: pl-553 pr-20 py-40 → inner 867 прижат вправо.
+.section {
+  padding: fluid(40) fluid(20);
+
+  @include mobile {
+    padding: fluid(40) fluid(8) 0 fluid(8);
+  }
+}
+
+.inner {
+  display: flex;
+  flex-direction: column;
+  gap: fluid(40);
+  width: 100%;
+  max-width: fluid(867);
+  margin-left: auto; // прижато вправо (x=553), слева — негативное пространство
+
+  @include mobile {
+    gap: fluid(28);
+    width: 74%;
+    max-width: none;
+  }
+}
+
+.heading {
+  width: 100%;
+}
+
+.paragraph {
+  width: fluid(690);
+  max-width: 100%;
+  color: var(--color-fg);
+  font-family: var(--font-body);
+  font-size: var(--fs-body); // 14 → 20
+  line-height: normal;
+
+  @include mobile {
+    width: 100%;
+  }
+}

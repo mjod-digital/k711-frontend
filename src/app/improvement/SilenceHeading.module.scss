@@ -1,0 +1,70 @@
+@use "breakpoints" as *;
+
+// Page-local секция «Пространство тишины» — собственная разметка заголовка
+// (вид как у CascadeHeading, но независимо от него). Меняй под /improvement здесь.
+.section {
+  display: flex;
+  justify-content: center;
+  padding: fluid(20) fluid(20);
+  margin-bottom: fluid(80);
+
+  @include mobile {
+    padding: fluid(0) fluid(8);
+    margin-bottom: fluid(60);
+
+    // На мобайле заголовок — на всю ширину (макет 397-10392: лесенка упирается
+    // в оба края). Внешняя обёртка Reveal иначе сжимается по контенту и
+    // центрируется через justify-content → строки не растягиваются на всю ширину.
+    > * {
+      width: 100%;
+    }
+  }
+}
+
+.wrap {
+  width: 100%;
+}
+
+// Каскадный заголовок (центрированный): дисплейный шрифт, uppercase, brown.
+.heading {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  font-family: var(--font-display);
+  color: var(--color-brown-medium);
+  text-transform: uppercase;
+}
+
+.line {
+  display: flex;
+  align-items: flex-start;
+  gap: fluid(12);
+  white-space: nowrap; // центрированный заголовок не переносим по словам
+
+  &:not(:first-child) {
+    margin-top: -0.06em; // лёгкое наложение строк, как в макете
+  }
+}
+
+.lg {
+  font-size: var(--fs-lead); // 28 → 68
+  line-height: 1.1;
+}
+
+.big {
+  font-size: var(--fs-h1); // 44 → 120
+  line-height: var(--lh-h1);
+  margin-left: fluid(120); // центрируем строку с большим словом (как в макете)
+
+  @include mobile {
+    margin-left: fluid(44); // макет 397-10392: средняя строка смещена слабее
+  }
+}
+
+.privatnosti {
+  margin-left: fluid(240); // центрируем строку с большим словом (как в макете)
+
+  @include mobile {
+    margin-left: auto; // макет 397-10392: «и приватности» прижата вправо
+  }
+}

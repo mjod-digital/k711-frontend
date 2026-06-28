@@ -53,7 +53,9 @@
   margin-left: auto;
 
   @include mobile {
-    width: 71%;
+    // ширину правой колонки на мобайле можно переопределить на конкретной
+    // странице через --inner-mobile-width (по умолчанию 71%).
+    width: var(--inner-mobile-width, 71%);
     max-width: none;
     margin-left: 0;
   }
