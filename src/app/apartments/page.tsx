@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import type { CSSProperties } from "react";
 import { PageHero } from "@/components/sections/PageHero";
 import { ApartmentCatalog } from "@/components/sections/ApartmentCatalog";
+import { fetchApartments, flatToApartment } from "@/lib/api";
 import styles from "./apartments.module.scss";
 
 export const metadata: Metadata = {
@@ -10,7 +11,12 @@ export const metadata: Metadata = {
     "Каталог резиденций клубного дома k 7/11 — подбор по числу спален, этажу, площади и стоимости.",
 };
 
-export default function ApartmentsPage() {
+export default async function ApartmentsPage() {
+  // Каталог из CRM; при сбое API показываем пустой список (не роняем страницу).
+  const apartments = await fetchApartments()
+    .then((flats) => flats.map(flatToApartment))
+    .catch(() => []);
+
   return (
     <>
       <PageHero
@@ -36,7 +42,7 @@ export default function ApartmentsPage() {
         </span>
       </PageHero>
 
-      <ApartmentCatalog />
+      <ApartmentCatalog apartments={apartments} />
     </>
   );
 }
