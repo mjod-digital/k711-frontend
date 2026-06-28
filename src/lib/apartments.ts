@@ -86,7 +86,7 @@ export function getApartmentDetail(id: string): ApartmentDetail | undefined {
     oldPrice: Math.round((totalPrice * 1.23) / 1000) * 1000,
     tags,
     plan: "/images/apartment/plan-sample.png",
-    keyPlan: "/images/apartment/keyplan-sample.png",
+    keyPlan: "/images/apartment/keyplan-floor.png",
   };
 }
 

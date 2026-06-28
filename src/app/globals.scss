@@ -14,7 +14,10 @@ body {
 }
 
 body {
-  min-height: 100%;
+  // 100dvh (а не 100%): при smooth-scroll Lenis высота body = auto, поэтому
+  // 100% «схлопывается» по контенту и футер не прижимается к низу на коротких
+  // страницах. dvh берёт высоту вьюпорта → main (flex:1) растягивается до футера.
+  min-height: 100dvh;
   display: flex;
   flex-direction: column;
   font-family: var(--font-sans);

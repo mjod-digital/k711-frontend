@@ -47,13 +47,12 @@ function HeartIcon() {
 const SPEC = (label: string, value: string) => ({ label, value });
 
 export function ApartmentCard({ apt }: { apt: ApartmentDetail }) {
+  // Состав характеристик — как в макете 481-12150 (6 строк).
   const specs = [
     SPEC("Общая площадь:", `${ru(apt.area)} м²`),
-    SPEC("Отделка:", apt.finish),
     SPEC("Стоимость за м²:", `${ru(apt.pricePerM2 * 1000)} ₽`),
     SPEC("Ввод в эксплуатацию:", apt.completion),
-    SPEC("Этаж:", `${apt.floor} из ${apt.totalFloors}`),
-    SPEC("Тип планировки:", apt.planType),
+    SPEC("Этаж:", `${apt.floor}`),
     SPEC("Высота потолков:", apt.ceiling),
     SPEC("Вид из окна:", apt.view),
   ];
