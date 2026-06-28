@@ -1,0 +1,68 @@
+@use "breakpoints" as *;
+
+.section {
+  padding-inline: fluid(20);
+
+  @include mobile {
+    padding-inline: fluid(8);
+  }
+}
+
+// Десктоп: две карточки 533 по центру с зазором 20 (макет: поля 177 по бокам).
+// Мобайл: одна колонка, карточки «лесенкой».
+.grid {
+  display: grid;
+  grid-template-columns: auto auto;
+  justify-content: center;
+  gap: fluid(20);
+
+  @include mobile {
+    grid-template-columns: 1fr;
+    gap: fluid(16);
+  }
+}
+
+.media {
+  position: relative;
+  display: block;
+  width: fluid(533);
+  aspect-ratio: 533 / 720;
+  overflow: hidden;
+
+  @include mobile {
+    width: fluid(300);
+    aspect-ratio: 300 / 340;
+  }
+}
+
+// мобайл: первая карточка прижата влево, вторая — вправо (Figma 397-11494)
+.top {
+  @include mobile {
+    margin-right: auto;
+  }
+}
+
+.bottom {
+  @include mobile {
+    margin-left: auto;
+  }
+}
+
+.image {
+  object-fit: cover;
+  object-position: center;
+}
+
+// Подпись «Лобби» / «Мягкая зона» (P2: CoFo Gothic 14, brown-medium).
+.caption {
+  margin-top: fluid(16);
+  color: var(--color-brown-medium);
+  font-family: var(--font-body);
+  font-size: fluid(14);
+  line-height: fluid(16);
+  letter-spacing: 0.01em;
+
+  @include mobile {
+    margin-top: fluid(8);
+  }
+}

@@ -7,7 +7,10 @@
 //   цена → теги.
 // ============================================================
 .wrap {
-  @include contentMax; // 1440+ — карточка замирает на 1440 и центрируется
+  // Выше 1440 замораживаем всю секцию на ширине 1440 и центрируем — иначе
+  // центральная колонка плана (1fr) растёт, улицы streetLeft/streetRight
+  // «разъезжаются» от плана, а схема выглядит мелкой в разросшейся колонке.
+  // @include contentMax(1440);
   padding: fluid(20) fluid(20) 0;
   // упирается в футер без зазора — гасим его margin-top
   margin-bottom: calc(-1 * #{fluid(80)});
@@ -270,8 +273,17 @@
   }
 }
 
+// Рамка вокруг картинки плана: съёживается ровно под её размер, поэтому
+// вертикальные подписи улиц можно привязать к её краям (right/left: 100%).
+.planFrame {
+  position: relative;
+  display: flex;
+  flex: 0 0 auto;
+}
+
 .planImg {
-  width: auto;
+  display: block;
+  width: 100%;
   height: fluid(470);
   max-width: 100%;
   object-fit: contain;
@@ -309,22 +321,29 @@
   left: 50%;
   transform: translateX(-50%);
 }
-.streetLeft {
-  left: fluid(120);
+// Вертикальные подписи привязаны к краям картинки плана (.planFrame), а не к
+// колонке, поэтому «обнимают» план на любой ширине. writing-mode даёт узкий
+// вертикальный блок (без широкого rotate-бокса), который ровно ложится у края.
+.streetLeft,
+.streetRight {
   top: 50%;
-  transform: translateY(-50%) rotate(-90deg);
+  writing-mode: vertical-rl;
+  transform: translateY(-50%) rotate(180deg);
+}
+.streetLeft {
+  right: 100%;
+  margin-right: fluid(10);
 
   @include mobile {
-    left: fluid(-65);
+    margin-right: fluid(2);
   }
 }
 .streetRight {
-  right: fluid(120);
-  top: 50%;
-  transform: translateY(-50%) rotate(-90deg);
+  left: 100%;
+  margin-left: fluid(10);
 
   @include mobile {
-    right: fluid(-65);
+    margin-left: fluid(2);
   }
 }
 

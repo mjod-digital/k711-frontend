@@ -49,6 +49,14 @@
 .hLine {
   display: block;
   white-space: nowrap;
+
+  // мобайл: узкая колонка 300px — длинные слова переносятся по мягкому
+  // переносу (U+00AD), напр. «благо­устройства» → «благо-» / «устройства».
+  @include mobile {
+    white-space: normal;
+    overflow-wrap: break-word;
+    hyphens: manual;
+  }
 }
 
 // Фото (513×620, x=21 y=177) + правая колонка.
