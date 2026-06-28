@@ -1,74 +1,80 @@
 @use "breakpoints" as *;
 
 // ============================================================
-//   SpaceSplit — «Пространство по вашим правилам» (Figma 397-11233).
-//   Десктоп: слева заголовок + вертикальное фото, справа — два абзаца.
-//   Мобайл: заголовок → фото (слева) → абзацы под ним.
+//   SpaceSplit «Пространство по вашим правилам» (Figma 373-9556).
+//   Крупный заголовок поверх верха фото (слева), справа — два абзаца
+//   и CTA-кнопка под вторым. Артборд 1440, поля 20.
 // ============================================================
 .section {
-  margin-top: fluid(128);
-  padding-inline: fluid(20);
+  position: relative;
+  margin-top: fluid(160);
+  padding: fluid(10) fluid(20) fluid(28);
 
   @include mobile {
-    margin-top: fluid(60);
-    padding-inline: fluid(8);
+    margin-block: fluid(60);
+    padding: fluid(20) fluid(8);
   }
 }
 
-.inner {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  column-gap: fluid(80);
-  align-items: end;
-
-  @include mobile {
-    display: block;
-  }
-}
-
-// ----- Левая колонка: заголовок над фото -----
-.left {
-  display: flex;
-  flex-direction: column;
-  gap: fluid(40);
-
-  @include mobile {
-    gap: fluid(20);
-  }
-}
-
+// Заголовок поверх фото (x=198, y=10), z выше картинки.
 .headingWrap {
-  width: 100%;
+  position: absolute;
+  top: fluid(10);
+  left: fluid(198);
+  z-index: 2;
+  width: fluid(1221);
+
+  @include mobile {
+    // макет 397-11233: заголовок по-прежнему поверх фото, смещён вправо
+    top: fluid(14);
+    left: fluid(52);
+    width: fluid(300);
+  }
 }
 
 .heading {
   display: flex;
   flex-direction: column;
-  color: var(--color-brown-medium);
   font-family: var(--font-display);
+  color: var(--color-brown-medium);
   text-transform: uppercase;
+  font-size: var(--fs-h1); // 120 / 44
+  line-height: 1;
+
+  @include mobile {
+    font-size: fluid(36);
+  }
 }
 
 .hLine {
-  font-size: var(--fs-h2); // 68 → 36
-  line-height: var(--lh-h2); // 88 → 40
-  letter-spacing: 0;
+  display: block;
+  white-space: nowrap;
+}
 
-  &:first-child {
-    align-self: flex-start;
+// Фото (513×620, x=21 y=177) + правая колонка.
+.content {
+  display: flex;
+  align-items: flex-start;
+  padding-top: fluid(167); // верх фото на y=177 (10 паддинг + 167)
+
+  @include mobile {
+    flex-direction: column;
+    padding-top: fluid(86); // верх фото на y=106 (20 паддинг + 86)
   }
 }
 
 .media {
   position: relative;
-  width: fluid(420);
-  max-width: 100%;
-  aspect-ratio: 212 / 280;
-  border-radius: var(--radius);
+  flex-shrink: 0;
+  width: fluid(513);
+  aspect-ratio: 513 / 620;
   overflow: hidden;
+  clip-path: polygon(0 0, 90% 0, 100% 25%, 100% 100%, 0 100%);
+
 
   @include mobile {
-    width: fluid(212);
+    width: fluid(212); // макет 397-11233: фото 212×280 слева
+    aspect-ratio: 212 / 280;
   }
 }
 
@@ -77,24 +83,61 @@
   object-position: center;
 }
 
-// ----- Правая колонка: два абзаца -----
+// Правая колонка: два абзаца в ряд (p1 + p2/CTA), сдвинута вниз и вправо.
 .body {
   display: flex;
-  flex-direction: column;
-  gap: fluid(20);
-  max-width: fluid(512);
-  margin-inline-start: auto;
+  gap: fluid(21);
+  margin-left: fluid(197); // отступ от фото (x=730 − 533)
+  margin-top: fluid(259); // абзацы на y=436 (верх контента 177 + 259)
 
   @include mobile {
-    margin-top: fluid(24);
-    max-width: none;
+    flex-direction: column;
+    gap: fluid(20);
+    margin: fluid(40) 0 0 fluid(44); // абзацы стопкой, x=52 (8+44), ниже фото
   }
 }
 
 .paragraph {
+  width: fluid(334);
   color: var(--color-fg);
   font-family: var(--font-body);
-  font-size: var(--fs-body); // 20 → 14
-  line-height: 1.4;
-  letter-spacing: 0.01em;
+  font-size: var(--fs-body); // 14 → 20
+  line-height: normal;
+
+  @include mobile {
+    width: 100%;
+  }
+}
+
+.col2 {
+  display: flex;
+  flex-direction: column;
+  gap: fluid(55); // абзац → CTA (y=586 → 641)
+  width: fluid(334);
+
+  @include mobile {
+    width: 100%;
+    gap: fluid(24);
+  }
+}
+
+.col2 .paragraph {
+  width: 100%;
+}
+
+.cta {
+  @include ctaSecondary;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: fluid(202);
+  height: fluid(48);
+  font-family: var(--font-body);
+  font-size: fluid(14);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+
+  @include mobile {
+    display: none; // нет CTA в мобильном макете 397-11233
+  }
 }

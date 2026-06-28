@@ -19,13 +19,13 @@
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   align-items: start;
-  column-gap: fluid(20);
+  column-gap: fluid(16); // макет: 3×456 + 2×16 = 1400
 
   @include mobile {
     display: flex;
     flex-direction: column;
     column-gap: 0;
-    row-gap: fluid(16);
+    row-gap: fluid(8);
   }
 }
 
@@ -34,8 +34,7 @@
   position: relative;
   margin: 0;
   width: 100%;
-  aspect-ratio: 440 / 540;
-  border-radius: var(--radius);
+  aspect-ratio: 456 / 768; // макет 373-9535: три одинаковых фото в ряд
   overflow: hidden;
   isolation: isolate;
 
@@ -45,31 +44,23 @@
   }
 }
 
-// Десктоп «лесенка» по вертикали: центральная ниже, правая — между ними.
+// Десктоп — ряд одинаковых фото (выровнены по верху). Мобайл — «лесенка»
+// слева/справа/слева (макет 397-11242).
 .left {
   @include mobile {
     align-self: flex-start;
-    margin-left: fluid(8);
   }
 }
 
 .center {
-  margin-top: fluid(120);
-
   @include mobile {
-    margin-top: 0;
-    align-self: flex-end;
-    margin-right: fluid(8);
+    align-self: flex-start;
   }
 }
 
 .right {
-  margin-top: fluid(56);
-
   @include mobile {
-    margin-top: 0;
-    align-self: flex-start;
-    margin-left: fluid(52);
+    align-self: flex-end;
   }
 }
 
@@ -94,8 +85,8 @@
 // ----- Подпись (число + строки) -----
 .label {
   position: absolute;
-  left: fluid(28);
-  bottom: fluid(24);
+  left: fluid(32);
+  bottom: fluid(37);
   z-index: 2;
   display: flex;
   flex-direction: column;
@@ -110,20 +101,46 @@
   }
 }
 
+// строка «число + мелкий текст» по общей базовой линии
 .value {
-  display: block;
-  font-size: fluid(80); // десктоп — крупно, но влезает в карточку
+  display: inline-flex;
+  align-items: baseline;
+  gap: fluid(10);
+  white-space: nowrap;
+
+  @include mobile {
+    flex-wrap: wrap; // суффикс с .qualBelow переносится под число
+    row-gap: 0;
+  }
+}
+
+.num {
+  font-size: var(--fs-h2); // 68 → крупная цифра (макет H2)
   line-height: 1;
   letter-spacing: -0.02em;
-  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
 
   @include mobile {
     font-size: var(--fs-h1); // 44
   }
+}
+
+// мелкий текст у числа (до / м² / квартиры) — как обычная подпись
+.qual {
+  font-size: var(--fs-h3); // 36 → 28
+  line-height: 1;
+  letter-spacing: -0.02em;
 
   sup {
-    font-size: 0.45em;
+    font-size: 0.6em;
     vertical-align: super;
+  }
+}
+
+// суффикс-слово («квартиры») переносится под число только на мобайле
+.qualBelow {
+  @include mobile {
+    flex-basis: 100%;
   }
 }
 

@@ -11,23 +11,25 @@
   white-space: nowrap;
 }
 
-// «клубного» — крупное слово (H1-шкала)
+// «клубного» — крупное слово (H1: 120 / 44)
 .klubnogo {
-  font-size: fluid(110);
+  font-size: var(--fs-h1);
 }
 
-// ----- Десктоп (фото 1400×720): композиция по центру-низу -----
+// ----- Десктоп (фото 1400×720): доли от фото = макет 373-9510 -----
+// редкость x=325, клубного x=403, формата x=764 (артборд) → минус паддинг 20,
+// делим на 1400. top: y−61, делим на 720.
 .redkost {
-  left: 33%;
-  top: 56%;
+  left: 21.8%;
+  top: 55.6%;
 }
 .klubnogo {
-  left: 38.5%;
-  top: 64%;
+  left: 27.4%;
+  top: 65.7%;
 }
 .formata {
-  left: 50%;
-  top: 78%;
+  left: 53.1%;
+  top: 80.7%;
 }
 
 @include mobile {
@@ -35,59 +37,38 @@
     font-size: fluid(44);
   }
 
+  // макет 397-11209 (фото 344×580, поля 8): доли от фото
   .redkost {
-    left: 9.6%;
+    left: 7.3%; // (33−8)/344
     top: 74.3%;
+    font-size: fluid(28);
   }
   .klubnogo {
-    left: 20.3%;
-    top: 80.2%;
+    left: 18%; // (70−8)/344
+    top: 79.2%;
   }
   .formata {
-    left: 53.8%;
+    left: 51.5%; // (185−8)/344
     top: 86.6%;
+    font-size: fluid(28);
   }
 }
 
 // ============================================================
-//   Заголовок «квартиры / с вашим / сценарием / жизни» (Figma 397-11375)
-//   поверх вертикального фото (ImageHeading shell). Лесенка вправо,
-//   «сценарием» крупное (H1) у левого края.
+//   StayHeading «дом, который не хочется покидать»: на десктопе — после
+//   слайдера, на мобайле — последним блоком (макет 397-11265). Рендерится
+//   в двух местах, лишний экземпляр скрыт через display.
 // ============================================================
-.scenarioHeading {
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-  color: var(--color-white);
-  font-family: var(--font-display);
-  text-transform: uppercase;
-}
-
-.sKvartiry {
-  align-self: flex-start;
-  font-size: var(--fs-h2); // 68 → 36
-  line-height: var(--lh-h2);
-}
-.sSvashim {
-  margin-left: fluid(180);
-  font-size: var(--fs-h2);
-  line-height: var(--lh-h2);
-
+.stayDesktop {
   @include mobile {
-    margin-left: fluid(74);
+    display: none;
   }
 }
-.sScenariem {
-  font-size: var(--fs-h1); // 120 → 44
-  line-height: 1;
-  letter-spacing: -0.02em;
-}
-.sZhizni {
-  margin-left: fluid(420);
-  font-size: var(--fs-h2);
-  line-height: var(--lh-h2);
+
+.stayMobile {
+  display: none;
 
   @include mobile {
-    margin-left: fluid(185);
+    display: block;
   }
 }
