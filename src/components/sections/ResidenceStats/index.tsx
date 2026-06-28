@@ -23,6 +23,8 @@ export type ResidenceStat = {
   caption: ReactNode;
   /** Позиция карточки в «лесенке» (мобайл): left | center | right. */
   place?: "left" | "center" | "right";
+  /** object-position фото — для панорамы-триптиха (одно фото, нарезанное по карточкам). */
+  objectPosition?: string;
 };
 
 type ResidenceStatsProps = {
@@ -80,6 +82,7 @@ export function ResidenceStats({ items }: ResidenceStatsProps) {
               fill
               sizes="(min-width: 768px) 30vw, 83vw"
               className={styles.image}
+              style={it.objectPosition ? { objectPosition: it.objectPosition } : undefined}
             />
             <span className={styles.scrim} aria-hidden="true" />
             <figcaption className={styles.label}>

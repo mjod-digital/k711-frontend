@@ -10,7 +10,7 @@ export function LobbyImage() {
     <section className={styles.section}>
       <div className={styles.media}>
         <Image
-          src="/images/lobby.png"
+          src="/images/design/lobby.png"
           alt="Лобби клубного дома k 7/11 — интерьерный манифест"
           fill
           sizes="100vw"
