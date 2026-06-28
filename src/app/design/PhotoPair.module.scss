@@ -1,9 +1,11 @@
 @use "breakpoints" as *;
 
 .section {
+  margin-top: fluid(110);
   padding-inline: fluid(20);
 
   @include mobile {
+    margin-top: fluid(76);
     padding-inline: fluid(8);
   }
 }

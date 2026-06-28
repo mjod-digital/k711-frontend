@@ -1,9 +1,6 @@
 @use "breakpoints" as *;
 
 .section {
-  // Выше 1440 замораживаем на 1440 и центрируем — иначе баннер (aspect 1400/400)
-  // тянется на всю ширину и растёт по высоте; должен держать макетные 1400×400.
-  @include contentMax(1440);
   padding-inline: fluid(20);
   margin-top: fluid(60);
 
@@ -15,7 +12,9 @@
 .banner {
   position: relative;
   display: block;
-  aspect-ratio: 1400 / 400;
+  width: 100%;
+  // Высота держит макет (400, заморожена выше 1440), ширина тянется на всю секцию.
+  height: fluid(400);
   overflow: hidden;
 
   // overflow:hidden + main{overflow-x:clip} обрежет тонкий контур —
@@ -26,6 +25,7 @@
   }
 
   @include mobile {
+    height: auto;
     aspect-ratio: 344 / 350;
   }
 }
