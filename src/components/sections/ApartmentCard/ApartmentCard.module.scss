@@ -287,6 +287,9 @@
   height: fluid(470);
   max-width: 100%;
   object-fit: contain;
+  // Планировки из CRM — тёмный чертёж на белом фоне. multiply «вмешивает»
+  // белый в кремовый фон страницы (он исчезает), а линии остаются тёмными.
+  mix-blend-mode: multiply;
 
   @include mobile {
     height: fluid(420);
