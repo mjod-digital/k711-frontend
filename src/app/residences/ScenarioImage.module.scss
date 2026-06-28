@@ -1,0 +1,121 @@
+@use "breakpoints" as *;
+
+// Фото 1400×1233 (поля 20) + заголовок в левом-нижнем углу. Макет 373-9518/9519:
+// рамка заголовка 1045 шириной, левый край на 178px от фото (12.7%), низ ~5%.
+.section {
+  margin-top: fluid(80);
+  padding-inline: fluid(20);
+
+  @include mobile {
+    margin-top: fluid(60);
+    padding-inline: fluid(8);
+  }
+}
+
+.media {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1400 / 1233;
+  overflow: hidden;
+
+  @include mobile {
+    aspect-ratio: 344 / 580; // макет 397-11376
+  }
+}
+
+.image {
+  object-fit: cover;
+  object-position: center;
+}
+
+.overlay {
+  position: absolute;
+  inset: 0;
+  background: rgb(0 0 0 / 20%);
+  pointer-events: none;
+}
+
+.headingWrap {
+  position: absolute;
+  left: 12.7%; // 178/1400
+  bottom: 4.9%; // рамка заканчивается ~60px от низа фото
+  width: 74.6%; // 1045/1400
+  z-index: 1;
+
+  @include mobile {
+    // макет 397-11376: слова позиционируются margin-left от левого края фото
+    left: 0;
+    bottom: 3.6%;
+    width: 100%;
+  }
+}
+
+// Правовыровненная лесенка: квартиры (слева) → с вашим → сценарием(крупно) → жизни,
+// правые края ступенями 513 / 888 / 1045 (доли от рамки заголовка).
+.heading {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  width: 100%;
+  color: var(--color-white);
+  font-family: var(--font-display);
+  text-transform: uppercase;
+}
+
+.line {
+  font-size: var(--fs-h2); // 68 / 36
+  line-height: var(--lh-h2);
+  white-space: nowrap;
+
+  &:not(:first-child) {
+    margin-top: fluid(-12); // наложение строк (макет mb -12)
+  }
+
+  @include mobile {
+    &:not(:nth-of-type(3)) {
+      font-size: fluid(28);
+    } 
+  }
+}
+.l1 {
+  width: 49.1%; // 513/1045
+  text-align: left;
+
+  @include mobile {
+    width: auto;
+    margin-left: fluid(22); // x=30 − поле 8
+  }
+}
+.l2 {
+  width: 49.1%;
+  text-align: right;
+
+  @include mobile {
+    width: auto;
+    margin-left: fluid(96); // x=104 − 8
+    text-align: left;
+  }
+}
+.l3 {
+  width: 85%; // 888/1045
+  text-align: right;
+  font-size: var(--fs-h1); // 120 / 44
+  line-height: var(--lh-h1);
+
+  @include mobile {
+    width: auto;
+    margin-left: fluid(22); // x=30 − 8
+    text-align: left;
+    font-size: fluid(44);
+  }
+}
+.l4 {
+  width: 100%;
+  text-align: right;
+
+  @include mobile {
+    width: auto;
+    margin-left: fluid(207); // x=215 − 8
+    text-align: left;
+  }
+}
