@@ -29,14 +29,17 @@
   .dlya {
     left: 2%;
     top: 74%;
+    font-size: fluid(27)
   }
   .utonchennogo {
     left: 2%;
-    top: 80.2%;
+    top: 79.2%;
+    font-size: fluid(43)
   }
   .obraza {
     left: 34.6%;
     top: 86.6%;
+    font-size: fluid(27)
   }
 }
 
@@ -50,4 +53,13 @@
 // SilenceHeading на /location: отступ сверху 60 (десктоп и мобайл).
 .silenceTop {
   margin-top: fluid(60);
+}
+
+// Location на /location: отступ снизу 100 (десктоп) / 60 (мобайл).
+.locationBottom {
+  margin-bottom: fluid(100);
+
+  @include mobile {
+    margin-bottom: fluid(60);
+  }
 }

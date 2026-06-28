@@ -67,7 +67,7 @@ export default function LocationPage() {
 
       <Slider slides={slides} mobileGallery />
 
-      <Location />
+      <Location className={styles.locationBottom} />
 
       <PhotoCards
         items={[
