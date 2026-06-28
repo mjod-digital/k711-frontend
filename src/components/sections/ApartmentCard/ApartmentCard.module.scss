@@ -10,7 +10,7 @@
   // Выше 1440 замораживаем всю секцию на ширине 1440 и центрируем — иначе
   // центральная колонка плана (1fr) растёт, улицы streetLeft/streetRight
   // «разъезжаются» от плана, а схема выглядит мелкой в разросшейся колонке.
-  @include contentMax(1440);
+  // @include contentMax(1440);
   padding: fluid(20) fluid(20) 0;
   // упирается в футер без зазора — гасим его margin-top
   margin-bottom: calc(-1 * #{fluid(80)});
@@ -283,7 +283,7 @@
 
 .planImg {
   display: block;
-  width: auto;
+  width: 100%;
   height: fluid(470);
   max-width: 100%;
   object-fit: contain;
