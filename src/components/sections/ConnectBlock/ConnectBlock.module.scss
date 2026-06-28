@@ -1,6 +1,9 @@
 @use "breakpoints" as *;
 
 .section {
+  // Выше 1440 замораживаем на 1440 и центрируем — иначе баннер (aspect 1400/400)
+  // тянется на всю ширину и растёт по высоте; должен держать макетные 1400×400.
+  @include contentMax(1440);
   padding-inline: fluid(20);
   margin-top: fluid(60);
 
