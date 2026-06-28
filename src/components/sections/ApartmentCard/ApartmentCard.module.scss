@@ -45,7 +45,9 @@
 .card {
   position: relative;
   display: grid;
-  grid-template-columns: fluid(333) minmax(0, 1fr) fluid(246);
+  // боковые столбцы равной ширины → план (центр) центрирован под заголовком.
+  // Мини-план+компас прижаты вправо внутри своего столбца (246), пустота слева.
+  grid-template-columns: fluid(333) minmax(0, 1fr) fluid(333);
   grid-template-rows: auto minmax(fluid(600), 1fr);
   grid-template-areas:
     "title title  title"
@@ -61,6 +63,7 @@
 }
 
 .title {
+  -webkit-text-stroke-width: fluid(0.3);
   grid-area: title;
   text-align: center;
   color: var(--color-brown-dark-2);
@@ -92,7 +95,7 @@
 
 .specs {
   margin: 0;
-  border-block: 1px solid var(--color-badge-light-2);
+  border-block: fluid(1) solid #D5D3CC;
   padding-block: fluid(16);
   display: flex;
   flex-direction: column;
@@ -110,8 +113,9 @@
   gap: fluid(16);
   color: var(--color-brown-dark-2);
   font-family: var(--font-body);
-  font-size: fluid(16);
+  font-size: fluid(14);
   line-height: 1;
+  color: var(--color-brown-medium);
 
   dt {
     color: var(--color-brown-medium);
@@ -127,24 +131,29 @@
 }
 
 .price {
-  margin: fluid(24) 0 0;
+  margin: fluid(16) 0 0;
   display: flex;
   align-items: baseline;
   gap: fluid(16);
+  -webkit-text-stroke-width: fluid(0.3);
   color: var(--color-brown-dark-2);
   font-family: var(--font-display);
-  font-size: fluid(28);
+  font-size: fluid(24);
   line-height: 1;
+  justify-content: flex-end;
 
   @include mobile {
-    margin-top: fluid(16);
+    margin-top: fluid(35);
     font-size: fluid(24);
+    gap: fluid(10);
+    justify-content: flex-start;
+    flex-direction: column;
   }
 }
 
 .oldPrice {
   display: none; // в макете десктопа старой цены нет — только на мобайле
-  color: var(--color-brown-light);
+  color: #A08B85;
   font-family: var(--font-body);
   font-size: fluid(16);
   text-decoration: line-through;
@@ -166,7 +175,7 @@
 
   li {
     padding: fluid(8) fluid(14);
-    border: 1px solid var(--color-badge-light-2);
+    border: fluid(1) solid var(--color-brown-medium);
     border-radius: fluid(2);
     color: var(--color-brown-medium);
     font-family: var(--font-body);
@@ -176,6 +185,7 @@
 
   @include mobile {
     display: flex;
+    margin-top: fluid(20);
   }
 }
 
@@ -188,8 +198,8 @@
 
   @include mobile {
     order: -1; // на мобайле кнопки сразу под планировкой (до характеристик)
-    margin-top: fluid(20);
-    margin-bottom: fluid(8);
+    margin-top: fluid(40);
+    margin-bottom: fluid(35);
   }
 }
 
@@ -221,7 +231,7 @@
 }
 
 .book {
-  flex: 1 1 auto;
+  margin-left: auto;
   height: fluid(48);
   padding-inline: fluid(24);
   background: var(--color-brown-dark);
@@ -229,14 +239,18 @@
   font-family: var(--font-display);
   font-size: fluid(16);
   line-height: 1;
+  -webkit-text-stroke-width: fluid(0.3);
   letter-spacing: 0.05em;
-  text-transform: uppercase;
   border-radius: fluid(2);
   cursor: pointer;
   transition: background-color 0.3s ease;
 
   &:hover {
     background: var(--color-brown-dark-2);
+  }
+
+  @include mobile {
+    padding-inline: fluid(42);
   }
 }
 
@@ -252,7 +266,7 @@
 
   @include mobile {
     order: 2;
-    padding-block: fluid(36) fluid(28);
+    padding-block: fluid(50) fluid(28);
   }
 }
 
@@ -274,6 +288,7 @@
   font-size: fluid(16);
   letter-spacing: 0.05em;
   white-space: nowrap;
+  -webkit-text-stroke-width: fluid(0.3);
 
   @include mobile {
     font-size: fluid(11);
@@ -284,6 +299,10 @@
   top: fluid(8);
   left: 50%;
   transform: translateX(-50%);
+
+  @include mobile {
+    top: fluid(30);
+  }
 }
 .streetBottom {
   bottom: fluid(8);
@@ -291,21 +310,21 @@
   transform: translateX(-50%);
 }
 .streetLeft {
-  left: fluid(20);
+  left: fluid(120);
   top: 50%;
   transform: translateY(-50%) rotate(-90deg);
 
   @include mobile {
-    left: fluid(2);
+    left: fluid(-65);
   }
 }
 .streetRight {
-  right: fluid(20);
+  right: fluid(120);
   top: 50%;
   transform: translateY(-50%) rotate(-90deg);
 
   @include mobile {
-    right: fluid(2);
+    right: fluid(-65);
   }
 }
 
@@ -316,13 +335,13 @@
   display: flex;
   flex-direction: column;
   align-items: flex-end;
-  justify-content: space-between;
+  justify-content: flex-start;
   padding-block: fluid(40);
 
   @include mobile {
     // оверлей в правом верхнем углу плана
     position: absolute;
-    top: fluid(46);
+    top: fluid(40);
     right: fluid(4);
     z-index: 1;
     padding: 0;
@@ -332,19 +351,23 @@
 
 .keyplan {
   width: fluid(246);
-  height: auto;
+  height: fluid(163); // макет 481-12212: план этажа 246×163
+  object-fit: cover;
+  object-position: bottom;
 
   @include mobile {
-    width: fluid(96);
+    display: none;
   }
 }
 
 .compass {
   width: fluid(96);
   height: fluid(96);
+  margin-top: fluid(193); // макет 481-12214: компас на ~70% высоты плана (y=486), не у дна
 
   @include mobile {
     width: fluid(54);
     height: fluid(54);
+    margin-top: 0;
   }
 }
