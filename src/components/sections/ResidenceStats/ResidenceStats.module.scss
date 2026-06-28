@@ -1,0 +1,152 @@
+@use "breakpoints" as *;
+
+// ============================================================
+//   ResidenceStats — три фото-карточки со статистикой (Figma 397-11242).
+//   Десктоп: ряд из трёх карточек «лесенкой» по вертикали.
+//   Мобайл: друг под другом со сдвигом (левая / правая / левая).
+// ============================================================
+.section {
+  margin-top: fluid(128);
+  padding-inline: fluid(20);
+
+  @include mobile {
+    margin-top: fluid(60);
+    padding-inline: fluid(8);
+  }
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  align-items: start;
+  column-gap: fluid(16); // макет: 3×456 + 2×16 = 1400
+
+  @include mobile {
+    display: flex;
+    flex-direction: column;
+    column-gap: 0;
+    row-gap: fluid(8);
+  }
+}
+
+// ----- Карточка -----
+.card {
+  position: relative;
+  margin: 0;
+  width: 100%;
+  aspect-ratio: 456 / 768; // макет 373-9535: три одинаковых фото в ряд
+  overflow: hidden;
+  isolation: isolate;
+
+  @include mobile {
+    width: fluid(300);
+    aspect-ratio: 300 / 340;
+  }
+}
+
+// Десктоп — ряд одинаковых фото (выровнены по верху). Мобайл — «лесенка»
+// слева/справа/слева (макет 397-11242).
+.left {
+  @include mobile {
+    align-self: flex-start;
+  }
+}
+
+.center {
+  @include mobile {
+    align-self: flex-start;
+  }
+}
+
+.right {
+  @include mobile {
+    align-self: flex-end;
+  }
+}
+
+.image {
+  object-fit: cover;
+  object-position: center;
+}
+
+// затемнение снизу — подпись читается поверх фото
+.scrim {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: linear-gradient(
+    to top,
+    rgba(33, 3, 3, 0.7) 0%,
+    rgba(33, 3, 3, 0) 45%
+  );
+}
+
+// ----- Подпись (число + строки) -----
+.label {
+  position: absolute;
+  left: fluid(32);
+  bottom: fluid(37);
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  color: var(--color-white);
+  font-family: var(--font-display);
+  text-transform: uppercase;
+
+  @include mobile {
+    left: fluid(20);
+    bottom: fluid(20);
+  }
+}
+
+// строка «число + мелкий текст» по общей базовой линии
+.value {
+  display: inline-flex;
+  align-items: baseline;
+  gap: fluid(10);
+  white-space: nowrap;
+
+  @include mobile {
+    flex-wrap: wrap; // суффикс с .qualBelow переносится под число
+    row-gap: 0;
+  }
+}
+
+.num {
+  font-size: var(--fs-h2); // 68 → крупная цифра (макет H2)
+  line-height: 1;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+
+  @include mobile {
+    font-size: var(--fs-h1); // 44
+  }
+}
+
+// мелкий текст у числа (до / м² / квартиры) — как обычная подпись
+.qual {
+  font-size: var(--fs-h3); // 36 → 28
+  line-height: 1;
+  letter-spacing: -0.02em;
+
+  sup {
+    font-size: 0.6em;
+    vertical-align: super;
+  }
+}
+
+// суффикс-слово («квартиры») переносится под число только на мобайле
+.qualBelow {
+  @include mobile {
+    flex-basis: 100%;
+  }
+}
+
+.caption {
+  display: block;
+  font-size: var(--fs-h3); // 36 → 28
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+}
