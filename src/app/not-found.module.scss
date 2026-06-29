@@ -1,0 +1,224 @@
+@use "breakpoints" as *;
+
+// ============================================================
+//   404 / страница не найдена (Figma 540-21098 / 540-21356 / 541-21952).
+//   Кремовое поле: слева код 404 + подзаголовок + абзац + CTA,
+//   справа фото фасада. На мобайле — фото сверху, текст ниже с отступом.
+//   Хедер и футер — глобальные (layout.tsx).
+// ============================================================
+.notFound {
+  position: relative;
+  background: var(--color-badge-light);
+  padding-inline: fluid(20);
+  padding-bottom: fluid(40);
+
+  @include mobile {
+    padding-inline: fluid(8);
+    padding-bottom: fluid(60);
+  }
+}
+
+// ----- Хлебные крошки «… / 404» -----
+.breadcrumb {
+  padding: fluid(24) 0 0;
+  color: var(--color-brown-dark);
+  font-family: var(--font-body);
+  font-size: fluid(12);
+  line-height: calc(16 / 12);
+  letter-spacing: 0.01em;
+
+  @include mobile {
+    padding: fluid(6) 0;
+  }
+}
+
+.crumbs {
+  display: flex;
+  align-items: center;
+  gap: fluid(6);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.crumb {
+  display: inline-flex;
+  align-items: center;
+  gap: fluid(6);
+
+  a {
+    transition: color 0.45s ease;
+
+    &:hover {
+      color: var(--color-brown-medium);
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--color-brown-dark);
+      outline-offset: 2px;
+    }
+  }
+}
+
+.sep {
+  color: var(--color-brown-light);
+}
+
+// ----- Сцена: фото + текст -----
+.body {
+  position: relative;
+  min-height: fluid(819);
+  margin-top: fluid(21); // фото стартует на top 61 (24 padding + ~16 строка крошек + 21)
+
+  @include mobile {
+    display: flex;
+    flex-direction: column;
+    gap: fluid(60);
+    min-height: 0;
+    margin-top: 0;
+  }
+}
+
+// Фото фасада: десктоп — правая колонка, мобайл — сверху на всю ширину.
+// position остаётся «позиционированным» в обоих режимах — нужно для <Image fill>.
+.media {
+  position: absolute;
+  top: 0;
+  right: 0;
+  // Фото = правая половина: от центра (+10) до правого края (right 0 = 20px от края).
+  // Ширину НЕ фиксируем (left+right) → выше 1440 фото тянется (690 на 1440 → 930 на 1920).
+  left: calc(50% + #{fluid(10)});
+  height: fluid(819);
+  overflow: hidden;
+
+  @include mobile {
+    position: relative;
+    inset: auto; // сброс desktop-смещений left/right для нормального потока
+    width: 100%;
+    height: fluid(350);
+  }
+}
+
+.image {
+  object-fit: cover;
+  object-position: center;
+}
+
+// Текстовая колонка: десктоп — слева, по центру по вертикали; мобайл — в потоке.
+.content {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  display: flex;
+  flex-direction: column;
+  gap: fluid(60);
+  width: fluid(513);
+  transform: translateY(-50%);
+
+  @include mobile {
+    position: static;
+    gap: fluid(12);
+    width: fluid(256);
+    margin-left: fluid(88);
+    transform: none;
+  }
+}
+
+// ----- Заголовок: 404 + подзаголовок -----
+.heading {
+  display: flex;
+  flex-direction: column;
+  gap: fluid(4);
+  margin: 0;
+  color: var(--color-brown-medium);
+  font-family: var(--font-display);
+  text-transform: uppercase;
+
+  @include mobile {
+    gap: 0;
+  }
+}
+
+.code {
+  margin: 0;
+  font-size: var(--fs-h1);
+  line-height: var(--lh-h1);
+  letter-spacing: var(--ls-h1);
+}
+
+.subtitle {
+  margin: 0;
+  font-weight: 400;
+  font-size: var(--fs-h3);
+  line-height: normal; // leading-[normal] из макета — важно для 2 строк на мобайле
+  letter-spacing: var(--ls-h3);
+}
+
+// <br> в подзаголовке — только мобайл (десктоп в одну строку).
+.subtitleBreak {
+  display: none;
+
+  @include mobile {
+    display: inline;
+  }
+}
+
+// ----- Абзац + кнопка -----
+.actions {
+  display: flex;
+  flex-direction: column;
+  gap: fluid(40);
+}
+
+.lead {
+  margin: 0;
+  color: #2b140c; // тёмно-коричневый из макета (между brown-dark и brown-dark-2)
+  font-family: var(--font-body);
+  font-size: fluid(20);
+  line-height: calc(25 / 20); // 100px кадр / 4 строки @ 20px (leading-[normal] из макета)
+
+  @include mobile {
+    color: var(--color-black);
+    font-size: fluid(14);
+    line-height: calc(16 / 14);
+    letter-spacing: 0.01em;
+  }
+}
+
+// <br> после первого предложения — только десктоп (мобайл одним абзацем).
+.leadBreak {
+  display: inline;
+
+  @include mobile {
+    display: none;
+  }
+}
+
+// CTA «на главную» — контурная кнопка проекта (см. .cta в Header/Showcase).
+.button {
+  display: inline-flex;
+  align-self: flex-start;
+  align-items: center;
+  justify-content: center;
+  padding: fluid(13) fluid(20);
+  font-family: var(--font-display);
+  font-size: var(--fs-button);
+  -webkit-text-stroke-width: fluid(0.3);
+  line-height: var(--lh-button);
+  letter-spacing: var(--ls-button);
+  white-space: nowrap;
+  @include ctaSecondary;
+
+  @include mobile {
+    padding: fluid(13) fluid(20) fluid(12);
+  }
+}
+
+// «вернуться » — только мобайл (десктоп: «на главную»).
+.buttonReturn {
+  display: none;
+
+  @include mobile {
+    display: inline;
+  }
+}
