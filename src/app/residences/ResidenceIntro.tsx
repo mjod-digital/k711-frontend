@@ -20,11 +20,11 @@ export function ResidenceIntro() {
             ]}
           />
         </Reveal>
-        <p className={styles.paragraph}>
+        <Reveal as="p" variant="fade" className={styles.paragraph}>
           Всего 46 резиденций — ни одной лишней, ни одной случайной. На этаже —
           от двух до четырёх квартир, что создаёт исключительную приватность,
           редкую даже для элитного сегмента.
-        </p>
+        </Reveal>
       </div>
     </section>
   );

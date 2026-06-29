@@ -7,6 +7,10 @@
 //   Мобайл — портрет+заголовок в .stage, текст течёт ниже.
 // ============================================================
 .section {
+  // Выше 1440 замораживаем на 1440 и центрируем — иначе абсолютная раскладка (в %
+  // от артборда) растягивается, скаттер-заголовок «расползается», а блок уезжает
+  // влево. Как в Author (та же раскладка).
+  @include contentMax;
   position: relative;
   aspect-ratio: 1440 / 901;
 
@@ -130,6 +134,41 @@
   font-family: var(--font-body);
   font-size: var(--fs-body);
   line-height: 1.4;
+}
+
+// ----- Появление снизу-вверх (как абзацы Terraces): para → CTA со стаггером -----
+// Триггер — вход .para в вид (data-reveal на .section). Без data-reveal (SSR /
+// no-JS) текст виден сразу.
+@media (prefers-reduced-motion: no-preference) {
+  .section[data-reveal] {
+    .para,
+    .cta {
+      transition:
+        opacity 1000ms ease-out var(--fd, 0ms),
+        transform 1000ms ease-out var(--fd, 0ms);
+    }
+    .para {
+      --fd: 0ms;
+    }
+    .cta {
+      --fd: 200ms; // CTA «за» абзацем
+    }
+  }
+  .section[data-reveal="hidden"] {
+    .para,
+    .cta {
+      opacity: 0;
+      transform: translate3d(0, #{fluid(64)}, 0);
+      will-change: opacity, transform;
+    }
+  }
+  .section[data-reveal="visible"] {
+    .para,
+    .cta {
+      opacity: 1;
+      transform: none;
+    }
+  }
 }
 
 .cta {

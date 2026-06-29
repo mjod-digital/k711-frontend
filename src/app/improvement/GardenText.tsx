@@ -19,7 +19,7 @@ export function GardenText() {
             ]}
           />
         </Reveal>
-        <div className={styles.body}>
+        <Reveal variant="fade" className={styles.body}>
           <p className={styles.paragraph}>
             Закрытый двор клубного дома «Климашкина&nbsp;7/11» — это камерное
             пространство, скрытое от города и полностью подчинённое идее
@@ -30,7 +30,7 @@ export function GardenText() {
             Внутренний двор спроектирован как цельная природная композиция, где
             каждый элемент работает на ощущение уединённого городского оазиса.
           </p>
-        </div>
+        </Reveal>
       </div>
     </section>
   );

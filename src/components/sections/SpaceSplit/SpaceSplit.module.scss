@@ -136,6 +136,47 @@
   width: 100%;
 }
 
+// ----- Появление снизу-вверх (как в Author): p0 → p1 (.col2) → CTA, со стаггером -----
+// Триггер — вход первого абзаца в вид (data-reveal на .section). Без data-reveal
+// (SSR / no-JS) — текст виден сразу.
+@media (prefers-reduced-motion: no-preference) {
+  .section[data-reveal] {
+    .body > .paragraph,
+    .col2 .paragraph,
+    .cta {
+      transition:
+        opacity 1000ms ease-out var(--fd, 0ms),
+        transform 1000ms ease-out var(--fd, 0ms);
+    }
+    .body > .paragraph {
+      --fd: 0ms;
+    }
+    .col2 .paragraph {
+      --fd: 150ms;
+    }
+    .cta {
+      --fd: 320ms; // CTA «за ними»
+    }
+  }
+  .section[data-reveal="hidden"] {
+    .body > .paragraph,
+    .col2 .paragraph,
+    .cta {
+      opacity: 0;
+      transform: translate3d(0, #{fluid(64)}, 0);
+      will-change: opacity, transform;
+    }
+  }
+  .section[data-reveal="visible"] {
+    .body > .paragraph,
+    .col2 .paragraph,
+    .cta {
+      opacity: 1;
+      transform: none;
+    }
+  }
+}
+
 .cta {
   @include ctaSecondary;
   display: inline-flex;

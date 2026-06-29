@@ -402,9 +402,14 @@
   width: fluid(335);
   height: fluid(335);
   padding: fluid(40) fluid(24) fluid(24);
-  background: var(--color-white);
-  border-radius: var(--radius);
-  box-shadow: 0 fluid(8) fluid(32) rgb(38 17 19 / 8%);
+  // Рамку и тень даёт НЕ border/box-shadow — их срезает clip-path по скошенному
+  // углу. Вместо этого: фон = цвет рамки, поверх — внутренняя заливка ::before
+  // (на 1px меньше, тот же скос) → между ними ровная полоса = «рамка», в т.ч. на
+  // скосе. Тень — filter: drop-shadow (повторяет форму клипа, в отличие от box-shadow).
+  clip-path: polygon(0 0, 90% 0, 100% 25%, 100% 100%, 0 100%);
+  background: var(--color-brown-medium); // видимая «рамка»
+  filter: drop-shadow(0 fluid(8) fluid(32) rgb(38 17 19 / 8%));
+  isolation: isolate; // свой контекст наложения для ::before (z-index:-1)
   animation: cardIn 0.4s ease both; // появление при клике на пин
 
   @include mobile {
@@ -414,6 +419,17 @@
     width: auto;
     height: auto;
   }
+}
+
+// Внутренняя заливка карточки: тот же скос, инсет на толщину рамки. Полоса фона
+// (.card) между внешним и внутренним клипом и читается как граница.
+.card::before {
+  content: "";
+  position: absolute;
+  inset: fluid(1); // толщина рамки
+  clip-path: polygon(0 0, 90% 0, 100% 25%, 100% 100%, 0 100%);
+  background: var(--color-white);
+  z-index: -1; // под контентом, но над фоном-«рамкой» (.card в своём контексте)
 }
 
 @keyframes cardIn {
@@ -505,6 +521,7 @@
 .cardArrows {
   display: flex;
   gap: fluid(8);
+  margin-left: auto;
 }
 
 .cardArrow {

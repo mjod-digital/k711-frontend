@@ -1,7 +1,11 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
+import { useRef } from "react";
 import type { CSSProperties } from "react";
 import { Reveal } from "@/components/ui/Reveal";
+import { useIsomorphicLayoutEffect } from "@/lib/useIsomorphicLayoutEffect";
 import styles from "./DesignBureau.module.scss";
 
 type DesignBureauProps = {
@@ -22,8 +26,44 @@ export function DesignBureau({
   ctaHref = "/residences",
   ctaLabel = "О дизайн-бюро",
 }: DesignBureauProps) {
+  const sectionRef = useRef<HTMLElement>(null);
+  const triggerRef = useRef<HTMLParagraphElement>(null);
+
+  // Абзац и CTA «выезжают» снизу при входе в вид (как абзацы Terraces / Author):
+  // para → CTA со стаггером. data-reveal ставим императивно на секцию — без
+  // мигания в SSR. Наблюдаем за абзацем (его реальная позиция = область текста).
+  useIsomorphicLayoutEffect(() => {
+    const section = sectionRef.current;
+    const trigger = triggerRef.current;
+    if (!section || !trigger) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    section.dataset.reveal = "hidden";
+    const mqMobile = window.matchMedia("(max-width: 767.98px)");
+    let io: IntersectionObserver | null = null;
+    const arm = () => {
+      io?.disconnect();
+      const margin = mqMobile.matches ? "0px 0px -10% 0px" : "0px 0px -20% 0px";
+      io = new IntersectionObserver(
+        ([entry], obs) => {
+          if (entry.isIntersecting) {
+            section.dataset.reveal = "visible";
+            obs.disconnect();
+          }
+        },
+        { threshold: 0.2, rootMargin: margin },
+      );
+      io.observe(trigger);
+    };
+    arm();
+    mqMobile.addEventListener("change", arm);
+    return () => {
+      io?.disconnect();
+      mqMobile.removeEventListener("change", arm);
+    };
+  }, []);
+
   return (
-    <section className={styles.section}>
+    <section ref={sectionRef} className={styles.section}>
       <div className={styles.stage}>
         <div className={styles.photo}>
           <Image
@@ -52,7 +92,7 @@ export function DesignBureau({
       </div>
 
       <div className={styles.body}>
-        <p className={styles.para}>
+        <p ref={triggerRef} className={styles.para}>
           L.BURO рассматривают садовое искусство как способ организации жизни.
           Авторский метод студии — «Скандинавские сады» — соединяет нордическую
           сдержанность с петербургской традицией. Результат — лаконичные формы,

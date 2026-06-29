@@ -17,7 +17,7 @@
 /.next/
 /.next-verify/
 /out/
-
+/.claude
 # figma dev-mode temp asset exports
 /public/images/figma-tmp/
 

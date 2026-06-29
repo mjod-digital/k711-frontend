@@ -26,6 +26,7 @@ export type Flat = {
   viewFromWindowTypology: string | null;
   sectionNumber: string;
   layoutUrl: string; // планировка (внешний S3)
+  floorPlan: string; // мини-план этажа (внешний S3)
 };
 
 export async function fetchApartments(): Promise<Flat[]> {
@@ -76,6 +77,12 @@ export function flatToApartment(f: Flat): Apartment {
 const COMPLETION = "IV кв. 2027"; // ввода в эксплуатацию нет в API
 const VIEW_FALLBACK = "внутренний двор";
 
+// API отдаёт мини-план этажа как inline-SVG с битым MIME (data:xml/svg;base64,…),
+// который браузер не рисует как картинку. Правим префикс на корректный image/svg+xml.
+function fixSvgDataUri(src: string): string {
+  return src.replace(/^data:xml\/svg(;base64)?,/, "data:image/svg+xml$1,");
+}
+
 export function flatToDetail(f: Flat): ApartmentDetail {
   const hasDiscount = f.amountDiscount > 0 && f.amountDiscount < f.amount;
   return {
@@ -91,6 +98,6 @@ export function flatToDetail(f: Flat): ApartmentDetail {
     oldPrice: hasDiscount ? f.amount : 0,
     tags: [],
     plan: f.layoutUrl,
-    keyPlan: "/images/apartment/keyplan-floor.png",
+    keyPlan: f.floorPlan ? fixSvgDataUri(f.floorPlan) : "/images/apartment/keyplan-floor.png",
   };
 }
