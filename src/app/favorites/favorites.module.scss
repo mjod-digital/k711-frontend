@@ -1,64 +1,180 @@
 @use "breakpoints" as *;
 
-.wrap {
-  // @include contentMax(1440);
-  padding: fluid(40) fluid(20) fluid(120);
-  min-height: 70vh;
+// ============================================================
+//   Избранное (Figma 534-14683 / 534-14160 / 551-25532).
+//   Hero (PageHero) «резиденции ВАШЕЙ мечты» + сетка карточек квартир.
+//   Карточка: план (contain) · характеристики · цена · удалить/забронировать.
+//   Hero и футер/хедер — общие; здесь только заголовок hero и сетка.
+// ============================================================
 
-  @include mobile {
-    padding: fluid(20) fluid(8) fluid(80);
+// ----- Скаттер-заголовок hero (в долях от фото; резина держит композицию,
+//   заголовок заморожен на 1400 и центрируется — как в каталоге). -----
+.word {
+  position: absolute;
+  white-space: nowrap;
+}
+.rezidentsii {
+  left: 20.8%;
+  top: 45.8%;
+}
+.vashej {
+  left: 38.4%;
+  top: 57.8%;
+  font-size: fluid(110);
+}
+.mechty {
+  left: 62.1%;
+  top: 77.7%;
+}
+
+@include mobile {
+  .rezidentsii {
+    left: 12.2%;
+    top: 64%;
+    font-size: var(--fs-h3); // 28 на мобайле (макет: 360/H3)
+  }
+  .vashej {
+    left: 12.2%;
+    top: 72.8%;
+    font-size: var(--fs-h1); // 44 на мобайле (макет: 360/H1)
+  }
+  .mechty {
+    left: 12.2%;
+    top: 83.2%;
+    font-size: var(--fs-h3);
   }
 }
 
-.breadcrumb {
+// ----- Сетка карточек. Замирает на 1400 и центрируется на 1920 (contentMax),
+//   ниже 1440 тянется; 4 колонки → 1 на мобайле. -----
+.grid {
+  @include contentMax(1440);
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: fluid(20);
+  margin: 0 auto;
+  padding: fluid(40) fluid(20) ;
+  list-style: none;
+
+  @include mobile {
+    grid-template-columns: 1fr;
+    padding: fluid(0) fluid(12);
+  }
+}
+
+// ----- Карточка -----
+.card {
   display: flex;
-  align-items: center;
-  gap: fluid(6);
-  padding-block: fluid(24) fluid(40);
+  flex-direction: column;
+  padding: fluid(12);
+  border: fluid(1) solid #d5d3cc;
+  border-radius: fluid(4);
+  background: var(--color-badge-light);
+}
+
+// План квартиры: квадратное поле, картинка вписана и центрирована
+// (планировки приходят разной пропорции — object-fit: contain).
+.plan {
+  position: relative;
+  display: block;
+  width: 100%;
+  margin-top: fluid(20);
+  margin-bottom: fluid(34);
+  aspect-ratio: 1 / 1;
+}
+.planImg {
+  object-fit: contain;
+  mix-blend-mode: multiply;
+  object-position: center;
+}
+
+// Таблица характеристик: разделители сверху и снизу.
+.specs {
+  display: flex;
+  flex-direction: column;
+  gap: fluid(16);
+  margin: 0;
+  padding-block: fluid(16);
+  border-block: fluid(1) solid #d5d3cc;
   color: var(--color-brown-medium);
   font-family: var(--font-body);
   font-size: fluid(14);
+  line-height: calc(16 / 14);
+  letter-spacing: 0.01em;
+}
+.specRow {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: fluid(12);
 
-  a:hover {
-    color: var(--color-brown-dark-2);
+  dt,
+  dd {
+    margin: 0;
   }
-
-  @include mobile {
-    padding-block: fluid(13) fluid(24);
-    font-size: fluid(12);
+  dd {
+    white-space: nowrap;
   }
 }
-.sep {
-  opacity: 0.6;
-}
 
-.title {
-  margin: 0 0 fluid(32);
-  color: var(--color-brown-dark-2);
+.price {
+  margin: fluid(16) 0 0;
+  color: #2b140c; // тёмно-коричневый из макета (как на 404)
   font-family: var(--font-display);
-  font-size: fluid(56);
-  line-height: 1;
-  letter-spacing: 0.02em;
-  text-transform: uppercase;
+  font-size: fluid(24);
+  line-height: normal;
   -webkit-text-stroke-width: fluid(0.3);
-
-  @include mobile {
-    margin-bottom: fluid(20);
-    font-size: fluid(32);
-  }
+  letter-spacing: 0.04em;
+  text-align: right;
+  text-transform: uppercase;
 }
 
+// ----- Действия: удалить (контур) + забронировать (заливка) в пропорции 120:179 -----
+.actions {
+  display: flex;
+  gap: fluid(12);
+  margin-top: fluid(40);
+}
+.delete,
+.book {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: fluid(48);
+  font-family: var(--font-display);
+  font-size: var(--fs-button);
+  line-height: var(--lh-button);
+  letter-spacing: var(--ls-button);
+  -webkit-text-stroke-width: fluid(0.3);
+  white-space: nowrap;
+}
+.delete {
+  flex: 120;
+  cursor: pointer;
+  @include ctaSecondary;
+}
+.book {
+  flex: 179;
+  @include ctaPrimary;
+}
+
+// ----- Пустое состояние / плейсхолдер до гидратации localStorage -----
 .placeholder {
   min-height: fluid(300);
 }
-
 .empty {
+  @include contentMax(1440);
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   gap: fluid(20);
+  padding: fluid(40) fluid(20) fluid(120);
   color: var(--color-brown-medium);
   font-family: var(--font-body);
+
+  @include mobile {
+    padding: fluid(24) fluid(12) fluid(80);
+  }
 }
 .emptyText {
   margin: 0;
@@ -74,156 +190,8 @@
   align-items: center;
   height: fluid(48);
   padding-inline: fluid(24);
-  border-radius: fluid(2);
-  font-family: var(--font-body);
-  font-size: fluid(14);
-  letter-spacing: 0.04em;
+  font-family: var(--font-display);
+  font-size: var(--fs-button);
+  letter-spacing: var(--ls-button);
   text-transform: uppercase;
-}
-
-.head {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  margin-bottom: fluid(20);
-  font-family: var(--font-body);
-}
-.count {
-  color: var(--color-brown-medium);
-  font-size: fluid(16);
-}
-.clear {
-  border: 0;
-  background: none;
-  color: var(--color-brown-medium);
-  font-family: var(--font-body);
-  font-size: fluid(14);
-  letter-spacing: 0.02em;
-  cursor: pointer;
-  transition: color 0.3s ease;
-
-  &:hover {
-    color: var(--color-brown-dark-2);
-  }
-}
-
-.list {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-  display: flex;
-  flex-direction: column;
-  gap: fluid(12);
-}
-
-.row {
-  position: relative;
-  display: grid;
-  grid-template-columns: fluid(260) 1fr auto fluid(48);
-  align-items: center;
-  gap: fluid(24);
-  padding: fluid(24) fluid(28);
-  border: 1px solid #d5d3cc;
-  border-radius: fluid(4);
-  transition: border-color 0.3s ease;
-
-  &:hover {
-    border-color: var(--color-brown-medium);
-  }
-
-  @include mobile {
-    grid-template-columns: 1fr fluid(40);
-    grid-template-areas:
-      "num    remove"
-      "specs  remove"
-      "price  remove";
-    gap: fluid(8) fluid(12);
-    padding: fluid(16);
-  }
-}
-
-.rowLink {
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-}
-
-.num {
-  z-index: 1;
-  color: var(--color-brown-dark-2);
-  font-family: var(--font-display);
-  font-size: fluid(22);
-  letter-spacing: 0.02em;
-
-  @include mobile {
-    grid-area: num;
-    font-size: fluid(18);
-  }
-}
-.specs {
-  z-index: 1;
-  color: var(--color-brown-medium);
-  font-family: var(--font-body);
-  font-size: fluid(14);
-
-  @include mobile {
-    grid-area: specs;
-    font-size: fluid(12);
-  }
-}
-.price {
-  z-index: 1;
-  justify-self: end;
-  color: var(--color-brown-dark-2);
-  font-family: var(--font-display);
-  font-size: fluid(20);
-  white-space: nowrap;
-
-  @include mobile {
-    grid-area: price;
-    justify-self: start;
-    font-size: fluid(16);
-  }
-}
-
-.remove {
-  z-index: 1;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: fluid(48);
-  height: fluid(48);
-  border: 1px solid var(--color-brown-medium);
-  border-radius: 50%;
-  background: transparent;
-  color: var(--color-brown-medium);
-  cursor: pointer;
-  transition:
-    background-color 0.3s ease,
-    color 0.3s ease;
-
-  svg {
-    width: fluid(20);
-    height: fluid(20);
-  }
-
-  &:hover {
-    background: var(--color-brown-medium);
-    color: var(--color-badge-light);
-  }
-
-  @include mobile {
-    grid-area: remove;
-    align-self: center;
-    width: fluid(40);
-    height: fluid(40);
-
-    svg {
-      width: fluid(18);
-      height: fluid(18);
-    }
-  }
-}
-.removeActive {
-  color: var(--color-brown-dark-2);
 }

@@ -1,74 +1,111 @@
 "use client";
 
+import { useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
-import { ru, type Apartment } from "@/lib/apartments";
-import { FavoriteButton } from "@/components/ui/FavoriteButton";
+import { ru, type ApartmentDetail } from "@/lib/apartments";
 import { useFavorites, useHydrated } from "@/store/favorites";
 import styles from "./favorites.module.scss";
 
-// Русское склонение: plural(1,'квартира','квартиры','квартир') → 'квартира'.
-const plural = (n: number, one: string, few: string, many: string) => {
-  const m10 = n % 10;
-  const m100 = n % 100;
-  if (m10 === 1 && m100 !== 11) return one;
-  if (m10 >= 2 && m10 <= 4 && (m100 < 10 || m100 >= 20)) return few;
-  return many;
-};
+// Карточка квартиры в избранном: план (вписан) · характеристики · цена · действия.
+function FavoriteCard({
+  apt,
+  onRemove,
+}: {
+  apt: ApartmentDetail;
+  onRemove: () => void;
+}) {
+  const specs: [string, string][] = [
+    ["Номер квартиры:", `№${apt.number}`],
+    ["Кол-во спален:", `${apt.bedrooms}`],
+    ["Этаж:", `${apt.floor}`],
+    ["Площадь:", `${ru(apt.area)} м²`],
+  ];
 
-export function FavoritesList({ apartments }: { apartments: Apartment[] }) {
+  return (
+    <li className={styles.card}>
+      <Link
+        href={`/apartments/${apt.id}`}
+        className={styles.plan}
+        aria-label={`Квартира №${apt.number}`}
+      >
+        {apt.plan && (
+          <Image
+            src={apt.plan}
+            alt={`Планировка квартиры №${apt.number}`}
+            fill
+            sizes="(max-width: 767.98px) 90vw, 24vw"
+            className={styles.planImg}
+          />
+        )}
+      </Link>
+
+      <dl className={styles.specs}>
+        {specs.map(([label, value]) => (
+          <div key={label} className={styles.specRow}>
+            <dt>{label}</dt>
+            <dd>{value}</dd>
+          </div>
+        ))}
+      </dl>
+
+      <p className={styles.price}>{ru(apt.totalPrice)} ₽</p>
+
+      <div className={styles.actions}>
+        <button type="button" className={styles.delete} onClick={onRemove}>
+          удалить
+        </button>
+        <Link href={`/apartments/${apt.id}`} className={styles.book}>
+          забронировать
+        </Link>
+      </div>
+    </li>
+  );
+}
+
+export function FavoritesList({ apartments }: { apartments: ApartmentDetail[] }) {
   const ids = useFavorites((s) => s.ids);
-  const clear = useFavorites((s) => s.clear);
+  const remove = useFavorites((s) => s.remove);
   const hydrated = useHydrated();
+  // Озвучка удаления для скринридера: фокус с кнопки исчезает вместе с карточкой,
+  // поэтому объявляем из persistent live-региона, живущего вне списка.
+  const [announcement, setAnnouncement] = useState("");
 
   // До гидратации localStorage — резервируем место, не мигаем пустотой.
   if (!hydrated) return <div className={styles.placeholder} aria-hidden="true" />;
 
   const items = apartments.filter((a) => ids.includes(a.id));
 
-  if (items.length === 0) {
-    return (
-      <div className={styles.empty}>
-        <p className={styles.emptyText}>В избранном пока пусто.</p>
-        <Link href="/apartments" className={styles.emptyCta}>
-          перейти в каталог
-        </Link>
-      </div>
-    );
-  }
+  const handleRemove = (apt: ApartmentDetail) => {
+    remove(apt.id);
+    setAnnouncement(`Квартира №${apt.number} удалена из избранного`);
+  };
 
   return (
     <>
-      <div className={styles.head}>
-        <span className={styles.count}>
-          {items.length} {plural(items.length, "квартира", "квартиры", "квартир")}
-        </span>
-        <button type="button" className={styles.clear} onClick={clear}>
-          очистить
-        </button>
-      </div>
+      <p
+        className="visually-hidden"
+        role="status"
+        aria-live="polite"
+        aria-atomic="true"
+      >
+        {announcement}
+      </p>
 
-      <ul className={styles.list}>
-        {items.map((a) => (
-          <li key={a.id} className={styles.row}>
-            <Link
-              href={`/apartments/${a.id}`}
-              className={styles.rowLink}
-              aria-label={`Квартира №${a.id}`}
-            />
-            <span className={styles.num}>Квартира №{a.id}</span>
-            <span className={styles.specs}>
-              {a.floor} этаж · {a.bedrooms}{" "}
-              {plural(a.bedrooms, "спальня", "спальни", "спален")} · {ru(a.area)} м²
-            </span>
-            <span className={styles.price}>{ru(Math.round(a.cost * 1_000_000))} ₽</span>
-            <FavoriteButton
-              id={a.id}
-              className={styles.remove}
-              activeClassName={styles.removeActive}
-            />
-          </li>
-        ))}
-      </ul>
+      {items.length === 0 ? (
+        <div className={styles.empty}>
+          <p className={styles.emptyText}>В избранном пока пусто.</p>
+          <Link href="/apartments" className={styles.emptyCta}>
+            перейти в каталог
+          </Link>
+        </div>
+      ) : (
+        <ul className={styles.grid}>
+          {items.map((a) => (
+            <FavoriteCard key={a.id} apt={a} onRemove={() => handleRemove(a)} />
+          ))}
+        </ul>
+      )}
     </>
   );
 }
