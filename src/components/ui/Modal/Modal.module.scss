@@ -1,0 +1,99 @@
+@use "breakpoints" as *;
+
+.root {
+  position: fixed;
+  inset: 0;
+  z-index: 200; // выше шапки (z 100) и меню (z 90)
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: fluid(20);
+
+  @include mobile {
+    padding: fluid(16);
+  }
+}
+
+// Подложка с блюром страницы (как у меню) + лёгкое затемнение. Клик — закрытие.
+// backdrop-filter задаётся ИНЛАЙНОМ в компоненте (оптимизатор Next 16 его срезает).
+.backdrop {
+  position: absolute;
+  inset: 0;
+  border: 0;
+  background: rgba(38, 17, 19, 0.2);
+  cursor: pointer;
+  // Плавное появление: страница за попапом плавно «размывается» (opacity 0→1).
+  animation: modalFade 0.3s ease both;
+}
+
+.panel {
+  position: relative;
+  z-index: 1;
+  max-height: 100%;
+  overflow-y: auto;
+  background: var(--color-badge-light);
+  // Плавное появление: лёгкий подъём + проявление.
+  animation: modalPop 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+  // ширина/паддинги/раскладка — в модификаторах попапов (Popups.module.scss)
+}
+
+@keyframes modalFade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes modalPop {
+  from {
+    opacity: 0;
+    transform: translateY(fluid(20)) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .backdrop,
+  .panel {
+    animation: none;
+  }
+}
+
+.close {
+  position: absolute;
+  top: fluid(20);
+  right: fluid(20);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: fluid(48);
+  height: fluid(48);
+  border: 0;
+  background: none;
+  color: var(--color-brown-dark);
+  cursor: pointer;
+  transition: color 0.3s ease;
+
+  &:hover {
+    color: var(--color-brown-medium);
+  }
+  &:focus-visible {
+    outline: 2px solid var(--color-brown-dark);
+    outline-offset: 2px;
+  }
+
+  svg {
+    width: fluid(24);
+    height: fluid(24);
+  }
+
+  @include mobile {
+    top: fluid(12);
+    right: fluid(12);
+  }
+}

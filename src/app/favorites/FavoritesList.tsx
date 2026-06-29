@@ -5,15 +5,18 @@ import Image from "next/image";
 import Link from "next/link";
 import { ru, type ApartmentDetail } from "@/lib/apartments";
 import { useFavorites, useHydrated } from "@/store/favorites";
+import { useBooking } from "@/store/booking";
 import styles from "./favorites.module.scss";
 
 // Карточка квартиры в избранном: план (вписан) · характеристики · цена · действия.
 function FavoriteCard({
   apt,
   onRemove,
+  onBook,
 }: {
   apt: ApartmentDetail;
   onRemove: () => void;
+  onBook: () => void;
 }) {
   const specs: [string, string][] = [
     ["Номер квартиры:", `№${apt.number}`],
@@ -55,9 +58,9 @@ function FavoriteCard({
         <button type="button" className={styles.delete} onClick={onRemove}>
           удалить
         </button>
-        <Link href={`/apartments/${apt.id}`} className={styles.book}>
+        <button type="button" className={styles.book} onClick={onBook}>
           забронировать
-        </Link>
+        </button>
       </div>
     </li>
   );
@@ -66,6 +69,7 @@ function FavoriteCard({
 export function FavoritesList({ apartments }: { apartments: ApartmentDetail[] }) {
   const ids = useFavorites((s) => s.ids);
   const remove = useFavorites((s) => s.remove);
+  const openBooking = useBooking((s) => s.openBooking);
   const hydrated = useHydrated();
   // Озвучка удаления для скринридера: фокус с кнопки исчезает вместе с карточкой,
   // поэтому объявляем из persistent live-региона, живущего вне списка.
@@ -102,7 +106,12 @@ export function FavoritesList({ apartments }: { apartments: ApartmentDetail[] })
       ) : (
         <ul className={styles.grid}>
           {items.map((a) => (
-            <FavoriteCard key={a.id} apt={a} onRemove={() => handleRemove(a)} />
+            <FavoriteCard
+              key={a.id}
+              apt={a}
+              onRemove={() => handleRemove(a)}
+              onBook={() => openBooking(a.number)}
+            />
           ))}
         </ul>
       )}

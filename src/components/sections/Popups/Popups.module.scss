@@ -1,0 +1,203 @@
+@use "breakpoints" as *;
+
+// Общий заголовок попапов: H3 (36→28), brown-medium, аплкейс.
+.title {
+  margin: 0;
+  color: var(--color-brown-medium);
+  font-family: var(--font-display);
+  font-size: var(--fs-h3);
+  line-height: var(--lh-h3); // 1.0 (H3 макета)
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+// ============================================================
+//   Попап бронирования (panel 690 на 1440)
+// ============================================================
+.bookingPanel {
+  display: flex;
+  flex-direction: column;
+  gap: fluid(20);
+  width: fluid(690);
+  padding: fluid(85) fluid(60) fluid(60);
+
+  @include mobile {
+    width: 100%;
+    gap: fluid(16);
+    padding: fluid(56) fluid(20) fluid(28);
+  }
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: fluid(74); // макет: чекбоксы (низ ~166) → кнопка (y 240)
+
+  @include mobile {
+    gap: fluid(28);
+  }
+}
+.fieldset {
+  display: flex;
+  flex-direction: column;
+  gap: fluid(16);
+}
+.fields {
+  display: flex;
+  flex-direction: column;
+  gap: fluid(20);
+}
+.row {
+  display: flex;
+  gap: fluid(20);
+
+  .input {
+    flex: 1;
+    min-width: 0;
+  }
+
+  @include mobile {
+    flex-direction: column;
+  }
+}
+
+// Подчёркнутые инпуты на кремовой панели (тёмный текст).
+.input {
+  width: 100%;
+  height: fluid(48);
+  padding: fluid(16) fluid(8);
+  background: none;
+  border: 0;
+  border-bottom: fluid(1) solid var(--color-brown-medium);
+  color: var(--color-brown-dark);
+  font-family: var(--font-body);
+  font-size: fluid(14);
+  line-height: calc(16 / 14);
+  letter-spacing: 0.01em;
+
+  &::placeholder {
+    color: var(--color-brown-light);
+  }
+  &:focus {
+    outline: none;
+    border-bottom-color: var(--color-brown-dark);
+  }
+}
+
+.checks {
+  display: flex;
+  flex-direction: column;
+  gap: fluid(8);
+}
+.check {
+  display: flex;
+  gap: fluid(8);
+  color: var(--color-brown-medium);
+  font-family: var(--font-body);
+  font-size: fluid(12);
+  line-height: calc(16 / 12);
+  letter-spacing: 0.01em;
+  cursor: pointer;
+
+  input {
+    flex-shrink: 0;
+    width: fluid(16);
+    height: fluid(16);
+    margin: 0;
+    appearance: none;
+    border: fluid(1) solid var(--color-brown-medium);
+    border-radius: 1px;
+    cursor: pointer;
+
+    // Квадратный чек: внутренний залитый квадрат (padding + content-box).
+    &:checked {
+      padding: fluid(2);
+      background-color: var(--color-brown-medium);
+      background-clip: content-box;
+    }
+  }
+}
+.link {
+  color: inherit;
+  text-decoration: underline;
+}
+
+.submit {
+  align-self: flex-end;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: fluid(48);
+  padding-inline: fluid(20);
+  font-family: var(--font-display);
+  font-size: var(--fs-button);
+  line-height: var(--lh-button);
+  letter-spacing: var(--ls-button);
+  text-transform: uppercase;
+  white-space: nowrap;
+  cursor: pointer;
+  @include ctaPrimary;
+
+  @include mobile {
+    align-self: stretch;
+  }
+}
+
+// ============================================================
+//   Попап успеха (panel 930 на 1440)
+// ============================================================
+.successPanel {
+  display: flex;
+  flex-direction: column;
+  width: fluid(930);
+  padding: fluid(112) fluid(80);
+
+  @include mobile {
+    width: 100%;
+    padding: fluid(56) fluid(20) fluid(28);
+  }
+}
+.success {
+  display: flex;
+  flex-direction: column;
+  gap: fluid(60);
+  max-width: fluid(610);
+
+  @include mobile {
+    gap: fluid(28);
+  }
+}
+.successBody {
+  display: flex;
+  flex-direction: column;
+  gap: fluid(40);
+
+  @include mobile {
+    gap: fluid(24);
+  }
+}
+.successText {
+  margin: 0;
+  color: #2b140c; // тёмно-коричневый из макета (как на 404 / в цене карточки)
+  font-family: var(--font-body);
+  font-size: fluid(20);
+  line-height: calc(25 / 20); // leading-[normal] из макета (как на 404)
+
+  @include mobile {
+    font-size: fluid(14);
+  }
+}
+.successCta {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  height: fluid(48);
+  padding-inline: fluid(20);
+  font-family: var(--font-display);
+  font-size: var(--fs-button);
+  line-height: var(--lh-button);
+  letter-spacing: var(--ls-button);
+  text-transform: uppercase;
+  white-space: nowrap;
+  @include ctaSecondary;
+}

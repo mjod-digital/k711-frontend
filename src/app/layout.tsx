@@ -4,6 +4,7 @@ import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { SmoothScroll } from "@/components/layout/SmoothScroll";
 import { Preloader } from "@/components/layout/Preloader";
+import { Popups } from "@/components/sections/Popups";
 import { siteConfig } from "@/config/site";
 import "./globals.scss";
 
@@ -45,6 +46,7 @@ export default function RootLayout({
         <Header />
         <main>{children}</main>
         <Footer />
+        <Popups />
       </body>
     </html>
   );
