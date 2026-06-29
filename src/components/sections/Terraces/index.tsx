@@ -1,14 +1,44 @@
 "use client";
 
 import Image from "next/image";
+import type { ReactNode } from "react";
 import { useRef, useState } from "react";
-import { CascadeHeading } from "@/components/ui/CascadeHeading";
+import { CascadeHeading, type CascadeLine } from "@/components/ui/CascadeHeading";
 import { useIsomorphicLayoutEffect } from "@/lib/useIsomorphicLayoutEffect";
 import styles from "./Terraces.module.scss";
 
 const clamp01 = (v: number) => Math.min(1, Math.max(0, v));
 
-export function Terraces() {
+// Контент по умолчанию — страница «Архитектура». Любую часть можно
+// переопределить пропсами, чтобы переиспользовать секцию на других страницах
+// (напр. «Аменитис» — «Дом, в котором город остаётся снаружи»).
+const DEFAULT_DESKTOP_LINES: CascadeLine[] = [
+  { parts: [{ text: "Дом, где история", big: true }] },
+  { parts: [{ text: "не замолкает", big: true }] },
+];
+const DEFAULT_MOBILE_LINES: CascadeLine[] = [
+  { parts: [{ text: "Дом,", big: true }] },
+  { parts: [{ text: "где история", big: true }] },
+  { parts: [{ text: "не замолкает", big: true }] },
+];
+
+type TerracesProps = {
+  /** Заголовок на десктопе (2 строки в макете). */
+  desktopLines?: CascadeLine[];
+  /** Заголовок на мобайле (уже, в 3 строки). */
+  mobileLines?: CascadeLine[];
+  image?: string;
+  imageAlt?: string;
+  paragraphs?: [ReactNode, ReactNode];
+};
+
+export function Terraces({
+  desktopLines = DEFAULT_DESKTOP_LINES,
+  mobileLines = DEFAULT_MOBILE_LINES,
+  image = "/images/terraces.png",
+  imageAlt = "Фасад k711 — сохранённая историческая стена",
+  paragraphs,
+}: TerracesProps = {}) {
   const ref = useRef<HTMLElement>(null);
   const colsRef = useRef<HTMLDivElement>(null);
   const [mobile, setMobile] = useState(false);
@@ -107,18 +137,7 @@ export function Terraces() {
       <div className={styles.headingWrap}>
         <CascadeHeading
           as="h2"
-          lines={
-            mobile
-              ? [
-                  { parts: [{ text: "Дом,", big: true }] },
-                  { parts: [{ text: "где история", big: true }] },
-                  { parts: [{ text: "не замолкает", big: true }] },
-                ]
-              : [
-                  { parts: [{ text: "Дом, где история", big: true }] },
-                  { parts: [{ text: "не замолкает", big: true }] },
-                ]
-          }
+          lines={mobile ? mobileLines : desktopLines}
           className={styles.heading}
         />
       </div>
@@ -127,8 +146,8 @@ export function Terraces() {
         <div className={styles.media}>
           <div className={styles.unfold}>
             <Image
-              src="/images/terraces.png"
-              alt="Фасад k711 — сохранённая историческая стена"
+              src={image}
+              alt={imageAlt}
               fill
               sizes="(min-width: 768px) 37vw, 100vw"
               className={styles.image}
@@ -138,15 +157,24 @@ export function Terraces() {
 
         <div className={styles.cols} ref={colsRef}>
           <p className={styles.paragraph}>
-            В основании k 7/11 — стена первого московского «тучереза», построенного
-            Эрнстом-Рихардом Нирнзее в 1905 году. Она бережно сохранена и стала
-            частью нового облика дома. Современные линии панорамных окон и чёткая
-            геометрия фасада не спорят с историей — они подчёркивают её, создавая
-            контрастную гармонию.
+            {paragraphs?.[0] ?? (
+              <>
+                В основании k 7/11 — стена первого московского «тучереза»,
+                построенного Эрнстом-Рихардом Нирнзее в 1905 году. Она бережно
+                сохранена и стала частью нового облика дома. Современные линии
+                панорамных окон и чёткая геометрия фасада не спорят с историей —
+                они подчёркивают её, создавая контрастную гармонию.
+              </>
+            )}
           </p>
           <p className={styles.paragraph}>
-            Проект Сергея Чобана превращает здание в архитектурный диалог: каждый
-            элемент здесь — одновременно жест уважения к прошлому и шаг вперёд.
+            {paragraphs?.[1] ?? (
+              <>
+                Проект Сергея Чобана превращает здание в архитектурный диалог:
+                каждый элемент здесь — одновременно жест уважения к прошлому и шаг
+                вперёд.
+              </>
+            )}
           </p>
         </div>
       </div>
