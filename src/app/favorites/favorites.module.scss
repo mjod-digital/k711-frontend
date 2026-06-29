@@ -1,7 +1,7 @@
 @use "breakpoints" as *;
 
 .wrap {
-  @include contentMax(1440);
+  // @include contentMax(1440);
   padding: fluid(40) fluid(20) fluid(120);
   min-height: 70vh;
 
