@@ -374,8 +374,11 @@
 .keyplan {
   width: fluid(246);
   height: fluid(163); // макет 481-12212: план этажа 246×163
-  object-fit: cover;
+  object-fit: contain;
   object-position: bottom;
+  // План этажа — тёмный чертёж на белом фоне (как и .planImg). multiply
+  // «вмешивает» белый в кремовый фон страницы, оставляя только линии.
+  mix-blend-mode: luminosity;
 
   @include mobile {
     display: none;

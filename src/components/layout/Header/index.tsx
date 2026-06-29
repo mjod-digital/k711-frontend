@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { siteConfig } from "@/config/site";
 import { useFavorites, useHydrated } from "@/store/favorites";
@@ -16,9 +17,19 @@ export function Header() {
   const [hidden, setHidden] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
 
+  // На каталоге квартир хедер не прячем при скролле: под ним «прилипшая» шапка
+  // таблицы и фильтры — постоянно видимый хедер аккуратнее (и перекрывает полосу
+  // над липкой шапкой).
+  const pathname = usePathname();
+  const lockShown = pathname === "/apartments";
+
   // Скролл вниз → хедер уезжает вверх; скролл вверх → возвращается.
   // У самого верха страницы всегда виден. rAF-throttle + passive — без тормозов.
   useEffect(() => {
+    if (lockShown) {
+      setHidden(false); // каталог — хедер всегда виден
+      return;
+    }
     lastY.current = window.scrollY;
     let raf = 0;
     const onScroll = () => {
@@ -42,13 +53,13 @@ export function Header() {
       window.removeEventListener("scroll", onScroll);
       cancelAnimationFrame(raf);
     };
-  }, []);
+  }, [lockShown]);
 
   return (
     <>
       <header
         ref={headerRef}
-        className={cn(styles.header, hidden && !menuOpen && styles.hidden)}
+        className={cn(styles.header, hidden && !menuOpen && !lockShown && styles.hidden)}
       >
       <div className={styles.inner}>
         {/* Левая зона */}
