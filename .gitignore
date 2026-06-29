@@ -20,6 +20,8 @@
 /.claude
 # figma dev-mode temp asset exports
 /public/images/figma-tmp/
+# local verification scripts (Playwright screenshots, scratch)
+/_*.mjs
 
 # production
 /build
