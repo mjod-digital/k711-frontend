@@ -1,7 +1,11 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
+import { useRef } from "react";
 import type { CSSProperties } from "react";
 import { Reveal } from "@/components/ui/Reveal";
+import { useIsomorphicLayoutEffect } from "@/lib/useIsomorphicLayoutEffect";
 import styles from "./Author.module.scss";
 
 type AuthorProps = {
@@ -21,8 +25,45 @@ export function Author({
   ctaHref = "/residences",
   ctaLabel = "выбрать резиденцию",
 }: AuthorProps) {
+  const sectionRef = useRef<HTMLElement>(null);
+  const triggerRef = useRef<HTMLParagraphElement>(null);
+
+  // Текст «выезжает» снизу при входе в вид (как абзацы Terraces): col1 → col2 →
+  // CTA, со стаггером. data-reveal ставим императивно на секцию (не через state),
+  // чтобы он не попал в SSR-HTML как "hidden" и текст не моргал бы без JS.
+  useIsomorphicLayoutEffect(() => {
+    const section = sectionRef.current;
+    const trigger = triggerRef.current;
+    if (!section || !trigger) return;
+    // reduced-motion: не вооружаем — без data-reveal текст сразу виден.
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    section.dataset.reveal = "hidden"; // прячем синхронно до отрисовки
+    const mqMobile = window.matchMedia("(max-width: 767.98px)");
+    let io: IntersectionObserver | null = null;
+    const arm = () => {
+      io?.disconnect();
+      const margin = mqMobile.matches ? "0px 0px -10% 0px" : "0px 0px -20% 0px";
+      io = new IntersectionObserver(
+        ([entry], obs) => {
+          if (entry.isIntersecting) {
+            section.dataset.reveal = "visible";
+            obs.disconnect();
+          }
+        },
+        { threshold: 0.2, rootMargin: margin },
+      );
+      io.observe(trigger); // наблюдаем за col1 — его реальная позиция = область текста
+    };
+    arm();
+    mqMobile.addEventListener("change", arm);
+    return () => {
+      io?.disconnect();
+      mqMobile.removeEventListener("change", arm);
+    };
+  }, []);
+
   return (
-    <section className={styles.section}>
+    <section ref={sectionRef} className={styles.section}>
       <div className={styles.stage}>
         <div className={styles.photo}>
           <Image
@@ -50,7 +91,7 @@ export function Author({
         </Reveal>
       </div>
 
-      <p className={styles.col1}>
+      <p ref={triggerRef} className={styles.col1}>
         Он известен проектами в Москве, Санкт-Петербурге и Берлине, включая
         участие в создании башни «Федерация» в «Москва-Сити» и ряда крупных
         общественных и культурных зданий.

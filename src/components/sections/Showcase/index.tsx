@@ -64,13 +64,19 @@ export function Showcase({ steps }: { steps: ShowcaseStep[] }) {
     const setStep = (
       el: HTMLDivElement | null,
       intro: number,
-      introText: number,
+      rTitle: number,
+      rDesc: number,
+      rCta: number,
       par: number,
+      ph: number, // фаза текста: 0 — появление (клип сверху), 1 — уход (клип снизу)
     ) => {
       if (!el) return;
       el.style.setProperty("--intro", String(intro));
-      el.style.setProperty("--introText", String(introText));
+      el.style.setProperty("--rTitle", String(rTitle));
+      el.style.setProperty("--rDesc", String(rDesc));
+      el.style.setProperty("--rCta", String(rCta));
       el.style.setProperty("--par", String(par));
+      el.style.setProperty("--ph", String(ph));
     };
 
     // ---- ДЕСКТОП: пин + скраб ----
@@ -81,10 +87,20 @@ export function Showcase({ steps }: { steps: ShowcaseStep[] }) {
       let ticking = false;
 
       // Картинка каждого шага «въезжает» шторкой снизу-вверх поверх предыдущего
-      // (--intro). Текст — ОДНОЙ шторкой снизу-вверх (как изначально): весь блок
-      // клипается по --introText (у прошлого шага текст убран). Первый шаг (счётчик)
-      // держится короткую паузу HOLD (идёт CountUp), затем переходы.
+      // (--intro). Текст шага РАСКРЫВАЕТСЯ ПОСТАДИЙНО снизу-вверх: картинка ведёт,
+      // заголовок выезжает на середине картинки шторкой (--rTitle), за ним —
+      // описание и кнопка, которые проявляются мягким «выездом» (opacity+сдвиг,
+      // как абзацы Statement; --rDesc/--rCta). Уходящий шаг (idx-1) ИСЧЕЗАЕТ тоже
+      // снизу-вверх (--ph=1: заголовок клипается снизу, текст гаснет), опережая
+      // въезд следующего, чтобы тексты не накладывались.
       const HOLD = 0.1;
+      const EXIT = 0.4; // уход текста завершается к sub=0.4 — до входа заголовка (0.45)
+      // Стадии входа активного шага (по под-прогрессу sub 0..1).
+      const stage = (sub: number) => ({
+        title: clamp01((sub - 0.45) / 0.3), // заголовок — на середине картинки
+        desc: clamp01((sub - 0.68) / 0.22), // описание — после заголовка
+        cta: clamp01((sub - 0.9) / 0.1), // кнопка — когда картинка целиком встала
+      });
       const render = () => {
         let idx: number;
         let sub: number;
@@ -97,27 +113,45 @@ export function Showcase({ steps }: { steps: ShowcaseStep[] }) {
           sub = clamp01(seg - (idx - 1));
         }
         for (let i = 0; i < N; i++) {
+          // --- Картинка (фоновый слой): счётчик и прошлые показаны, будущие скрыты ---
           let intro: number;
-          let introText: number;
-          let par: number;
-          if (i === 0) {
-            intro = 1; // счётчик показан всегда (его накрывает следующий)
-            introText = idx === 0 ? 1 : 0; // текст счётчика виден только на старте
-            par = clamp01(p * N);
-          } else if (i < idx) {
-            intro = 1;
-            introText = 0; // прошлый: фото показано, текст убран (шторка закрыта)
-            par = 1;
-          } else if (i > idx) {
-            intro = 0;
-            introText = 0;
-            par = 0;
+          if (i === 0 || i < idx) intro = 1;
+          else if (i === idx) intro = sub; // активный въезжает шторкой
+          else intro = 0;
+
+          // --- Текст шага: появление (ph=0) / уход снизу-вверх (ph=1) ---
+          let rTitle: number;
+          let rDesc: number;
+          let rCta: number;
+          let ph = 0;
+          if (idx === 0 && i === 0) {
+            // вход счётчика: счётчик → desc → cta, последовательно снизу-вверх
+            const e0 = clamp01(p / HOLD);
+            rTitle = clamp01(e0 / 0.55);
+            rDesc = clamp01((e0 - 0.45) / 0.3);
+            rCta = clamp01((e0 - 0.75) / 0.25);
+          } else if (i === idx) {
+            // активный шаг — постадийное появление
+            const s = stage(sub);
+            rTitle = s.title;
+            rDesc = s.desc;
+            rCta = s.cta;
+          } else if (i === idx - 1) {
+            // уходящий шаг — исчезает снизу-вверх, опережая въезд следующего
+            const vexit = 1 - clamp01(sub / EXIT);
+            rTitle = vexit;
+            rDesc = vexit;
+            rCta = vexit;
+            ph = 1;
           } else {
-            intro = sub; // картинка въезжает шторкой
-            introText = clamp01((sub - 0.12) / 0.4); // текст — одной шторкой, чуть позже
-            par = sub;
+            // далёкое прошлое / будущее — скрыт
+            rTitle = 0;
+            rDesc = 0;
+            rCta = 0;
           }
-          setStep(stepRefs.current[i], intro, introText, par);
+
+          const par = i === idx ? sub : i < idx ? 1 : 0; // (десктоп-параллакс не используется)
+          setStep(stepRefs.current[i], intro, rTitle, rDesc, rCta, par, ph);
         }
         return idx;
       };
@@ -162,7 +196,10 @@ export function Showcase({ steps }: { steps: ShowcaseStep[] }) {
     setActive(-1);
     stepRefs.current.forEach((el) => {
       el?.style.removeProperty("--intro");
-      el?.style.removeProperty("--introText");
+      el?.style.removeProperty("--rTitle");
+      el?.style.removeProperty("--rDesc");
+      el?.style.removeProperty("--rCta");
+      el?.style.removeProperty("--ph");
     });
 
     if (reduce) {

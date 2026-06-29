@@ -332,9 +332,6 @@ export function Location({ className }: { className?: string }) {
               </div>
             </div>
             <div className={styles.cardFooter}>
-              <span className={styles.cardCount}>
-                {openIndex + 1} / {visible.length}
-              </span>
               <div className={styles.cardArrows}>
                 <button
                   type="button"

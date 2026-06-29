@@ -144,6 +144,47 @@
   margin: 0;
 }
 
+// ----- Появление снизу-вверх (как абзацы Terraces): col1 → col2 (.para) → CTA -----
+// Триггер — вход .col1 в вид (data-reveal на .section). Без data-reveal (SSR /
+// no-JS) текст виден сразу. Стаггер задаёт --fd: col1 первым, CTA — последней.
+@media (prefers-reduced-motion: no-preference) {
+  .section[data-reveal] {
+    .col1,
+    .para,
+    .cta {
+      transition:
+        opacity 1000ms ease-out var(--fd, 0ms),
+        transform 1000ms ease-out var(--fd, 0ms);
+    }
+    .col1 {
+      --fd: 0ms;
+    }
+    .para {
+      --fd: 150ms;
+    }
+    .cta {
+      --fd: 320ms; // CTA «за ними»
+    }
+  }
+  .section[data-reveal="hidden"] {
+    .col1,
+    .para,
+    .cta {
+      opacity: 0;
+      transform: translate3d(0, #{fluid(64)}, 0);
+      will-change: opacity, transform;
+    }
+  }
+  .section[data-reveal="visible"] {
+    .col1,
+    .para,
+    .cta {
+      opacity: 1;
+      transform: none;
+    }
+  }
+}
+
 .cta {
   align-self: flex-start;
   display: inline-flex;
