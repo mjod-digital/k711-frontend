@@ -36,5 +36,6 @@ export default async function ApartmentDetailPage({
   const { id } = await params;
   const data = await fetchApartmentById(id).catch(() => null);
   if (!data) notFound();
+  console.log(`[apartment ${id}] API response:`, JSON.stringify(data, null, 2));
   return <ApartmentCard apt={flatToDetail(data.flat)} />;
 }
