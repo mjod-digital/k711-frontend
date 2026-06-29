@@ -1,7 +1,13 @@
+"use client";
+
 import Image from "next/image";
+import { useBooking } from "@/store/booking";
+import { PhoneInput } from "@/components/ui/PhoneInput";
 import styles from "./Contact.module.scss";
 
 export function Contact() {
+  const openSuccess = useBooking((s) => s.openSuccess);
+
   return (
     <section className={styles.contact} id="contact">
       <div className={styles.inner}>
@@ -22,7 +28,13 @@ export function Contact() {
             на встречу
           </h2>
 
-          <form className={styles.form}>
+          <form
+            className={styles.form}
+            onSubmit={(e) => {
+              e.preventDefault();
+              openSuccess();
+            }}
+          >
             <div className={styles.fields}>
               <input
                 className={styles.input}
@@ -31,9 +43,8 @@ export function Contact() {
                 placeholder="Имя"
                 aria-label="Имя"
               />
-              <input
+              <PhoneInput
                 className={styles.input}
-                type="tel"
                 name="phone"
                 placeholder="Телефон"
                 aria-label="Телефон"

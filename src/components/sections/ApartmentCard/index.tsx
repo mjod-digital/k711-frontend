@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { ru, type ApartmentDetail } from "@/lib/apartments";
 import { FavoriteButton } from "@/components/ui/FavoriteButton";
+import { BookButton } from "@/components/ui/BookButton";
 import styles from "./ApartmentCard.module.scss";
 
 // Компас из макета (481-12214) — вектор, инлайним.
@@ -127,9 +128,9 @@ export function ApartmentCard({ apt }: { apt: ApartmentDetail }) {
               <ShareIcon />
             </button>
             <FavoriteButton id={apt.id} className={styles.iconBtn} />
-            <button type="button" className={styles.book}>
+            <BookButton number={apt.number} className={styles.book}>
               Забронировать
-            </button>
+            </BookButton>
           </div>
         </div>
       </article>
