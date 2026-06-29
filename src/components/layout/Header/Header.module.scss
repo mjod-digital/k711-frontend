@@ -98,14 +98,14 @@
   align-items: center;
   justify-content: center;
   padding: fluid(10);
-  color: var(--color-brown-dark);
+  color: var(--color-brown-medium);
   background: none;
   border: 0;
   cursor: pointer;
   transition: color 0.45s ease;
-
+  
   &:hover {
-    color: var(--color-brown-medium);
+    color: var(--color-brown-dark);
   }
 
   svg {
@@ -120,35 +120,9 @@
   }
 }
 
-// Сердце-ссылка на /избранное со счётчиком в углу.
+// Сердце-ссылка на /избранное (заливается, когда есть сохранённые квартиры).
 .favLink {
-  position: relative;
   text-decoration: none;
-}
-.favBadge {
-  position: absolute;
-  top: fluid(2);
-  right: fluid(2);
-  min-width: fluid(16);
-  height: fluid(16);
-  padding-inline: fluid(4);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 999px;
-  background: var(--color-brown-dark);
-  color: var(--color-badge-light);
-  font-family: var(--font-body);
-  font-size: fluid(10);
-  line-height: 1;
-
-  @include mobile {
-    top: 0;
-    right: 0;
-    min-width: fluid(14);
-    height: fluid(14);
-    font-size: fluid(9);
-  }
 }
 
 // ----- Логотип по центру (абсолютно отцентрован) -----

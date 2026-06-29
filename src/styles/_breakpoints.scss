@@ -60,6 +60,11 @@ $bp-desktop: 768px;
     border-color: var(--color-brown-dark-2);
     color: var(--color-brown-light);
   }
+
+  &:focus-visible {
+    outline: 2px solid var(--color-brown-dark);
+    outline-offset: 2px;
+  }
 }
 
 // Декоративный «сглаженный» уголок (Figma: cream-треугольник, mix-blend soft-light)
@@ -103,5 +108,11 @@ $bp-desktop: 768px;
     background: var(--color-brown-dark-3);
     border-color: var(--color-brown-dark-3);
     color: var(--color-brown-light);
+  }
+
+  // Светлое кольцо — читается на тёмной заливке primary-кнопки.
+  &:focus-visible {
+    outline: 2px solid var(--color-badge-light);
+    outline-offset: 2px;
   }
 }
