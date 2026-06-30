@@ -9,7 +9,7 @@ export const siteConfig = {
   },
   cta: {
     label: "выбрать резиденцию",
-    href: "/residences",
+    href: "/apartments",
   },
   nav: [
     { label: "Главная", href: "/" },

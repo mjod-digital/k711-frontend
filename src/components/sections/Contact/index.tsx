@@ -42,18 +42,20 @@ export function Contact() {
                 name="name"
                 placeholder="Имя"
                 aria-label="Имя"
+                required
               />
               <PhoneInput
                 className={styles.input}
                 name="phone"
                 placeholder="Телефон"
                 aria-label="Телефон"
+                required
               />
             </div>
 
             <div className={styles.checks}>
               <label className={styles.check}>
-                <input type="checkbox" />
+                <input type="checkbox" required />
                 <span>
                   Соглашаюсь с{" "}
                   <a href="#" className={styles.link}>

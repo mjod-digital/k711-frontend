@@ -120,9 +120,36 @@
   }
 }
 
-// Сердце-ссылка на /избранное (заливается, когда есть сохранённые квартиры).
+// Сердце-ссылка на /избранное: тёмное сердце (контур → заливка на ховере)
+// + терракотовая точка при непустом избранном.
 .favLink {
+  position: relative;
+  color: var(--color-brown-dark);
   text-decoration: none;
+
+  svg {
+    transition: fill 0.45s ease;
+  }
+
+  &:hover svg {
+    fill: currentColor;
+  }
+}
+.favDot {
+  position: absolute;
+  top: fluid(8);
+  right: fluid(8);
+  width: fluid(10);
+  height: fluid(10);
+  border-radius: 50%;
+  background: var(--color-brown-light);
+
+  @include mobile {
+    top: fluid(5);
+    right: fluid(5);
+    width: fluid(8);
+    height: fluid(8);
+  }
 }
 
 // ----- Логотип по центру (абсолютно отцентрован) -----
@@ -149,7 +176,7 @@
 .phone {
   display: inline-block;
   font-family: var(--font-display);
-  font-size: var(--fs-h4);
+  font-size: fluid(16);
   line-height: var(--lh-h4);
   -webkit-text-stroke-width: fluid(0.3);
   -webkit-text-stroke-color: var(--color-brown-dark);

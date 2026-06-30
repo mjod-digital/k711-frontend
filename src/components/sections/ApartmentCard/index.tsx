@@ -22,14 +22,14 @@ function Compass() {
   );
 }
 
-function ShareIcon() {
+// Иконка скачивания PDF (Figma 527-13810) — документ со стрелкой вниз.
+function DownloadIcon() {
   return (
-    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-      <path
-        d="M9 12a3 3 0 1 0 0 .01M18 6a3 3 0 1 0 0 .01M18 18a3 3 0 1 0 0 .01M11.6 10.5l4.8-3M11.6 13.5l4.8 3"
-        stroke="currentColor"
-        strokeWidth="1.4"
-      />
+    <svg viewBox="0 0 13.2 13.8" fill="none" aria-hidden="true">
+      <path d="M3.6 13.2H0.6L0.6 0.6H9L12.6 4.2V13.2H9.6" stroke="currentColor" strokeWidth="1.2" />
+      <path d="M6.6 6.6L6.6 12.6" stroke="currentColor" strokeWidth="1.2" />
+      <path d="M9 10.2L6.6 12.6L4.2 10.2" stroke="currentColor" strokeWidth="1.2" />
+      <path d="M9 0.6V4.2H12.6" stroke="currentColor" strokeWidth="1.2" />
     </svg>
   );
 }
@@ -124,9 +124,16 @@ export function ApartmentCard({ apt }: { apt: ApartmentDetail }) {
           )}
 
           <div className={styles.cta}>
-            <button type="button" className={styles.iconBtn} aria-label="Поделиться">
-              <ShareIcon />
-            </button>
+            <a
+              href={apt.pdf}
+              download
+              target="_blank"
+              rel="noopener noreferrer"
+              className={styles.iconBtn}
+              aria-label="Скачать PDF квартиры"
+            >
+              <DownloadIcon />
+            </a>
             <FavoriteButton id={apt.id} className={styles.iconBtn} />
             <BookButton number={apt.number} className={styles.book}>
               Забронировать

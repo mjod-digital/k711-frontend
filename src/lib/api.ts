@@ -99,5 +99,6 @@ export function flatToDetail(f: Flat): ApartmentDetail {
     tags: [],
     plan: f.layoutUrl,
     keyPlan: f.floorPlan ? fixSvgDataUri(f.floorPlan) : "/images/apartment/keyplan-floor.png",
+    pdf: f.pdf,
   };
 }

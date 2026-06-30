@@ -23,6 +23,7 @@ export type ApartmentDetail = Apartment & {
   tags: string[];
   plan: string; // изображение планировки квартиры
   keyPlan: string; // мини-план этажа
+  pdf: string; // PDF-презентация квартиры (с API)
 };
 
 export type Range = [number, number];

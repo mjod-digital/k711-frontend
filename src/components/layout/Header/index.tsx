@@ -115,7 +115,10 @@ export function Header() {
               hydrated && favCount > 0 ? `Избранное (${favCount})` : "Избранное"
             }
           >
-            <HeartIcon filled={hydrated && favCount > 0} />
+            <HeartIcon />
+            {hydrated && favCount > 0 && (
+              <span className={styles.favDot} aria-hidden="true" />
+            )}
           </Link>
 
           <Link href={siteConfig.cta.href} className={styles.cta}>
@@ -130,11 +133,11 @@ export function Header() {
   );
 }
 
-function HeartIcon({ filled = false }: { filled?: boolean }) {
+function HeartIcon() {
   return (
     <svg
       viewBox="0 0 24 24"
-      fill={filled ? "currentColor" : "none"}
+      fill="none"
       stroke="currentColor"
       strokeWidth={1.5}
       strokeLinecap="round"

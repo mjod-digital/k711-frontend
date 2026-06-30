@@ -82,6 +82,21 @@
     outline: none;
     border-bottom-color: var(--color-brown-dark);
   }
+
+  // Сброс заливки автозаполнения: перекрываем её фоном панели (текст — поверх).
+  &:-webkit-autofill,
+  &:-webkit-autofill:hover,
+  &:-webkit-autofill:focus {
+    -webkit-text-fill-color: var(--color-brown-dark);
+    box-shadow: 0 0 0 100px var(--color-badge-light) inset;
+    caret-color: var(--color-brown-dark);
+    transition: background-color 600000s 0s;
+  }
+
+  // Незаполненное обязательное поле (после попытки отправки) — подсветка бордера.
+  &:user-invalid {
+    border-bottom-color: var(--color-error);
+  }
 }
 
 .checks {
@@ -115,6 +130,14 @@
       background-color: var(--color-brown-medium);
       background-clip: content-box;
     }
+  }
+
+  // Обязательный, но не отмеченный (после отправки) — подсветка рамки и лейбла.
+  input:user-invalid {
+    border-color: var(--color-error);
+  }
+  input:user-invalid ~ span {
+    color: var(--color-error);
   }
 }
 .link {

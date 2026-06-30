@@ -112,6 +112,20 @@
     outline: none;
     border-bottom-color: var(--color-brown-light);
   }
+
+  // Сброс заливки автозаполнения: перекрываем её фоном тёмной панели.
+  &:-webkit-autofill,
+  &:-webkit-autofill:hover,
+  &:-webkit-autofill:focus {
+    -webkit-text-fill-color: var(--color-badge-light);
+    box-shadow: 0 0 0 100px var(--color-brown-dark) inset;
+    caret-color: var(--color-badge-light);
+    transition: background-color 600000s 0s;
+  }
+
+  &:user-invalid {
+    border-bottom-color: var(--color-error);
+  }
 }
 
 .checks {
@@ -152,6 +166,14 @@
       background-color: var(--color-brown-light);
       background-clip: content-box;
     }
+  }
+
+  // Обязательный, но не отмеченный (после отправки) — подсветка рамки и лейбла.
+  input:user-invalid {
+    border-color: var(--color-error);
+  }
+  input:user-invalid ~ span {
+    color: var(--color-error);
   }
 }
 

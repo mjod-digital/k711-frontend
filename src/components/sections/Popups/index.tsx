@@ -38,12 +38,14 @@ function BookingForm({
                 name="name"
                 placeholder="Имя"
                 aria-label="Имя"
+                required
               />
               <PhoneInput
                 className={styles.input}
                 name="phone"
                 placeholder="+7 (9__) ___-__-__"
                 aria-label="Телефон"
+                required
               />
             </div>
             <input
