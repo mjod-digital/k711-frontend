@@ -5,10 +5,26 @@
 // ============================================================
 .photoCards {
   margin-top: fluid(80);
+
+  @include mobile {
+    margin-top: fluid(60);
+  }
 }
 
 .centerHeading {
   padding-top: fluid(60);
+
+  // Мобайл (только amenities): 1-я строка «дом, который» — к левому краю,
+  // 2-я строка «не хочется покидать» — с небольшим отступом слева.
+  @include mobile {
+    :global(.reveal-line):nth-child(1) {
+      align-self: flex-start;
+    }
+
+    :global(.reveal-line):nth-child(2) {
+      padding-left: fluid(15);
+    }
+  }
 }
 
 // ============================================================

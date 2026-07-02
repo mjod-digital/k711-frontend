@@ -2,12 +2,15 @@ import Image from "next/image";
 import Link from "next/link";
 import type { CSSProperties } from "react";
 import { Reveal } from "@/components/ui/Reveal";
+import { cn } from "@/lib/utils";
 import styles from "./ConnectBlock.module.scss";
 
 type ConnectBlockProps = {
   href?: string;
   image?: string;
   imageAlt?: string;
+  /** Доп. класс на секцию — для постраничных отступов (напр. amenities). */
+  className?: string;
 };
 
 // Тёмный CTA-баннер «Перейти к выбору резиденции» (Figma 373-9316).
@@ -16,9 +19,10 @@ export function ConnectBlock({
   href = "/residences",
   image = "/images/arch-connect.png",
   imageAlt = "",
+  className,
 }: ConnectBlockProps) {
   return (
-    <section className={styles.section}>
+    <section className={cn(styles.section, className)}>
       <Link
         href={href}
         className={styles.banner}

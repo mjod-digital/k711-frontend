@@ -36,6 +36,21 @@
   object-position: center;
 }
 
+// Равномерное затемнение всего фото (Figma: #1b090b, multiply, 30%). multiply
+// приглушает, сохраняя фактуру; работает внутри .media (isolation:isolate),
+// с кремовым фоном не смешивается. Текст (.overlay z-index:2) рисуется поверх и
+// НЕ затемняется. Ниже bottom-градиента (оба z-index:1, ::before красится раньше).
+.media::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: #1b090b;
+  mix-blend-mode: multiply;
+  opacity: 0.3;
+  pointer-events: none;
+}
+
 // затемнение снизу — чтобы белый текст читался поверх фото
 .media::after {
   content: "";

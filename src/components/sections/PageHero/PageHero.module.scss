@@ -88,7 +88,24 @@
   object-position: center;
 }
 
-// затемнение снизу — белый заголовок читается поверх фото
+// Равномерное затемнение всего фото (Figma: заливка #1b090b, multiply, 30%).
+// multiply умножает цвет фото на тёмно-бордовый → приглушает, сохраняя фактуру
+// (не плоская пелена). Работает только внутри .media благодаря isolation:isolate
+// на ней — с кремовым фоном страницы не смешивается. Заголовок (.overlay z-index:2)
+// рисуется поверх и НЕ затемняется. Ниже bottom-градиента (оба z-index:1, ::before
+// красится раньше ::after).
+.media::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: #1b090b;
+  mix-blend-mode: multiply;
+  opacity: 0.3;
+  pointer-events: none;
+}
+
+// Доп. затемнение снизу — белый заголовок читается поверх фото
 .media::after {
   content: "";
   position: absolute;
