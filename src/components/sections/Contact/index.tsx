@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { useBooking } from "@/store/booking";
+import { sendLead } from "@/lib/comagic";
 import { PhoneInput } from "@/components/ui/PhoneInput";
 import styles from "./Contact.module.scss";
 
@@ -34,15 +35,11 @@ export function Contact() {
             onSubmit={(e) => {
               e.preventDefault();
               const fd = new FormData(e.currentTarget);
-              void fetch("/api/lead", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                  source: "contact",
-                  name: fd.get("name"),
-                  phone: fd.get("phone"),
-                }),
-              }).catch(() => {});
+              sendLead({
+                source: "contact",
+                name: fd.get("name") as string,
+                phone: fd.get("phone") as string,
+              });
               openSuccess();
             }}
           >

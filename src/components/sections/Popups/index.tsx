@@ -2,16 +2,17 @@
 
 import Link from "next/link";
 import { useBooking } from "@/store/booking";
+import { sendLead, type LeadApartment } from "@/lib/comagic";
 import { Modal } from "@/components/ui/Modal";
 import { PhoneInput } from "@/components/ui/PhoneInput";
 import styles from "./Popups.module.scss";
 
-// Попап «Забронировать резиденцию №N» (Figma 547-24961). Номер — из карточки.
+// Попап «Забронировать резиденцию №N» (Figma 547-24961). Квартира — из карточки.
 function BookingForm({
-  number,
+  apartment,
   onDone,
 }: {
-  number: number | null;
+  apartment: LeadApartment | null;
   onDone: () => void;
 }) {
   return (
@@ -19,7 +20,7 @@ function BookingForm({
       <h2 id="booking-title" className={styles.title}>
         забронировать
         <br />
-        резиденцию{number != null ? ` №${number}` : ""}
+        резиденцию{apartment ? ` №${apartment.number}` : ""}
       </h2>
 
       <form
@@ -29,18 +30,14 @@ function BookingForm({
         onSubmit={(e) => {
           e.preventDefault();
           const fd = new FormData(e.currentTarget);
-          // Шлём заявку с номером квартиры (fire-and-forget — попап показываем сразу).
-          void fetch("/api/lead", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              source: "booking",
-              apartmentNumber: number,
-              name: fd.get("name"),
-              phone: fd.get("phone"),
-              comment: fd.get("comment"),
-            }),
-          }).catch(() => {});
+          // Заявка с инфой о квартире → CoMagic (fire-and-forget — попап сразу).
+          sendLead({
+            source: "booking",
+            apartment,
+            name: fd.get("name") as string,
+            phone: fd.get("phone") as string,
+            comment: fd.get("comment") as string,
+          });
           onDone();
         }}
       >
@@ -123,7 +120,7 @@ function SuccessContent({ onClose }: { onClose: () => void }) {
 // Глобальный рендер попапов (монтируется в layout). Управляется booking-стором.
 export function Popups() {
   const mode = useBooking((s) => s.mode);
-  const apartmentNumber = useBooking((s) => s.apartmentNumber);
+  const apartment = useBooking((s) => s.apartment);
   const openSuccess = useBooking((s) => s.openSuccess);
   const close = useBooking((s) => s.close);
 
@@ -135,7 +132,7 @@ export function Popups() {
         className={styles.bookingPanel}
         labelledBy="booking-title"
       >
-        <BookingForm number={apartmentNumber} onDone={openSuccess} />
+        <BookingForm apartment={apartment} onDone={openSuccess} />
       </Modal>
 
       <Modal

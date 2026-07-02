@@ -135,7 +135,16 @@ export function ApartmentCard({ apt }: { apt: ApartmentDetail }) {
               <DownloadIcon />
             </a>
             <FavoriteButton id={apt.id} className={styles.iconBtn} />
-            <BookButton number={apt.number} className={styles.book}>
+            <BookButton
+              apartment={{
+                number: apt.number,
+                area: apt.area,
+                floor: apt.floor,
+                bedrooms: apt.bedrooms,
+                totalPrice: apt.totalPrice,
+              }}
+              className={styles.book}
+            >
               Забронировать
             </BookButton>
           </div>

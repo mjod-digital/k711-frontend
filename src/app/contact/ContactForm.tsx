@@ -1,11 +1,12 @@
 "use client";
 
 import { useBooking } from "@/store/booking";
+import { sendLead } from "@/lib/comagic";
 import { PhoneInput } from "@/components/ui/PhoneInput";
 import styles from "./contact.module.scss";
 
 // Форма «Заказать звонок» (Figma 373-10119). После отправки — общий попап успеха;
-// заявка уходит в /api/lead (source: contact). Нативная подсказка браузера погашена
+// заявка уходит в CoMagic (source: contact). Нативная подсказка браузера погашена
 // (onInvalidCapture) — своя подсветка обязательных полей через :user-invalid.
 export function ContactForm() {
   const openSuccess = useBooking((s) => s.openSuccess);
@@ -17,17 +18,13 @@ export function ContactForm() {
       onSubmit={(e) => {
         e.preventDefault();
         const fd = new FormData(e.currentTarget);
-        void fetch("/api/lead", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            source: "contact",
-            name: fd.get("name"),
-            email: fd.get("email"),
-            phone: fd.get("phone"),
-            comment: fd.get("comment"),
-          }),
-        }).catch(() => {});
+        sendLead({
+          source: "contact",
+          name: fd.get("name") as string,
+          email: fd.get("email") as string,
+          phone: fd.get("phone") as string,
+          comment: fd.get("comment") as string,
+        });
         openSuccess();
       }}
     >

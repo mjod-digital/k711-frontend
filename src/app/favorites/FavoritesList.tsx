@@ -110,7 +110,15 @@ export function FavoritesList({ apartments }: { apartments: ApartmentDetail[] })
               key={a.id}
               apt={a}
               onRemove={() => handleRemove(a)}
-              onBook={() => openBooking(a.number)}
+              onBook={() =>
+                openBooking({
+                  number: a.number,
+                  area: a.area,
+                  floor: a.floor,
+                  bedrooms: a.bedrooms,
+                  totalPrice: a.totalPrice,
+                })
+              }
             />
           ))}
         </ul>
