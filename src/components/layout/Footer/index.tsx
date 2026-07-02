@@ -11,7 +11,7 @@ const navCol1 = [
 ];
 const navCol2 = [
   { label: "Благоустройство", href: "/improvement" },
-  { label: "Аменитис", href: "#" },
+  { label: "Аменитис", href: "/amenities" },
   { label: "Передовые технологии", href: "/technologies" },
   { label: "Выборщик квартир", href: "/apartments" },
   { label: "Контакты", href: "/contact" },

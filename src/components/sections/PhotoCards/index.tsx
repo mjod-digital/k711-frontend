@@ -19,11 +19,13 @@ export type PhotoCard = {
 
 type PhotoCardsProps = {
   items: PhotoCard[];
+  /** Доп. класс на секцию — для постраничных отступов (напр. amenities). */
+  className?: string;
 };
 
 // Пара фото-карточек с заголовком поверх (Figma 373-9288). Десктоп — две в ряд;
 // мобайл — друг под другом «лесенкой» (первая прижата влево, вторая — вправо).
-export function PhotoCards({ items }: PhotoCardsProps) {
+export function PhotoCards({ items, className }: PhotoCardsProps) {
   const gridRef = useRef<HTMLDivElement>(null);
   const [revealed, setRevealed] = useState(false);
 
@@ -62,7 +64,7 @@ export function PhotoCards({ items }: PhotoCardsProps) {
   }, []);
 
   return (
-    <section className={styles.section}>
+    <section className={cn(styles.section, className)}>
       <div className={styles.grid} ref={gridRef}>
         {items.map((it, i) => {
           const bottom = it.position === "bottom";

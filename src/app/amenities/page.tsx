@@ -89,6 +89,7 @@ export default function AmenitiesPage() {
       />
 
       <PhotoCards
+        className={styles.photoCards}
         items={[
           {
             src: "/images/amenities-spa.png",
@@ -112,8 +113,9 @@ export default function AmenitiesPage() {
       />
 
       <CenterHeading
+        className={styles.centerHeading}
         lines={[
-          { parts: [{ text: "дом,", big: true }, { text: "который" }], align: "center" },
+          { parts: [{ text: "дом,", big: true }, { text: "который", alignSelf: "end" }], align: "center" },
           { parts: [{ text: "не хочется покидать" }], align: "center" },
         ]}
       />

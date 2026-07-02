@@ -15,16 +15,17 @@ const FROST: CSSProperties = {
   WebkitBackdropFilter: "blur(40px)",
 };
 
+// Все пункты ведут на существующие страницы. «Офис продаж» = контакты (/contact).
+// Пункты без своей страницы (напр. «Историческая справка») убраны.
 const NAV = [
   { label: "Главная", href: "/" },
   { label: "Локация", href: "/location" },
   { label: "Архитектура", href: "/architecture" },
   { label: "Дизайн и искусство", href: "/design" },
-  { label: "Аменитис", href: "#" },
+  { label: "Аменитис", href: "/amenities" },
   { label: "Благоустройство", href: "/improvement" },
   { label: "Резиденции", href: "/residences" },
   { label: "Паркинг", href: "/technologies" },
-  { label: "Историческая справка", href: "#" },
   { label: "Офис продаж", href: "/contact" },
 ];
 

@@ -150,7 +150,10 @@ export function Terraces({
         style={
           rowPadTop != null
             ? ({
-                "--terr-row-pt": `calc(${rowPadTop} / var(--vw-screen) * 100 * 1vw)`,
+                // повторяем fluid() ДОСЛОВНО, включая var(--fvw): иначе отступ не
+                // замерзает на 1440+ (растёт как 1vw), фото уезжает вниз из-под
+                // замороженного заголовка → разрыв на широких экранах.
+                "--terr-row-pt": `calc(${rowPadTop} / var(--vw-screen) * 100 * var(--fvw, 1vw))`,
               } as CSSProperties)
             : undefined
         }
