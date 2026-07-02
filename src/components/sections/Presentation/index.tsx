@@ -1,7 +1,6 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
 import { useRef } from "react";
 import { useIsomorphicLayoutEffect } from "@/lib/useIsomorphicLayoutEffect";
 import styles from "./Presentation.module.scss";
@@ -78,9 +77,14 @@ export function Presentation() {
             уникальной концепции и локации до планировочных решений и премиальных
             сервисов.
           </p>
-          <Link href="#" className={styles.cta}>
+          <a
+            href="/pdf/klimashkina711.pdf"
+            target="_blank"
+            rel="noopener noreferrer"
+            className={styles.cta}
+          >
             Скачать презентацию
-          </Link>
+          </a>
         </div>
       </div>
     </section>

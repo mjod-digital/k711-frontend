@@ -24,8 +24,23 @@ function BookingForm({
 
       <form
         className={styles.form}
+        // Гасим нативную подсказку браузера — оставляем свою подсветку (:user-invalid).
+        onInvalidCapture={(e) => e.preventDefault()}
         onSubmit={(e) => {
           e.preventDefault();
+          const fd = new FormData(e.currentTarget);
+          // Шлём заявку с номером квартиры (fire-and-forget — попап показываем сразу).
+          void fetch("/api/lead", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              source: "booking",
+              apartmentNumber: number,
+              name: fd.get("name"),
+              phone: fd.get("phone"),
+              comment: fd.get("comment"),
+            }),
+          }).catch(() => {});
           onDone();
         }}
       >

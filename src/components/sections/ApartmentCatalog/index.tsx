@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
-import type { Dispatch, ReactNode, SetStateAction } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import type { Dispatch, ReactNode, RefObject, SetStateAction } from "react";
 import { RangeSlider } from "@/components/ui/RangeSlider";
 import {
   bedroomOptions,
@@ -54,6 +54,7 @@ function FilterPanel({
   bedOptions,
   onReset,
   onClose,
+  panelRef,
 }: {
   filters: Filters;
   setFilters: Dispatch<SetStateAction<Filters>>;
@@ -61,6 +62,7 @@ function FilterPanel({
   bedOptions: number[];
   onReset: () => void;
   onClose?: () => void;
+  panelRef?: RefObject<HTMLDivElement | null>;
 }) {
   const slider = (key: "floor" | "area" | "pricePerM2" | "cost", label: ReactNode) => (
     <RangeSlider
@@ -87,7 +89,8 @@ function FilterPanel({
         </button>
       )}
 
-      <div className={styles.bedGroup}>
+      <div className={styles.filtersInner} ref={panelRef}>
+        <div className={styles.bedGroup}>
         <p className={styles.bedLabel}>Количество спален</p>
         <div className={styles.tabs}>
           {bedOptions.map((n) => (
@@ -121,9 +124,10 @@ function FilterPanel({
       )}
       {slider("cost", "Стоимость (млн руб.)")}
 
-      <button type="button" className={styles.reset} onClick={onReset}>
-        сбросить фильтры
-      </button>
+        <button type="button" className={styles.reset} onClick={onReset}>
+          сбросить фильтры
+        </button>
+      </div>
     </div>
   );
 }
@@ -177,6 +181,42 @@ export function ApartmentCatalog({ apartments }: { apartments: Apartment[] }) {
 
   const reset = () => setFilters(initialFilters(ranges));
 
+  // Десктоп: масштабируем панель фильтров под высоту окна (zoom, как в меню) —
+  // на невысоких экранах панель ужимается целиком, а не срезается кнопка «сбросить».
+  const panelRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const content = panelRef.current;
+    const wrapper = content?.parentElement; // .filters (sticky, max-height)
+    if (!content || !wrapper) return;
+    const mqMobile = window.matchMedia("(max-width: 767.98px)");
+
+    const applyScale = () => {
+      if (mqMobile.matches) {
+        content.style.removeProperty("zoom");
+        return;
+      }
+      content.style.setProperty("zoom", "1"); // сброс перед замером натуральной высоты
+      const natural = content.offsetHeight;
+      const cs = getComputedStyle(wrapper);
+      const vpad = parseFloat(cs.paddingTop) + parseFloat(cs.paddingBottom);
+      const avail = wrapper.clientHeight - vpad;
+      const chrome = window.innerHeight - avail;
+      const availFloor = Math.max(0, 600 - chrome); // пол: ниже — внутренний скролл
+      const scale = Math.min(1, Math.max(avail, availFloor) / Math.max(1, natural));
+      content.style.setProperty("zoom", String(scale));
+    };
+
+    applyScale();
+    void document.fonts?.ready.then(applyScale); // пересчёт после загрузки шрифтов
+    window.addEventListener("resize", applyScale);
+    mqMobile.addEventListener("change", applyScale);
+    return () => {
+      window.removeEventListener("resize", applyScale);
+      mqMobile.removeEventListener("change", applyScale);
+      content.style.removeProperty("zoom");
+    };
+  }, []);
+
   const rows = useMemo(
     () =>
       apartments.filter(
@@ -199,6 +239,7 @@ export function ApartmentCatalog({ apartments }: { apartments: Apartment[] }) {
           ranges={ranges}
           bedOptions={bedOptions}
           onReset={reset}
+          panelRef={panelRef}
         />
       </aside>
 

@@ -37,15 +37,19 @@
 
 // ----- Панель фильтров (общая для сайдбара и оверлея) -----
 .filters {
-  display: flex;
-  flex-direction: column;
-  gap: fluid(20);
   padding: fluid(40) fluid(20);
 
   @include mobile {
     // верхний отступ очищает фиксированную шапку (она видна над панелью)
     padding: calc(var(--header-h) + #{fluid(24)}) fluid(16) fluid(28);
   }
+}
+
+// Содержимое панели — его масштабирует zoom (десктоп), см. ApartmentCatalog.tsx.
+.filtersInner {
+  display: flex;
+  flex-direction: column;
+  gap: fluid(20);
 }
 
 // Десктоп: панель фильтров «прилипает» под хедером и видна всегда при прокрутке
@@ -104,7 +108,8 @@
   min-width: fluid(76);
   padding: fluid(8) fluid(20) fluid(10);
   background: var(--color-brown-dark); // #3e2022
-  color: var(--color-brown-medium); // #753b29
+
+  color: var(--color-badge-light);
   font-family: var(--font-display);
   font-size: fluid(16);
   line-height: 1;
@@ -124,7 +129,7 @@
 .reset {
   align-self: flex-start;
   margin-top: fluid(20);
-
+  flex-shrink: 0;
   // в мобильном оверлее кнопка сброса по центру (Figma 399-13142)
   height: fluid(48);
   padding-inline: fluid(20);

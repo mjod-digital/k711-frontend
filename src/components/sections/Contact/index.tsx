@@ -30,8 +30,19 @@ export function Contact() {
 
           <form
             className={styles.form}
+            onInvalidCapture={(e) => e.preventDefault()}
             onSubmit={(e) => {
               e.preventDefault();
+              const fd = new FormData(e.currentTarget);
+              void fetch("/api/lead", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  source: "contact",
+                  name: fd.get("name"),
+                  phone: fd.get("phone"),
+                }),
+              }).catch(() => {});
               openSuccess();
             }}
           >

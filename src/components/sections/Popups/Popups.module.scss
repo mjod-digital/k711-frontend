@@ -136,7 +136,8 @@
   input:user-invalid {
     border-color: var(--color-error);
   }
-  input:user-invalid ~ span {
+  input:user-invalid ~ span,
+  input:user-invalid ~ span .link {
     color: var(--color-error);
   }
 }

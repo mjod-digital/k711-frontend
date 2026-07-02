@@ -278,14 +278,19 @@
 .planFrame {
   position: relative;
   display: flex;
-  flex: 0 0 auto;
+  flex: 0 1 auto;
+  min-width: 0;
+  // Схема не шире 690 («690×540 всегда») и оставляет место вертикальным подписям
+  // (~32px с каждой стороны), чтобы они не залезали на соседние колонки. Выше 1440
+  // застывает на 690, ниже — ужимается под колонку.
+  max-width: min(#{fluid(690)}, calc(100% - #{fluid(64)}));
 }
 
 .planImg {
   display: block;
-  width: 100%;
+  width: auto;
   height: fluid(470);
-  max-width: 100%;
+  max-width: fluid(440);
   object-fit: contain;
   // Планировки из CRM — тёмный чертёж на белом фоне. multiply «вмешивает»
   // белый в кремовый фон страницы (он исчезает), а линии остаются тёмными.
