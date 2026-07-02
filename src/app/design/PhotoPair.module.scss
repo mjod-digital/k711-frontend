@@ -50,6 +50,21 @@
   }
 }
 
+// Разворот фото снизу вверх, scrubbed по --intro (0 — скрыто, 1 — раскрыто).
+// Плавность даёт демпфирование --intro в JS (lerp), см. PhotoPair.tsx.
+.unfold {
+  position: absolute;
+  inset: 0;
+  clip-path: inset(calc((1 - var(--intro, 0)) * 100%) 0 0 0);
+  will-change: clip-path;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .unfold {
+    clip-path: none;
+  }
+}
+
 .image {
   object-fit: cover;
   object-position: center;

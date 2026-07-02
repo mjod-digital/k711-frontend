@@ -1,0 +1,253 @@
+@use "breakpoints" as *;
+
+// ============================================================
+//   Контакты / офис продаж (Figma 373-10119 / 432-14921).
+//   Десктоп: фото слева (левый край зафиксирован) + кремовая панель справа.
+//   Контент панели следует за 50%(+38) → выше 1440 отрывается от фото,
+//   т.е. зазор между фото и текстом растёт (как просил дизайн).
+//   Мобайл: фото сверху → заголовок → контакты → форма.
+// ============================================================
+.contact {
+  position: relative;
+  background: var(--color-badge-light);
+
+  @include mobile {
+    display: flex;
+    flex-direction: column;
+    padding: 0 fluid(8) fluid(60);
+  }
+}
+
+// Хлебные крошки — только мобайл.
+.breadcrumb {
+  display: none;
+
+  @include mobile {
+    display: flex;
+    align-items: center;
+    gap: fluid(6);
+    padding: fluid(6) 0;
+    color: var(--color-brown-dark);
+    font-family: var(--font-body);
+    font-size: fluid(12);
+    line-height: calc(16 / 12);
+    letter-spacing: 0.01em;
+  }
+}
+.sep {
+  color: var(--color-brown-light);
+}
+
+// Фото: десктоп — левая колонка на всю высоту (фикс. ширина → выше 1440 замирает);
+// мобайл — сверху, на всю ширину.
+.media {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  // Ширину НЕ фиксируем: фото = левая половина от края до центра (−10). Выше 1440
+  // тянется вместе с экраном (как фото на 404), а не замирает.
+  right: calc(50% + #{fluid(10)});
+  overflow: hidden;
+
+  @include mobile {
+    position: relative;
+    inset: auto;
+    width: 100%;
+    height: fluid(220);
+  }
+}
+.image {
+  object-fit: cover;
+  object-position: center;
+}
+
+// Правая панель с контентом. margin-left следует за 50%(+38): фото слева зафиксировано,
+// поэтому выше 1440 панель уезжает вправо и зазор до фото растёт.
+.panel {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: fluid(631);
+  min-height: calc(100vh - var(--header-h));
+  // Контент фикс. ширины прижат к правому краю (как текст на 404 — к своему краю):
+  // фото слева тянется, панель стоит справа → зазор между ними растёт выше 1440.
+  margin-left: auto;
+  margin-right: fluid(51);
+  padding-block: fluid(145) fluid(49);
+
+  @include mobile {
+    width: 100%;
+    min-height: 0;
+    margin-left: 0;
+    margin-right: 0;
+    padding: fluid(20) fluid(12) 0;
+  }
+}
+
+.title {
+  margin: 0;
+  color: var(--color-brown-dark);
+  font-family: var(--font-display);
+  font-size: fluid(68);
+  line-height: fluid(88);
+  text-transform: uppercase;
+
+  @include mobile {
+    font-size: fluid(28);
+    line-height: normal;
+  }
+}
+
+.info {
+  display: flex;
+  gap: fluid(40);
+  margin-top: fluid(33);
+  color: var(--color-brown-dark);
+  font-family: var(--font-body);
+  font-size: fluid(20);
+
+  a {
+    transition: color 0.3s ease;
+
+    &:hover {
+      color: var(--color-brown-medium);
+    }
+  }
+
+  @include mobile {
+    flex-direction: column;
+    gap: fluid(8);
+    margin-top: fluid(20);
+    font-size: fluid(16);
+  }
+}
+
+// ----- Форма (прижата к низу панели на десктопе) -----
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: fluid(100);
+  align-items: flex-end;
+  margin-top: auto;
+
+  @include mobile {
+    gap: fluid(28);
+    margin-top: fluid(28);
+  }
+}
+.fields {
+  display: flex;
+  flex-direction: column;
+  gap: fluid(16);
+  width: 100%;
+}
+.row {
+  display: flex;
+  gap: fluid(20);
+
+  .input {
+    flex: 1;
+    min-width: 0;
+  }
+
+  @include mobile {
+    flex-direction: column;
+    gap: fluid(16);
+  }
+}
+
+// Подчёркнутые инпуты на кремовой панели.
+.input {
+  width: 100%;
+  height: fluid(48);
+  padding: fluid(16);
+  background: none;
+  border: 0;
+  border-bottom: fluid(1) solid var(--color-brown-medium);
+  color: var(--color-brown-dark);
+  font-family: var(--font-body);
+  font-size: fluid(14);
+  line-height: calc(16 / 14);
+  letter-spacing: 0.01em;
+
+  &::placeholder {
+    color: var(--color-brown-light);
+  }
+  &:focus {
+    outline: none;
+    border-bottom-color: var(--color-brown-dark);
+  }
+
+  // Сброс заливки автозаполнения → фон панели.
+  &:-webkit-autofill,
+  &:-webkit-autofill:hover,
+  &:-webkit-autofill:focus {
+    -webkit-text-fill-color: var(--color-brown-dark);
+    box-shadow: 0 0 0 100px var(--color-badge-light) inset;
+    caret-color: var(--color-brown-dark);
+    transition: background-color 600000s 0s;
+  }
+
+  // Незаполненное обязательное поле (после отправки) — подсветка.
+  &:user-invalid {
+    border-bottom-color: var(--color-error);
+  }
+}
+
+.check {
+  display: flex;
+  gap: fluid(8);
+  color: var(--color-brown-light);
+  font-family: var(--font-body);
+  font-size: fluid(12);
+  line-height: calc(16 / 12);
+  letter-spacing: 0.01em;
+  cursor: pointer;
+
+  input {
+    flex-shrink: 0;
+    width: fluid(16);
+    height: fluid(16);
+    margin: 0;
+    appearance: none;
+    border: fluid(1) solid var(--color-brown-light);
+    border-radius: 1px;
+    cursor: pointer;
+
+    &:checked {
+      padding: fluid(3);
+      background-color: var(--color-brown-light);
+      background-clip: content-box;
+    }
+  }
+
+  input:user-invalid {
+    border-color: var(--color-error);
+  }
+  input:user-invalid ~ span,
+  input:user-invalid ~ span .link {
+    color: var(--color-error);
+  }
+}
+.link {
+  color: inherit;
+  text-decoration: underline;
+}
+
+.submit {
+  align-self: flex-end;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: fluid(48);
+  padding-inline: fluid(20);
+  font-family: var(--font-display);
+  font-size: var(--fs-button);
+  line-height: var(--lh-button);
+  letter-spacing: var(--ls-button);
+  text-transform: uppercase;
+  white-space: nowrap;
+  cursor: pointer;
+  @include ctaPrimary;
+}

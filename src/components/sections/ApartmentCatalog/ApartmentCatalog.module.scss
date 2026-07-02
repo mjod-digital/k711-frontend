@@ -159,7 +159,9 @@
 
 // ----- Таблица -----
 .list {
-  padding: fluid(40) fluid(24) fluid(60);
+  // Верхний отступ перенесён в .thead (ниже) — чтобы липкая шапка таблицы вставала
+  // на тот же уровень, что и липкая панель фильтров (у неё тоже padding-top 40).
+  padding: 0 fluid(24) fluid(60);
 
   @include mobile {
     padding: fluid(20) fluid(8) 0;
@@ -186,7 +188,8 @@
   top: var(--header-h);
   z-index: 3; // выше строк (.rowLink z1, .fav z2)
   background: var(--color-bg); // непрозрачный фон — строки уходят ПОД шапку
-  padding: 0 0 fluid(20);
+  // padding-top 40 = как у панели фильтров → шапка и фильтры на одном уровне при скролле.
+  padding: fluid(40) 0 fluid(20);
   color: var(--color-brown-medium);
   font-family: var(--font-display);
   font-size: fluid(16);

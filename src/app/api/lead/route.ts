@@ -11,6 +11,7 @@ type LeadPayload = {
   source?: "booking" | "contact";
   name?: string;
   phone?: string;
+  email?: string;
   comment?: string;
   apartmentNumber?: number | null;
 };
@@ -29,6 +30,7 @@ export async function POST(request: NextRequest) {
     source: data.source ?? "unknown",
     name: data.name,
     phone: data.phone,
+    email: data.email ?? "",
     comment: data.comment ?? "",
     // Для брони — номер квартиры, от которой пришла форма (пойдёт в письмо).
     apartmentNumber: data.apartmentNumber ?? null,

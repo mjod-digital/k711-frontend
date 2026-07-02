@@ -25,7 +25,7 @@ const NAV = [
   { label: "Резиденции", href: "/residences" },
   { label: "Паркинг", href: "/technologies" },
   { label: "Историческая справка", href: "#" },
-  { label: "Офис продаж", href: "#" },
+  { label: "Офис продаж", href: "/contact" },
 ];
 
 const PICK = [
