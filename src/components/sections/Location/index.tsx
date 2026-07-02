@@ -160,6 +160,10 @@ export function Location({ className }: { className?: string }) {
       const map = mapRef.current;
       if (!pan || !map) return;
       const d = drag.current;
+      // Реальные размеры контейнера → в CSS: .pan кроет их, сохраняя пропорции
+      // карты (без погрешности скроллбара, в отличие от 100vw). См. Location.scss.
+      pan.style.setProperty("--map-w", `${map.clientWidth}px`);
+      pan.style.setProperty("--map-h", `${map.clientHeight}px`);
       d.maxX = Math.max(0, pan.offsetWidth - map.clientWidth);
       d.maxY = Math.max(0, pan.offsetHeight - map.clientHeight);
       d.x = clamp(-d.maxX / 2, -d.maxX, 0); // старт по центру карты
