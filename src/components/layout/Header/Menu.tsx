@@ -26,12 +26,11 @@ const NAV = [
   { label: "Благоустройство", href: "/improvement" },
   { label: "Резиденции", href: "/residences" },
   { label: "Передовые технологии", href: "/technologies" },
-  { label: "Контакты", href: "/contact" },
+  { label: "Офис продаж", href: "/contact" },
 ];
 
 const PICK = [
   { label: "Выбор по параметрам", href: "/apartments" },
-  { label: "Визуальный выбор", href: "/apartments" },
 ];
 
 type MenuProps = { open: boolean; onClose: () => void };
