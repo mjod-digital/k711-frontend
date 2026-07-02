@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import type { ReactNode } from "react";
+import type { CSSProperties, ReactNode } from "react";
 import { useRef, useState } from "react";
 import { CascadeHeading, type CascadeLine } from "@/components/ui/CascadeHeading";
 import { useIsomorphicLayoutEffect } from "@/lib/useIsomorphicLayoutEffect";
@@ -30,6 +30,8 @@ type TerracesProps = {
   image?: string;
   imageAlt?: string;
   paragraphs?: [ReactNode, ReactNode];
+  /** Отступ .row над фото (px @1440, десктоп). По умолчанию 188. */
+  rowPadTop?: number;
 };
 
 export function Terraces({
@@ -38,6 +40,7 @@ export function Terraces({
   image = "/images/terraces.png",
   imageAlt = "Фасад k711 — сохранённая историческая стена",
   paragraphs,
+  rowPadTop,
 }: TerracesProps = {}) {
   const ref = useRef<HTMLElement>(null);
   const [mobile, setMobile] = useState(false);
@@ -107,7 +110,16 @@ export function Terraces({
         />
       </div>
 
-      <div className={styles.row}>
+      <div
+        className={styles.row}
+        style={
+          rowPadTop != null
+            ? ({
+                "--terr-row-pt": `calc(${rowPadTop} / var(--vw-screen) * 100 * 1vw)`,
+              } as CSSProperties)
+            : undefined
+        }
+      >
         <div className={styles.media}>
           <div className={styles.unfold}>
             <Image

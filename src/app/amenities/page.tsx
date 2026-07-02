@@ -70,6 +70,7 @@ export default function AmenitiesPage() {
       <Terraces
         image="/images/amenities-lobby.png"
         imageAlt="Лобби клубного дома k 7/11 — кофейная и барная зона"
+        rowPadTop={290}
         desktopLines={[
           { parts: [{ text: "Дом,", big: true }] },
           { parts: [{ text: "в котором город остаётся снаружи", big: true }] },
