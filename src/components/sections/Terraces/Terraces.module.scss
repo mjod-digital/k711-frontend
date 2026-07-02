@@ -58,7 +58,9 @@
   flex-direction: row;
   align-items: center; // текст — в нижней зоне, мимо опустившегося заголовка
   gap: fluid(197);
-  padding-top: fluid(188); // отступ из макета (заголовок «наезжает» сверху)
+  // отступ из макета (заголовок «наезжает» сверху); переопределяется на конкретной
+  // странице через проп rowPadTop → --terr-row-pt (напр. «Аменитис» = 290).
+  padding-top: var(--terr-row-pt, #{fluid(188)});
 
   @include mobile {
     flex-direction: column;
