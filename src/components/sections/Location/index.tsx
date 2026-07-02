@@ -219,7 +219,9 @@ export function Location({ className }: { className?: string }) {
     d.sy = e.clientY;
     d.bx = d.x;
     d.by = d.y;
-    panRef.current?.setPointerCapture?.(e.pointerId);
+    // НЕ захватываем указатель здесь: setPointerCapture на pointerdown уводит
+    // pointerup на .pan и гасит click дочерних кнопок-пинов (клик проходил только
+    // программным .click()). Захват — лениво в onPointerMove, когда реально тащим.
   };
 
   const onPointerMove = (e: ReactPointerEvent) => {
@@ -227,7 +229,11 @@ export function Location({ className }: { className?: string }) {
     if (!d.active) return;
     const dx = e.clientX - d.sx;
     const dy = e.clientY - d.sy;
-    if (Math.abs(dx) + Math.abs(dy) > 5) d.moved = true;
+    if (!d.moved) {
+      if (Math.abs(dx) + Math.abs(dy) <= 5) return; // до порога — это ещё клик
+      d.moved = true;
+      panRef.current?.setPointerCapture?.(e.pointerId); // тащим — забираем указатель
+    }
     d.x = clamp(d.bx + dx, -d.maxX, 0);
     d.y = clamp(d.by + dy, -d.maxY, 0);
     applyPan();
@@ -235,8 +241,8 @@ export function Location({ className }: { className?: string }) {
 
   const onPointerUp = (e: ReactPointerEvent) => {
     const d = drag.current;
+    if (d.moved) panRef.current?.releasePointerCapture?.(e.pointerId);
     d.active = false;
-    panRef.current?.releasePointerCapture?.(e.pointerId);
   };
 
   const visible = PLACES.filter((p) => inCategory(p, active));
