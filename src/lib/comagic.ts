@@ -45,6 +45,10 @@ export type Lead = {
   email?: string | null;
   comment?: string | null;
   apartment?: LeadApartment | null;
+  /** Согласие на обработку персональных данных (обязательный чекбокс). */
+  consent?: boolean;
+  /** Согласие на маркетинговые рассылки (необязательный чекбокс). */
+  marketing?: boolean;
 };
 
 const SOURCE_LABEL: Record<Lead["source"], string> = {
@@ -63,10 +67,16 @@ function apartmentLine(a: LeadApartment): string {
   return parts.join(", ");
 }
 
+const yesNo = (v: boolean) => (v ? "да" : "нет");
+
 function buildMessage(lead: Lead): string {
   const lines = [SOURCE_LABEL[lead.source]];
   if (lead.apartment) lines.push(`Квартира: ${apartmentLine(lead.apartment)}`);
   if (lead.comment) lines.push(`Комментарий: ${lead.comment}`);
+  if (lead.consent !== undefined)
+    lines.push(`Согласие на обработку ПД: ${yesNo(lead.consent)}`);
+  if (lead.marketing !== undefined)
+    lines.push(`Согласие на рассылку: ${yesNo(lead.marketing)}`);
   return lines.join("\n");
 }
 
@@ -112,6 +122,8 @@ export function sendLead(lead: Lead): void {
       email: lead.email,
       comment: lead.comment,
       apartmentNumber: lead.apartment?.number ?? null,
+      consent: lead.consent ?? null,
+      marketing: lead.marketing ?? null,
     }),
   }).catch(() => {});
 }

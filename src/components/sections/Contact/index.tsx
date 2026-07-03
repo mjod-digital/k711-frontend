@@ -39,6 +39,8 @@ export function Contact() {
                 source: "contact",
                 name: fd.get("name") as string,
                 phone: fd.get("phone") as string,
+                consent: !!fd.get("consent"),
+                marketing: !!fd.get("marketing"),
               });
               openSuccess();
             }}
@@ -63,7 +65,7 @@ export function Contact() {
 
             <div className={styles.checks}>
               <label className={styles.check}>
-                <input type="checkbox" required />
+                <input type="checkbox" name="consent" required />
                 <span>
                   Соглашаюсь с{" "}
                   <a href="#" className={styles.link}>
@@ -73,7 +75,7 @@ export function Contact() {
                 </span>
               </label>
               <label className={styles.check}>
-                <input type="checkbox" />
+                <input type="checkbox" name="marketing" />
                 <span>Подписаться на маркетинговые и рекламные рассылки</span>
               </label>
             </div>
