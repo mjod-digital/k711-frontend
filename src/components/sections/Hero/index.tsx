@@ -46,6 +46,7 @@ export function Hero() {
             alt="Клубный дом k711 на тихой Пресне"
             fill
             priority
+            data-hero
             sizes="100vw"
             className={styles.image}
           />

@@ -117,6 +117,7 @@ export function PageHero({
             alt={imageAlt}
             fill
             priority
+            data-hero
             sizes="100vw"
             className={styles.image}
           />

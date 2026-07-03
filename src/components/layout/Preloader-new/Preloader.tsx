@@ -25,11 +25,32 @@ function Preloader() {
         // Lenis может создаться чуть позже (соседний эффект) — добиваем stop.
         const stopRaf = requestAnimationFrame(() => getLenis()?.stop?.());
 
-        let loaded = document.readyState === 'complete';
-        const onLoad = () => {
+        // Ждём именно HERO-картинку (data-hero) — приоритетную, она в SSR-HTML и уже
+        // в DOM на момент этого layout-effect. Прелоудер НЕ гаснет, пока она не
+        // загрузилась → после прелоудера hero всегда на месте. (Раньше ждали
+        // window.load — на медленной загрузке срабатывала 8с-страховка и гасила
+        // прелоудер с ещё не загруженным hero.)
+        let loaded = false;
+        const markLoaded = () => {
             loaded = true;
         };
-        if (!loaded) window.addEventListener('load', onLoad, { once: true });
+        const hero = document.querySelector<HTMLImageElement>('img[data-hero]');
+        const detachHero = () => {
+            hero?.removeEventListener('load', markLoaded);
+            hero?.removeEventListener('error', markLoaded);
+        };
+        if (hero) {
+            if (hero.complete && hero.naturalWidth > 0) {
+                loaded = true; // уже загружена (кэш)
+            } else {
+                hero.addEventListener('load', markLoaded, { once: true });
+                hero.addEventListener('error', markLoaded, { once: true }); // не виснем на ошибке
+            }
+        } else if (document.readyState === 'complete') {
+            loaded = true; // нет hero на странице — по общему load
+        } else {
+            window.addEventListener('load', markLoaded, { once: true });
+        }
 
         let done = false;
         let tick = 0;
@@ -47,7 +68,7 @@ function Preloader() {
             closeT = window.setTimeout(() => setPhase('done'), 500); // = fade в CSS
         };
 
-        // 100 шагов × 24мс ≈ 2.4с. Пока не loaded — потолок 99 (держим до load).
+        // 100 шагов × 24мс ≈ 2.4с. Пока hero не загружена — потолок 99 (держим).
         let current = 0;
         tick = window.setInterval(() => {
             const cap = loaded ? 100 : 99;
@@ -56,16 +77,18 @@ function Preloader() {
             if (current >= 100) finish();
         }, 24);
 
+        // Жёсткая страховка: если hero так и не пришла за 10с — всё равно завершаем.
         const fallback = window.setTimeout(() => {
-            loaded = true; // разблокирует добивание до 100 в ближайший tick
-        }, 8000);
+            loaded = true;
+        }, 10000);
 
         return () => {
             window.clearInterval(tick);
             window.clearTimeout(fallback);
             window.clearTimeout(closeT);
             cancelAnimationFrame(stopRaf);
-            window.removeEventListener('load', onLoad);
+            detachHero();
+            window.removeEventListener('load', markLoaded);
             html.classList.remove('is-loading');
             getLenis()?.start?.();
         };
