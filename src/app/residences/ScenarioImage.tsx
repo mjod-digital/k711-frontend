@@ -10,7 +10,7 @@ export function ScenarioImage() {
   return (
     <section className={styles.section}>
       <div className={styles.media}>
-        <Image
+        <Image loading="eager"
           src="/images/residences-scenario.png"
           alt="Интерьер резиденции — квартиры с вашим сценарием жизни"
           fill

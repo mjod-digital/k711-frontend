@@ -83,7 +83,7 @@ export function SpaceSplit({
 
       <div className={styles.content}>
         <div className={styles.media}>
-          <Image
+          <Image loading="eager"
             src={image}
             alt={imageAlt}
             fill

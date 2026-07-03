@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { Hero } from "@/components/sections/Hero";
 import { Statement } from "@/components/sections/Statement";
 import { Showcase, type ShowcaseStep } from "@/components/sections/Showcase";
@@ -15,6 +16,29 @@ import { TextDuo } from "@/components/sections/TextDuo";
 import { Contact } from "@/components/sections/Contact";
 import { Slider, type Slide } from "@/components/ui/Slider";
 import { GalleryStrip, type GalleryItem } from "@/components/ui/GalleryStrip";
+
+// SEO-метаданные главной берём из API (MODX): /api/index → meta.title/description.
+// Абсолютный URL (как в lib/api.ts) — на сервере петлёй через nginx → MODX.
+// Если API недоступен — возвращаем {}, тогда действуют дефолты из layout.
+export async function generateMetadata(): Promise<Metadata> {
+  try {
+    const res = await fetch("https://www.klimashkina711.ru/api/index", {
+      next: { revalidate: 60 },
+    });
+    if (!res.ok) return {};
+    const data = (await res.json()) as {
+      meta?: { title?: string; description?: string };
+    };
+    const meta = data.meta;
+    if (!meta?.title && !meta?.description) return {};
+    return {
+      title: meta.title || undefined,
+      description: meta.description || undefined,
+    };
+  } catch {
+    return {};
+  }
+}
 
 const slidesSpa: Slide[] = [
   { src: "/images/slider-1.png", caption: "SPA, где забота о себе превращается в ритуал" },

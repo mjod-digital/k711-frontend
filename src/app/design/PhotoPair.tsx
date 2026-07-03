@@ -84,7 +84,7 @@ export function PhotoPair({ items }: { items: Photo[] }) {
                     refs.current[i] = el;
                   }}
                 >
-                  <Image
+                  <Image loading="eager"
                     src={it.src}
                     alt={it.alt}
                     fill

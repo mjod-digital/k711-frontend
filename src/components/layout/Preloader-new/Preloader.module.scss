@@ -1,0 +1,72 @@
+@use "breakpoints" as *;
+
+// Прелоудер первого экрана: % по центру на кремовом фоне. Размеры — через fluid
+// (резина), а не гигантские rem из исходника: было ~320px, стало ~fluid(120).
+.root {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background-color: var(--color-badge-light);
+  color: var(--color-brown-medium);
+  font-family: var(--font-display);
+  transition:
+    opacity 0.5s ease-in-out,
+    visibility 0.5s ease-in-out;
+}
+
+.root.fadeOut {
+  opacity: 0;
+  visibility: hidden;
+}
+
+.txt {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  animation: fadeInUp 0.5s ease-out;
+}
+
+.txt_perc {
+  margin: 0 0 fluid(16) 0;
+  font-family: var(--font-display);
+  font-size: fluid(20);
+  line-height: 1;
+  color: var(--color-brown-medium);
+
+  @include mobile {
+    margin-bottom: fluid(12);
+  }
+}
+
+.progress {
+  width: fluid(160);
+  height: fluid(2);
+  margin: 0 auto;
+  background-color: rgb(117 59 41 / 15%); // тонкая дорожка
+  overflow: hidden;
+
+  @include mobile {
+    width: fluid(120);
+  }
+}
+
+.progress span {
+  display: block;
+  width: 0;
+  height: 100%;
+  background-color: var(--color-brown-medium);
+  transition: width 0.3s ease;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -40%);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%);
+  }
+}

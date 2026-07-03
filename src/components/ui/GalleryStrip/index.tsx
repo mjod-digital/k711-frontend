@@ -188,7 +188,7 @@ export function GalleryStrip({ items, className }: GalleryStripProps) {
                   }}
                 >
                   <div className={styles.parallax}>
-                    <Image
+                    <Image loading="eager"
                       src={it.src}
                       alt={it.alt ?? it.caption ?? ""}
                       fill

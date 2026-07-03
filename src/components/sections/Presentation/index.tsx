@@ -56,7 +56,7 @@ export function Presentation() {
     <section ref={ref} className={styles.presentation}>
       <div className={styles.media}>
         <div className={styles.unfold} ref={unfoldRef}>
-          <Image
+          <Image loading="eager"
             src="/images/slider-2.png"
             alt="Клубный дом k711"
             fill

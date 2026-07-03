@@ -9,7 +9,7 @@ export function Residences() {
   return (
     <section className={styles.residences}>
       <div className={styles.media}>
-        <Image
+        <Image loading="eager"
           src="/images/residences.png"
           alt="Клубный дом k711 — 46 резиденций"
           fill

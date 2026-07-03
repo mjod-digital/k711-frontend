@@ -4,7 +4,7 @@ import localFont from "next/font/local";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { SmoothScroll } from "@/components/layout/SmoothScroll";
-import { Preloader } from "@/components/layout/Preloader";
+import Preloader from "@/components/layout/Preloader-new/Preloader";
 import { Popups } from "@/components/sections/Popups";
 import { siteConfig } from "@/config/site";
 import "./globals.scss";

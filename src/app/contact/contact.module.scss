@@ -127,7 +127,7 @@
 .form {
   display: flex;
   flex-direction: column;
-  gap: fluid(100);
+  gap: fluid(50);
   align-items: flex-end;
   margin-top: auto;
 
@@ -193,6 +193,13 @@
   &:user-invalid {
     border-bottom-color: var(--color-error);
   }
+}
+
+// Группа чекбоксов (согласие + рассылка) — как в попапе и секции Contact.
+.checks {
+  display: flex;
+  flex-direction: column;
+  gap: fluid(8);
 }
 
 .check {

@@ -66,7 +66,7 @@ export function Author({
     <section ref={sectionRef} className={styles.section}>
       <div className={styles.stage}>
         <div className={styles.photo}>
-          <Image
+          <Image loading="eager"
             src={image}
             alt={imageAlt}
             fill

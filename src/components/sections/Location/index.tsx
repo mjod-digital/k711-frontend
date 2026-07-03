@@ -1,7 +1,11 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import type { CSSProperties, PointerEvent as ReactPointerEvent } from "react";
+import type {
+  CSSProperties,
+  MouseEvent as ReactMouseEvent,
+  PointerEvent as ReactPointerEvent,
+} from "react";
 import { MapVector } from "@/components/ui/MapVector";
 import { Reveal } from "@/components/ui/Reveal";
 import { useIsomorphicLayoutEffect } from "@/lib/useIsomorphicLayoutEffect";
@@ -113,6 +117,12 @@ const clamp = (v: number, min: number, max: number) =>
 export function Location({ className }: { className?: string }) {
   const [active, setActive] = useState<"все" | Category>("все");
   const [openId, setOpenId] = useState<string | null>(null);
+  // Карточка держится в DOM во время анимации закрытия (плавный уход после того,
+  // как openId стал null). cardIdRef — синхронный слепок, чтобы эффект знал,
+  // была ли карточка показана.
+  const [cardId, setCardId] = useState<string | null>(null);
+  const [cardClosing, setCardClosing] = useState(false);
+  const cardIdRef = useRef<string | null>(null);
   const [dropped, setDropped] = useState(false);
   const [filterOpen, setFilterOpen] = useState(false);
   const mapRef = useRef<HTMLDivElement>(null);
@@ -186,6 +196,25 @@ export function Location({ className }: { className?: string }) {
     });
   }, [active]);
 
+  // Синхронизация карточки с openId: при открытии показываем сразу, при закрытии
+  // держим в DOM и проигрываем cardOut, потом снимаем (плавный уход).
+  useEffect(() => {
+    if (openId) {
+      setCardId(openId);
+      cardIdRef.current = openId;
+      setCardClosing(false);
+      return;
+    }
+    if (!cardIdRef.current) return; // и так ничего не показано
+    setCardClosing(true);
+    const t = window.setTimeout(() => {
+      setCardId(null);
+      cardIdRef.current = null;
+      setCardClosing(false);
+    }, 320); // = длительность cardOut
+    return () => window.clearTimeout(t);
+  }, [openId]);
+
   // Дропдаун категорий (мобайл): закрытие по клику мимо и по Esc.
   useEffect(() => {
     if (!filterOpen) return;
@@ -245,9 +274,19 @@ export function Location({ className }: { className?: string }) {
     d.active = false;
   };
 
+  // Клик по карте вне пина и карточки — закрываем открытую карточку места.
+  // (Карточка — сосед .pan, её клики сюда не всплывают; клик по пину открывает
+  // сам пин, поэтому его игнорируем. Перетаскивание — не клик.)
+  const onMapClick = (e: ReactMouseEvent) => {
+    if (drag.current.moved) return;
+    if ((e.target as HTMLElement).closest?.(`.${styles.mapPin}`)) return;
+    setOpenId(null);
+  };
+
   const visible = PLACES.filter((p) => inCategory(p, active));
   const openIndex = visible.findIndex((p) => p.id === openId);
-  const openPlace = openIndex >= 0 ? visible[openIndex] : null;
+  // Место, которое рисует карточка (при закрытии отстаёт от openId — для анимации).
+  const cardPlace = cardId ? (PLACES.find((p) => p.id === cardId) ?? null) : null;
 
   const step = (dir: number) => {
     if (!visible.length) return;
@@ -267,6 +306,7 @@ export function Location({ className }: { className?: string }) {
           onPointerMove={onPointerMove}
           onPointerUp={onPointerUp}
           onPointerCancel={onPointerUp}
+          onClick={onMapClick}
         >
           <MapVector className={styles.mapImg} />
 
@@ -382,16 +422,16 @@ export function Location({ className }: { className?: string }) {
           </button>
         </div>
 
-        {/* Карточка-слайдер места — появляется при клике на пин */}
-        {openPlace && (
-          <article className={styles.card}>
+        {/* Карточка-слайдер места — появляется при клике на пин, плавно уходит при закрытии */}
+        {cardPlace && (
+          <article className={cn(styles.card, cardClosing && styles.closing)}>
             <div className={styles.cardLive} aria-live="polite" aria-atomic="true">
-              <div key={openPlace.id} className={styles.cardBody}>
+              <div key={cardPlace.id} className={styles.cardBody}>
                 <h3 className={styles.cardTitle}>
-                  <span className={styles.wipe}>{openPlace.title}</span>
+                  <span className={styles.wipe}>{cardPlace.title}</span>
                 </h3>
                 <p className={styles.cardText}>
-                  <span className={styles.wipe}>{openPlace.text}</span>
+                  <span className={styles.wipe}>{cardPlace.text}</span>
                 </p>
               </div>
             </div>

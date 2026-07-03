@@ -116,7 +116,7 @@ export function PageHero({
             src={image}
             alt={imageAlt}
             fill
-            preload
+            priority
             sizes="100vw"
             className={styles.image}
           />

@@ -64,16 +64,22 @@ export function ContactForm() {
           aria-label="Комментарий"
         />
 
-        <label className={styles.check}>
-          <input type="checkbox" defaultChecked required />
-          <span>
-            Соглашаюсь с{" "}
-            <a href="#" className={styles.link}>
-              политикой конфиденциальности
-            </a>{" "}
-            и даю своё согласие на обработку персональных данных
-          </span>
-        </label>
+        <div className={styles.checks}>
+          <label className={styles.check}>
+            <input type="checkbox" defaultChecked required />
+            <span>
+              Соглашаюсь с{" "}
+              <a href="#" className={styles.link}>
+                политикой конфиденциальности
+              </a>{" "}
+              и даю своё согласие на обработку персональных данных
+            </span>
+          </label>
+          <label className={styles.check}>
+            <input type="checkbox" />
+            <span>Подписаться на маркетинговые и рекламные рассылки</span>
+          </label>
+        </div>
       </div>
 
       <button type="submit" className={styles.submit}>

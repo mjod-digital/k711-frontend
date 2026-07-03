@@ -429,6 +429,13 @@
   }
 }
 
+// Закрытие: плавный уход (перебивает cardIn по специфичности .card.closing).
+// Во время анимации не кликается — карточка держится в DOM ~320мс (см. index.tsx).
+.card.closing {
+  animation: cardOut 0.3s ease both;
+  pointer-events: none;
+}
+
 // Внутренняя заливка карточки: тот же скос, инсет на толщину рамки. Полоса фона
 // (.card) между внешним и внутренним клипом и читается как граница.
 .card::before {
@@ -448,6 +455,17 @@
   to {
     opacity: 1;
     transform: none;
+  }
+}
+
+@keyframes cardOut {
+  from {
+    opacity: 1;
+    transform: none;
+  }
+  to {
+    opacity: 0;
+    transform: translateY(fluid(16));
   }
 }
 

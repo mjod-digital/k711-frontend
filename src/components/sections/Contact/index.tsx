@@ -13,7 +13,7 @@ export function Contact() {
     <section className={styles.contact} id="contact">
       <div className={styles.inner}>
         <div className={styles.media}>
-          <Image
+          <Image loading="eager"
             src="/images/contact.png"
             alt="Клубный дом k711"
             fill

@@ -103,7 +103,7 @@ export function ResidenceStats({ items }: ResidenceStatsProps) {
       <div className={styles.grid}>
         {items.map((it, i) => (
           <figure key={i} className={cn(styles.card, styles[it.place ?? "left"])}>
-            <Image
+            <Image loading="eager"
               src={it.src}
               alt={it.alt}
               fill

@@ -25,7 +25,7 @@ export default function ContactPage() {
       </nav>
 
       <div className={styles.media}>
-        <Image
+        <Image loading="eager"
           src="/images/contact-office.jpg"
           alt="Офис продаж клубного дома k 7/11"
           fill

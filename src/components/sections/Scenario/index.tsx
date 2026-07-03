@@ -41,7 +41,7 @@ export function Scenario() {
     <section className={styles.scenario}>
       <div className={styles.media} ref={mediaRef}>
         <div className={styles.parallax} ref={parallaxRef}>
-          <Image
+          <Image loading="eager"
             src="/images/scenario.png"
             alt="Интерьер клубного дома k711"
             fill

@@ -131,6 +131,9 @@ export function Slider({ slides, className, mobileGallery = false }: SliderProps
                     src={slide.src}
                     alt={slide.alt ?? slide.caption ?? ""}
                     fill
+                    // Слайды за пределами вьюпорта карусели (в т.ч. клоны loop) не
+                    // грузятся при lazy → при свайпе/доскролле пустые. Грузим сразу.
+                    loading="eager"
                     sizes="(min-width: 768px) 76vw, 86vw"
                     className={styles.image}
                   />

@@ -33,7 +33,7 @@ function FavoriteCard({
         aria-label={`Квартира №${apt.number}`}
       >
         {apt.plan && (
-          <Image
+          <Image loading="eager"
             src={apt.plan}
             alt={`Планировка квартиры №${apt.number}`}
             fill

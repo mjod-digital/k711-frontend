@@ -25,7 +25,7 @@ export function FeatureScreen({
   return (
     <section className={styles.feature}>
       <div className={styles.media}>
-        <Image
+        <Image loading="eager"
           src={image}
           alt={imageAlt}
           fill

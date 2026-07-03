@@ -73,7 +73,7 @@ export function PhotoCards({ items, className }: PhotoCardsProps) {
               key={i}
               className={cn(styles.card, bottom ? styles.bottom : styles.top)}
             >
-              <Image
+              <Image loading="eager"
                 src={it.src}
                 alt={it.alt}
                 fill

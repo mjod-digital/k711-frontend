@@ -14,7 +14,7 @@ const navCol2 = [
   { label: "Аменитис", href: "/amenities" },
   { label: "Передовые технологии", href: "/technologies" },
   { label: "Выборщик квартир", href: "/apartments" },
-  { label: "Контакты", href: "/contact" },
+  { label: "Офис продаж", href: "/contact" },
 ];
 
 export function Footer() {
