@@ -52,3 +52,23 @@
     font-size: fluid(28);
   }
 }
+
+// ResidenceStats на technologies — отступы: 80 десктоп / 60 мобайл (сверху и снизу).
+.stats {
+  --rs-mt: #{fluid(80)};
+  --rs-mb: #{fluid(80)};
+
+  @include mobile {
+    --rs-mt: #{fluid(60)};
+    --rs-mb: #{fluid(60)};
+  }
+}
+
+// PhotoCards на technologies — margin-top: 80 десктоп / 60 мобайл (как на amenities).
+.photoCards {
+  margin-top: fluid(80);
+
+  @include mobile {
+    margin-top: fluid(60);
+  }
+}

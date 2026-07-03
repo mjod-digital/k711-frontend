@@ -83,6 +83,7 @@ export default function DesignPage() {
       />
 
       <SpaceSplit
+        className={styles.spaceSplit}
         image="/images/design/garden.png"
         imageAlt="Концепция благоустройства от L.BURO"
         headingLines={["концепция", "благо­устройства", "от EDXXKAT"]}

@@ -551,7 +551,12 @@
 .cardArrows {
   display: flex;
   gap: fluid(8);
-  margin-left: auto;
+  margin-right: auto;
+
+  @include mobile {
+    margin-right: unset;
+    margin-left: auto;
+  }
 }
 
 .cardArrow {

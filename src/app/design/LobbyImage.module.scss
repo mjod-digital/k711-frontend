@@ -65,6 +65,10 @@
   color: var(--color-white);
   font-family: var(--font-display);
   text-transform: uppercase;
+
+  @include mobile {
+    gap: fluid(8);
+  }
 }
 
 .line {

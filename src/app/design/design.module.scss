@@ -43,3 +43,11 @@
     top: 85.5%;
   }
 }
+
+// SpaceSplit на design — мобильные правки (Figma): заголовок выше, секция ниже.
+.spaceSplit {
+  @include mobile {
+    --ss-heading-top: #{fluid(-20)};
+    --ss-mt: #{fluid(80)};
+  }
+}

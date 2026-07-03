@@ -72,3 +72,10 @@
     font-size: fluid(44);
   }
 }
+
+// ConnectBlock на amenities: без верхнего отступа на мобайле.
+.connect {
+  @include mobile {
+    --cb-mt: 0;
+  }
+}

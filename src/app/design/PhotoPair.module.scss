@@ -32,21 +32,22 @@
   overflow: hidden;
 
   @include mobile {
-    width: fluid(300);
+    width: 100%; // на всю ширину колонки
     aspect-ratio: 300 / 340;
   }
 }
 
-// мобайл: первая карточка прижата влево, вторая — вправо (Figma 397-11494)
+// мобайл: карточки на всю ширину колонки (без «лесенки» — auto-маргины ужимали
+// figure до контента, из-за чего .media width:100% схлопывалась).
 .top {
   @include mobile {
-    margin-right: auto;
+    margin-inline: 0;
   }
 }
 
 .bottom {
   @include mobile {
-    margin-left: auto;
+    margin-inline: 0;
   }
 }
 
@@ -57,6 +58,11 @@
   inset: 0;
   clip-path: inset(calc((1 - var(--intro, 0)) * 100%) 0 0 0);
   will-change: clip-path;
+
+  // Мобайл: без разворота — картинка сразу видна целиком (как в reduced-motion).
+  @include mobile {
+    clip-path: none;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

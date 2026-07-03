@@ -2,7 +2,9 @@
 
 .section {
   padding-inline: fluid(20);
-  margin-top: fluid(60);
+  // Отступ сверху переопределяется постранично через --cb-mt (напр. amenities
+  // убирает его на мобайле). По умолчанию — макетные fluid(60).
+  margin-top: var(--cb-mt, #{fluid(60)});
 
   @include mobile {
     padding-inline: fluid(8);

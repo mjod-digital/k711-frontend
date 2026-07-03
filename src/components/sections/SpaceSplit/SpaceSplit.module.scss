@@ -14,7 +14,9 @@
   padding: fluid(10) fluid(20) fluid(28);
 
   @include mobile {
-    margin-block: fluid(60);
+    // margin-top переопределяется постранично через --ss-mt (design: 80).
+    margin-top: var(--ss-mt, #{fluid(60)});
+    margin-bottom: fluid(60);
     padding: fluid(20) fluid(8);
   }
 }
@@ -28,8 +30,9 @@
   width: fluid(1221);
 
   @include mobile {
-    // макет 397-11233: заголовок по-прежнему поверх фото, смещён вправо
-    top: fluid(14);
+    // макет 397-11233: заголовок по-прежнему поверх фото, смещён вправо.
+    // top переопределяется постранично через --ss-heading-top (design: -20).
+    top: var(--ss-heading-top, #{fluid(14)});
     left: fluid(52);
     width: fluid(300);
   }

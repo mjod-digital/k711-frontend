@@ -18,8 +18,8 @@ const FROST: CSSProperties = {
 // Названия пунктов совпадают с футером (единый нейминг по страницам).
 // Все пункты ведут на существующие страницы.
 const NAV = [
-  { label: "О проекте", href: "/" },
-  { label: "Окружение", href: "/location" },
+  { label: "Главная", href: "/" },
+  { label: "Локация", href: "/location" },
   { label: "Архитектура", href: "/architecture" },
   { label: "Дизайн и искусство", href: "/design" },
   { label: "Аменитис", href: "/amenities" },

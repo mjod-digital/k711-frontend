@@ -6,6 +6,7 @@ import { useRef } from "react";
 import type { CSSProperties, ReactNode } from "react";
 import { Reveal } from "@/components/ui/Reveal";
 import { useIsomorphicLayoutEffect } from "@/lib/useIsomorphicLayoutEffect";
+import { cn } from "@/lib/utils";
 import styles from "./SpaceSplit.module.scss";
 
 type SpaceSplitProps = {
@@ -18,6 +19,8 @@ type SpaceSplitProps = {
   /** Подпись CTA-кнопки под вторым абзацем. */
   ctaLabel?: string;
   ctaHref?: string;
+  /** Постраничные переопределения (напр. --ss-mt / --ss-heading-top на design). */
+  className?: string;
 };
 
 // «Пространство по вашим правилам» (Figma 373-9556): крупный коричневый
@@ -29,6 +32,7 @@ export function SpaceSplit({
   paragraphs,
   ctaLabel = "выбрать резиденцию",
   ctaHref = "/apartments",
+  className,
 }: SpaceSplitProps) {
   const sectionRef = useRef<HTMLElement>(null);
   const triggerRef = useRef<HTMLParagraphElement>(null);
@@ -66,7 +70,7 @@ export function SpaceSplit({
   }, []);
 
   return (
-    <section ref={sectionRef} className={styles.section}>
+    <section ref={sectionRef} className={cn(styles.section, className)}>
       <Reveal variant="lines" className={styles.headingWrap}>
         <h2 className={styles.heading}>
           {headingLines.map((line, i) => (

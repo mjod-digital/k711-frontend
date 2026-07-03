@@ -3,8 +3,8 @@ import { siteConfig } from "@/config/site";
 import styles from "./Footer.module.scss";
 
 const navCol1 = [
-  { label: "О проекте", href: "/" },
-  { label: "Окружение", href: "/location" },
+  { label: "Главная", href: "/" },
+  { label: "Локация", href: "/location" },
   { label: "Архитектура", href: "/architecture" },
   { label: "Резиденции", href: "/residences" },
   { label: "Дизайн и искусство", href: "/design" },

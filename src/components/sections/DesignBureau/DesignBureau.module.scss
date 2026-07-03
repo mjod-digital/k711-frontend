@@ -40,7 +40,6 @@
   width: 39.86%; // 574 / 1440
   clip-path: polygon(0 0, 90% 0, 100% 25%, 100% 100%, 0 100%);
   height: 73.7%; // 664 / 901
-  border-radius: var(--radius);
   overflow: hidden;
   @include cornerFade(50.6, 151);
 
@@ -76,6 +75,10 @@
     position: absolute;
     white-space: nowrap;
   }
+
+  @include mobile {
+    font-size: fluid(28);
+  }
 }
 
 .avtory {
@@ -100,18 +103,18 @@
   // позиции — в долях от .stage (высота 410)
   .avtory {
     left: 2.2%;
-    top: 13.9%;
+    top: 14.9%;
   } // 8, 57
   .koncepcii {
     left: 14.4%;
-    top: 21%;
+    top: 22%;
   } // 52, 86
   .blagoustroystva {
     left: 14.2%;
-    top: 28.8%;
+    top: 29.8%;
   } // 51, 118
   .lburo {
-    left: 60%;
+    left: 61%;
     top: 36.8%;
     font-size: fluid(44);
   } // 216, 151
@@ -203,7 +206,7 @@
     left: auto;
     top: auto;
     width: auto;
-    margin: fluid(20) fluid(8) fluid(40) fluid(52); // отступ слева как в макете (x52)
+    margin: fluid(20) fluid(8) fluid(0) fluid(52); // отступ слева как в макете (x52)
     gap: fluid(20);
   }
 }

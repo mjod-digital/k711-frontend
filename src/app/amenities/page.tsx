@@ -65,7 +65,7 @@ export default function AmenitiesPage() {
         ]}
       />
 
-      <Slider slides={slides} mobileGallery />
+      <Slider slides={slides} />
 
       <Terraces
         image="/images/amenities-lobby.png"
@@ -120,7 +120,7 @@ export default function AmenitiesPage() {
         ]}
       />
 
-      <ConnectBlock />
+      <ConnectBlock className={styles.connect} />
     </>
   );
 }

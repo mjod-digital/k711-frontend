@@ -176,7 +176,7 @@ export default function HomePage() {
         paragraphs={spaceParagraphs}
       />
 
-      <Slider slides={slidesSpa} mobileGallery />
+      <Slider slides={slidesSpa} />
 
       <TextDuo
         variant="full"

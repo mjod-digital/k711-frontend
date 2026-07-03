@@ -9,11 +9,14 @@
   // Выше 1440 замораживаем секцию на 1440 и центрируем — иначе колонки 1fr
   // растягивают карточки на весь контейнер; должны держать макетные 456px.
   @include contentMax(1440);
-  margin-top: fluid(128);
+  // Отступы переопределяются постранично через --rs-mt / --rs-mb
+  // (напр. technologies: 80 десктоп / 60 мобайл сверху и снизу).
+  margin-top: var(--rs-mt, #{fluid(128)});
+  margin-bottom: var(--rs-mb, 0);
   padding-inline: fluid(20);
 
   @include mobile {
-    margin-top: fluid(60);
+    margin-top: var(--rs-mt, #{fluid(60)});
     padding-inline: fluid(8);
   }
 }
@@ -42,7 +45,6 @@
   isolation: isolate;
 
   @include mobile {
-    width: fluid(300);
     aspect-ratio: 300 / 340;
   }
 }

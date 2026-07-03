@@ -67,6 +67,7 @@ export default function TechnologiesPage() {
       <Slider slides={slides} />
 
       <ResidenceStats
+        className={styles.stats}
         items={[
           {
             src: "/images/technologies/parking.png",
@@ -104,6 +105,7 @@ export default function TechnologiesPage() {
       <StayHeading />
 
       <PhotoCards
+        className={styles.photoCards}
         items={[
           { src: "/images/technologies/photo-left.png", alt: "Инженерия дома", position: "top", lines: [] },
           { src: "/images/technologies/photo-right.png", alt: "Комфорт резиденций", position: "bottom", lines: [] },

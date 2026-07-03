@@ -29,6 +29,8 @@ export type ResidenceStat = {
 
 type ResidenceStatsProps = {
   items: ResidenceStat[];
+  /** Постраничные переопределения отступов (--rs-mt / --rs-mb). */
+  className?: string;
 };
 
 // Все цифры в строке умножаем на прогресс p (0→1): «157»→«0»…«157», «2-4»→«0-0»…«2-4».
@@ -37,7 +39,7 @@ const lerpNumbers = (s: string, p: number) =>
 
 // Три фото-карточки со статистикой (Figma 373-9535): крупное число + мелкая
 // подпись снизу-слева. Числа считаются от 0 при появлении секции в виде.
-export function ResidenceStats({ items }: ResidenceStatsProps) {
+export function ResidenceStats({ items, className }: ResidenceStatsProps) {
   const ref = useRef<HTMLElement>(null);
   const [p, setP] = useState(0); // общий прогресс счётчика 0..1
   const [revealed, setRevealed] = useState(false); // раскрытие подписей-шторок
@@ -99,7 +101,7 @@ export function ResidenceStats({ items }: ResidenceStatsProps) {
   }, []);
 
   return (
-    <section ref={ref} className={styles.section}>
+    <section ref={ref} className={cn(styles.section, className)}>
       <div className={styles.grid}>
         {items.map((it, i) => (
           <figure key={i} className={cn(styles.card, styles[it.place ?? "left"])}>
