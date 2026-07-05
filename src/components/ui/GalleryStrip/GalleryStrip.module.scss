@@ -52,7 +52,7 @@
     display: none;
   }
 
-  // Мобайл: не лента, а вертикальная «шахматная» колонка (макет 373-12515) —
+  // Мобайл: не лента, а вертикальная колонка кадров на всю ширину —
   // горизонтальный скролл выключаем, секция течёт по высоте страницы.
   @include mobile {
     overflow: visible;
@@ -67,10 +67,11 @@
   width: max-content;
 
   @include mobile {
+    // Мобайл: вертикальная колонка кадров во всю ширину (8px боковые отступы).
     flex-direction: column;
-    align-items: flex-start;
+    align-items: stretch;
     gap: fluid(40);
-    padding-inline: 0;
+    padding-inline: fluid(8);
     width: auto;
   }
 }
@@ -97,12 +98,13 @@
   overflow: hidden;
 }
 
+// Мобайл: оба варианта — во всю ширину колонки, единая высота (без «лесенки»).
+// На десктопе сохраняются макетные ширины ленты (wide 1100 / narrow 520).
 .wide .imageBox {
   width: fluid(1100);
 
-  // Мобайл: широкий кадр почти во всю ширину (344×260 @360, макет 373-12515).
   @include mobile {
-    width: fluid(344);
+    width: 100%;
     height: fluid(260);
   }
 }
@@ -110,38 +112,9 @@
 .narrow .imageBox {
   width: fluid(520);
 
-  // Мобайл: узкий кадр 212×262 @360 (макет 373-12515).
   @include mobile {
-    width: fluid(212);
-    height: fluid(262);
-  }
-}
-
-// Мобайл — горизонтальные смещения «шахматки» (макет 373-12515):
-// широкий кадр прижат к левому краю (8px), узкие чередуют сдвиг вправо/влево.
-.wide {
-  @include mobile {
-    margin-left: fluid(8);
-  }
-}
-
-.narrow[data-side="right"] {
-  @include mobile {
-    margin-left: fluid(96);
-
-    .imageBox {
-      height: fluid(266); // макет 373-12515: первый узкий кадр чуть выше
-    }
-  }
-}
-
-.narrow[data-side="left"] {
-  @include mobile {
-    margin-left: fluid(52);
-
-    .imageBox {
-      height: fluid(260); // макет 373-12515: второй узкий кадр чуть ниже
-    }
+    width: 100%;
+    height: fluid(260);
   }
 }
 

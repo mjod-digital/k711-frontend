@@ -160,12 +160,6 @@ export function GalleryStrip({ items, className }: GalleryStripProps) {
     };
   }, [pinned, items.length]);
 
-  // Мобайл (макет 373-12515): «узкие» кадры смещаются вправо/влево поочерёдно.
-  let narrowSeen = 0;
-  const narrowSide = items.map((it) =>
-    it.variant === "narrow" ? (narrowSeen++ % 2 === 0 ? "right" : "left") : undefined,
-  );
-
   return (
     <section
       ref={sectionRef}
@@ -179,7 +173,6 @@ export function GalleryStrip({ items, className }: GalleryStripProps) {
               <figure
                 key={i}
                 className={cn(styles.item, isNarrow ? styles.narrow : styles.wide)}
-                data-side={narrowSide[i]}
               >
                 <div
                   className={styles.imageBox}
@@ -192,7 +185,7 @@ export function GalleryStrip({ items, className }: GalleryStripProps) {
                       src={it.src}
                       alt={it.alt ?? it.caption ?? ""}
                       fill
-                      sizes={`(min-width: 768px) 76vw, ${isNarrow ? "59vw" : "96vw"}`}
+                      sizes="(min-width: 768px) 76vw, 96vw"
                       className={styles.image}
                     />
                   </div>
