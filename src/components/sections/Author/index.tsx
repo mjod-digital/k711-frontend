@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useRef } from "react";
-import type { CSSProperties } from "react";
+import type { CSSProperties, ReactNode } from "react";
 import { Reveal } from "@/components/ui/Reveal";
 import { useIsomorphicLayoutEffect } from "@/lib/useIsomorphicLayoutEffect";
 import styles from "./Author.module.scss";
@@ -13,7 +13,15 @@ type AuthorProps = {
   imageAlt: string;
   ctaHref?: string;
   ctaLabel?: string;
+  /** Два абзаца био (редактируются из CMS). */
+  paragraphs?: [ReactNode, ReactNode];
 };
+
+// Дефолт = текущий текст (fallback-first).
+const DEFAULT_PARAGRAPHS: [ReactNode, ReactNode] = [
+  "Он известен проектами в Москве, Санкт-Петербурге и Берлине, включая участие в создании башни «Федерация» в «Москва-Сити» и ряда крупных общественных и культурных зданий.",
+  "Чобан активно развивает графическую практику и основал в Берлине Музей архитектурного рисунка, где коллекционируются и экспонируются работы разных эпох.",
+];
 
 // Блок об авторе проекта (Figma 373-9301 / 373-13114): портрет, «разбросанный»
 // заголовок, два абзаца и CTA. Десктоп — абсолютная раскладка в долях от
@@ -24,6 +32,7 @@ export function Author({
   imageAlt,
   ctaHref = "/residences",
   ctaLabel = "выбрать резиденцию",
+  paragraphs = DEFAULT_PARAGRAPHS,
 }: AuthorProps) {
   const sectionRef = useRef<HTMLElement>(null);
   const triggerRef = useRef<HTMLParagraphElement>(null);
@@ -91,18 +100,10 @@ export function Author({
         </Reveal>
       </div>
 
-      <p ref={triggerRef} className={styles.col1}>
-        Он известен проектами в Москве, Санкт-Петербурге и Берлине, включая
-        участие в создании башни «Федерация» в «Москва-Сити» и ряда крупных
-        общественных и культурных зданий.
-      </p>
+      <p ref={triggerRef} className={styles.col1}>{paragraphs[0]}</p>
 
       <div className={styles.col2}>
-        <p className={styles.para}>
-          Чобан активно развивает графическую практику и основал в Берлине Музей
-          архитектурного рисунка, где коллекционируются и экспонируются работы
-          разных эпох.
-        </p>
+        <p className={styles.para}>{paragraphs[1]}</p>
         <Link href={ctaHref} className={styles.cta}>
           {ctaLabel}
         </Link>

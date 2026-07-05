@@ -2,15 +2,20 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { ContactForm } from "./ContactForm";
+import { fetchContact } from "@/lib/api";
 import styles from "./contact.module.scss";
 
-export const metadata: Metadata = {
-  title: "Контакты",
-  description:
-    "Офис продаж клубного дома k 7/11: +7 (495) 123-45-67, ул. Климашкина, 7/11, private@mr-group.ru.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const c = await fetchContact();
+  return { title: c.meta.title, description: c.meta.description };
+}
 
-export default function ContactPage() {
+// tel: только цифры/плюс из отформатированного телефона.
+const telHref = (phone: string) => `tel:${phone.replace(/[^\d+]/g, "")}`;
+
+export default async function ContactPage() {
+  const c = await fetchContact();
+
   return (
     <section className={styles.contact}>
       {/* Хлебные крошки — только мобайл (на десктопе фото занимает левую колонку). */}
@@ -26,8 +31,8 @@ export default function ContactPage() {
 
       <div className={styles.media}>
         <Image loading="eager"
-          src="/images/contact-office.jpg"
-          alt="Офис продаж клубного дома k 7/11"
+          src={c.office.image}
+          alt={c.office.alt}
           fill
           sizes="(max-width: 767.98px) 100vw, 50vw"
           className={styles.image}
@@ -38,9 +43,9 @@ export default function ContactPage() {
         <h1 className={styles.title}>контакты</h1>
 
         <div className={styles.info}>
-          <a href="tel:+74951234567">+7 (495) 123-45-67</a>
-          <span>ул. Климашкина, 7/11</span>
-          <a href="mailto:private@mr-group.ru">private@mr-group.ru</a>
+          <a href={telHref(c.phone)}>{c.phone}</a>
+          <span>{c.address}</span>
+          <a href={`mailto:${c.email}`}>{c.email}</a>
         </div>
 
         <ContactForm />

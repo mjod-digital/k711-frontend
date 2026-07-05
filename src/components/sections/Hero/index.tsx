@@ -2,16 +2,41 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import type { CSSProperties } from "react";
 import { Reveal } from "@/components/ui/Reveal";
 import { siteConfig } from "@/config/site";
 import { useIsomorphicLayoutEffect } from "@/lib/useIsomorphicLayoutEffect";
 import styles from "./Hero.module.scss";
 
-export function Hero() {
+type HeroProps = { image?: string; imageAlt?: string };
+
+export function Hero({
+  image = "/images/hero.jpg",
+  imageAlt = "Клубный дом k711 на тихой Пресне",
+}: HeroProps = {}) {
   const mediaRef = useRef<HTMLDivElement>(null);
   const parallaxRef = useRef<HTMLDivElement>(null);
+  // Заголовок держим под шторкой, пока перекрывает прелоудер: свой IO сработал бы
+  // сразу при монтировании и анимация отыграла бы «вслепую». Стартуем шторку по
+  // сигналу прелоудера (событие preloader:done) — заголовок проявляется на его сходе.
+  const [revealed, setRevealed] = useState(false);
+
+  useIsomorphicLayoutEffect(() => {
+    const w = window as Window & { __preloaderDone?: boolean };
+    if (w.__preloaderDone) {
+      setRevealed(true); // прелоудер уже ушёл (кэш/быстрый load/повторный маунт)
+      return;
+    }
+    const onDone = () => setRevealed(true);
+    window.addEventListener("preloader:done", onDone, { once: true });
+    // Страховка: если прелоудера нет или событие не пришло — покажем заголовок.
+    const fallback = window.setTimeout(() => setRevealed(true), 12000);
+    return () => {
+      window.removeEventListener("preloader:done", onDone);
+      window.clearTimeout(fallback);
+    };
+  }, []);
 
   // Параллакс фото: при скролле сдвигаем слой картинки внутри media (overflow:hidden).
   useIsomorphicLayoutEffect(() => {
@@ -42,8 +67,8 @@ export function Hero() {
       <div className={styles.media} ref={mediaRef}>
         <div className={styles.parallax} ref={parallaxRef}>
           <Image
-            src="/images/hero.jpg"
-            alt="Клубный дом k711 на тихой Пресне"
+            src={image}
+            alt={imageAlt}
             fill
             priority
             data-hero
@@ -56,9 +81,9 @@ export function Hero() {
           <Reveal
             as="h1"
             variant="lines"
-            // hero — первый экран: запускаем шторку сразу при входе, без сдвига
-            // к центру (иначе на мобилке заголовок в нижних 35% и ждёт скролла).
-            rootMargin="0px 0px 0px 0px"
+            // hero — первый экран: свой IO не нужен, шторку ведём извне (active),
+            // старт по сигналу прелоудера — иначе анимация отыграет под ним «вслепую».
+            active={revealed}
             className={styles.title}
           >
             <span className="reveal-line" style={{ "--i": 0 } as CSSProperties}>
@@ -69,9 +94,13 @@ export function Hero() {
             </span>
           </Reveal>
 
-          <Link href={siteConfig.cta.href} className={styles.cta}>
-            {siteConfig.cta.label}
-          </Link>
+          {/* Кнопка — как абзацы в Statement: мягкий fade+сдвиг снизу от ТОГО ЖЕ
+              триггера, что и заголовок, с задержкой → появляется вслед за ним. */}
+          <Reveal variant="fade" active={revealed} delay={1400} duration={900}>
+            <Link href={siteConfig.cta.href} className={styles.cta}>
+              {siteConfig.cta.label}
+            </Link>
+          </Reveal>
         </div>
       </div>
     </section>

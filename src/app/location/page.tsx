@@ -7,15 +7,26 @@ import { PhotoCards } from "@/components/sections/PhotoCards";
 import { Location } from "@/components/sections/Location";
 import { ConnectBlock } from "@/components/sections/ConnectBlock";
 import { Slider, type Slide } from "@/components/ui/Slider";
+import { fetchPage, txt, img, cmsSlides } from "@/lib/api";
 import styles from "./location.module.scss";
 
-export const metadata: Metadata = {
+const ALIAS = "location";
+
+const FALLBACK_META: Metadata = {
   title: "Локация",
   description:
     "Локация клубного дома k 7/11: тихий интеллигентный квартал в центре Москвы — в 10 минутах от Кремля и 5 минутах от Патриарших.",
 };
 
-const slides: Slide[] = [
+export async function generateMetadata(): Promise<Metadata> {
+  const c = await fetchPage(ALIAS);
+  return {
+    title: c.meta.title || FALLBACK_META.title,
+    description: c.meta.description || FALLBACK_META.description,
+  };
+}
+
+const FALLBACK_SLIDES: Slide[] = [
   {
     src: "/images/location-slide-1.png",
     caption: "SPA, где забота о себе превращается в ритуал",
@@ -30,12 +41,20 @@ const slides: Slide[] = [
   },
 ];
 
-export default function LocationPage() {
+const FALLBACK_INTRO: [string, string] = [
+  "Здесь много парков и скверов: «Красная Пресня», Патриаршие и Красногвардейские пруды, парк Декабрьского восстания.",
+  "Культурное наследие рядом: собор Непорочного Зачатия, мастерская Зураба Церетели, храм Георгия Победоносца.",
+];
+
+export default async function LocationPage() {
+  const content = await fetchPage(ALIAS);
+  const slides = cmsSlides(content, "slider", FALLBACK_SLIDES);
+
   return (
     <>
       <PageHero
-        image="/images/location-hero.png"
-        imageAlt="Клубный дом k 7/11 — локация в тихом центре Москвы"
+        image={img(content, "hero_image", "/images/location-hero.png")}
+        imageAlt={txt(content, "hero_alt", "Клубный дом k 7/11 — локация в тихом центре Москвы")}
         breadcrumb={[
           { label: "…", href: "/", ariaLabel: "Главная" },
           { label: "Локация" },
@@ -60,8 +79,8 @@ export default function LocationPage() {
           { parts: [{ text: "компании" }] },
         ]}
         paragraphs={[
-          "Здесь много парков и скверов: «Красная Пресня», Патриаршие и Красногвардейские пруды, парк Декабрьского восстания.",
-          "Культурное наследие рядом: собор Непорочного Зачатия, мастерская Зураба Церетели, храм Георгия Победоносца.",
+          txt(content, "intro_p1", FALLBACK_INTRO[0]),
+          txt(content, "intro_p2", FALLBACK_INTRO[1]),
         ]}
       />
 

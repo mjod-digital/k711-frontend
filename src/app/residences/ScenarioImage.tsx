@@ -18,7 +18,11 @@ export function ScenarioImage() {
           className={styles.image}
         />
         <div className={styles.overlay} aria-hidden />
-        <Reveal variant="lines" className={styles.headingWrap}>
+        <Reveal
+          variant="lines"
+          rootMargin="0px 0px -20% 0px" // старт чуть раньше (как Scenario), дефолт -35% поздноват
+          className={styles.headingWrap}
+        >
           <h2 className={styles.heading}>
             <span className={`${styles.line} ${styles.l1} reveal-line`} style={{ "--i": 0 } as CSSProperties}>
               квартиры

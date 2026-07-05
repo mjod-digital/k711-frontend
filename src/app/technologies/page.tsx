@@ -6,27 +6,46 @@ import { ResidenceStats } from "@/components/sections/ResidenceStats";
 import { PhotoCards } from "@/components/sections/PhotoCards";
 import { ConnectBlock } from "@/components/sections/ConnectBlock";
 import { Slider, type Slide } from "@/components/ui/Slider";
+import { fetchPage, txt, img, cmsSlides } from "@/lib/api";
 import { StayHeading } from "./StayHeading";
 import styles from "./technologies.module.scss";
 
-export const metadata: Metadata = {
+const ALIAS = "technologies";
+
+const FALLBACK_META: Metadata = {
   title: "Передовые технологии",
   description:
     "Передовые технологии клубного дома k 7/11: безопасность, комфорт и тишина — вентиляция, фильтрация воды, паркинг на 55 машиномест с зарядками для электрокаров.",
 };
 
-const slides: Slide[] = [
+export async function generateMetadata(): Promise<Metadata> {
+  const c = await fetchPage(ALIAS);
+  return {
+    title: c.meta.title || FALLBACK_META.title,
+    description: c.meta.description || FALLBACK_META.description,
+  };
+}
+
+const FALLBACK_SLIDES: Slide[] = [
   { src: "/images/technologies/slider-spa.png", caption: "SPA, где забота о себе превращается в ритуал" },
   { src: "/images/technologies/photo-right.png", caption: "Паркинг" },
   { src: "/images/technologies/photo-left.png", caption: "Инженерия дома" },
 ];
 
-export default function TechnologiesPage() {
+const FALLBACK_INTRO: [string, string] = [
+  "К7/11 устроен так, чтобы вы чувствовали не технологии, а результаты их тонкой работы: абсолютный комфорт, безопасность и тишину.",
+  "Работу воздуха поддерживает централизованная приточно-вытяжная вентиляция с тонкой регулировкой. Горячая вода проходит многоступенчатую систему фильтрации и доступна круглый год.",
+];
+
+export default async function TechnologiesPage() {
+  const content = await fetchPage(ALIAS);
+  const slides = cmsSlides(content, "slider", FALLBACK_SLIDES);
+
   return (
     <>
       <PageHero
-        image="/images/technologies/hero.png"
-        imageAlt="Передовые технологии клубного дома k 7/11"
+        image={img(content, "hero_image", "/images/technologies/hero.png")}
+        imageAlt={txt(content, "hero_alt", "Передовые технологии клубного дома k 7/11")}
         breadcrumb={[
           { label: "…", href: "/", ariaLabel: "Главная" },
           { label: "Передовые технологии" },
@@ -59,8 +78,8 @@ export default function TechnologiesPage() {
           { parts: [{ text: "технологии" }] },
         ]}
         paragraphs={[
-          "К7/11 устроен так, чтобы вы чувствовали не технологии, а результаты их тонкой работы: абсолютный комфорт, безопасность и тишину.",
-          "Работу воздуха поддерживает централизованная приточно-вытяжная вентиляция с тонкой регулировкой. Горячая вода проходит многоступенчатую систему фильтрации и доступна круглый год.",
+          txt(content, "intro_p1", FALLBACK_INTRO[0]),
+          txt(content, "intro_p2", FALLBACK_INTRO[1]),
         ]}
       />
 

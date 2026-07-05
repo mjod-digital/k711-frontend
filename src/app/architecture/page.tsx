@@ -7,15 +7,26 @@ import { PhotoCards } from "@/components/sections/PhotoCards";
 import { Author } from "@/components/sections/Author";
 import { ConnectBlock } from "@/components/sections/ConnectBlock";
 import { Slider, type Slide } from "@/components/ui/Slider";
+import { fetchPage, txt, img, cmsSlides } from "@/lib/api";
 import styles from "./architecture.module.scss";
 
-export const metadata: Metadata = {
+const ALIAS = "architecture";
+
+const FALLBACK_META: Metadata = {
   title: "Архитектура",
   description:
     "Архитектура клубного дома k 7/11: современность с историческим сердцем, фасад по проекту Сергея Чобана.",
 };
 
-const slides: Slide[] = [
+export async function generateMetadata(): Promise<Metadata> {
+  const c = await fetchPage(ALIAS);
+  return {
+    title: c.meta.title || FALLBACK_META.title,
+    description: c.meta.description || FALLBACK_META.description,
+  };
+}
+
+const FALLBACK_SLIDES: Slide[] = [
   {
     src: "/images/slider-2.png",
     caption: "Ритм панорамных окон и чёткая геометрия фасада",
@@ -34,12 +45,26 @@ const slides: Slide[] = [
   },
 ];
 
-export default function ArchitecturePage() {
+// Дефолтные абзацы intro (fallback-first: если CMS пусто — этот текст).
+const FALLBACK_INTRO: [string, string] = [
+  "Архитектура k 7/11 — это редкий пример того, как прошлое становится сердцем современности: уцелевшая стена первого московского «тучереза» 1905 года, построенного Эрнстом-Рихардом Нирнзее, бережно сохранена и интегрирована в новый облик дома.",
+  "Современные линии панорамных окон и чёткая геометрия фасада не спорят с историей, а подчёркивают её, создавая контрастную гармонию.",
+];
+
+export default async function ArchitecturePage() {
+  const content = await fetchPage(ALIAS);
+  const slides = cmsSlides(content, "slider", FALLBACK_SLIDES);
+  const authorP1 = content.texts.author_p1;
+
   return (
     <>
       <PageHero
-        image="/images/arch-hero.png"
-        imageAlt="Клубный дом k 7/11 — современная архитектура с историческим фасадом"
+        image={img(content, "hero_image", "/images/arch-hero.png")}
+        imageAlt={txt(
+          content,
+          "hero_alt",
+          "Клубный дом k 7/11 — современная архитектура с историческим фасадом",
+        )}
         breadcrumb={[
           { label: "…", href: "/", ariaLabel: "Главная" },
           { label: "Архитектура" },
@@ -64,6 +89,9 @@ export default function ArchitecturePage() {
         lines={[
           { parts: [{ text: "Современность" }] },
           {
+            // На мобиле строка переносится (историчес- / ким сердцем) → раскрываем
+            // сверху вниз, чтобы визуальные строки шли по порядку (1→2→3, не 1→3→2).
+            revealDown: true,
             parts: [
               {
                 // На мобиле «историческим» переносится с дефисом: историчес- / ким
@@ -81,8 +109,8 @@ export default function ArchitecturePage() {
           },
         ]}
         paragraphs={[
-          "Архитектура k 7/11 — это редкий пример того, как прошлое становится сердцем современности: уцелевшая стена первого московского «тучереза» 1905 года, построенного Эрнстом-Рихардом Нирнзее, бережно сохранена и интегрирована в новый облик дома.",
-          "Современные линии панорамных окон и чёткая геометрия фасада не спорят с историей, а подчёркивают её, создавая контрастную гармонию.",
+          txt(content, "intro_p1", FALLBACK_INTRO[0]),
+          txt(content, "intro_p2", FALLBACK_INTRO[1]),
         ]}
       />
 
@@ -119,8 +147,13 @@ export default function ArchitecturePage() {
       />
 
       <Author
-        image="/images/arch-author.png"
-        imageAlt="Архитектор Сергей Чобан"
+        image={img(content, "author_image", "/images/arch-author.png")}
+        imageAlt={txt(content, "author_alt", "Архитектор Сергей Чобан")}
+        paragraphs={
+          authorP1
+            ? [authorP1, content.texts.author_p2 ?? ""]
+            : undefined
+        }
       />
 
       <ConnectBlock />

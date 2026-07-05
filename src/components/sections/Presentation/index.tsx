@@ -2,10 +2,33 @@
 
 import Image from "next/image";
 import { useRef } from "react";
+import type { ReactNode } from "react";
 import { useIsomorphicLayoutEffect } from "@/lib/useIsomorphicLayoutEffect";
 import styles from "./Presentation.module.scss";
 
-export function Presentation() {
+// Контент редактируем из CMS; дефолты = текущие значения (fallback-first).
+type PresentationProps = {
+  title?: ReactNode;
+  description?: ReactNode;
+  image?: string;
+  imageAlt?: string;
+  ctaLabel?: ReactNode;
+  ctaHref?: string;
+};
+
+export function Presentation({
+  title = (
+    <>
+      Презентация
+      <br />о проекте
+    </>
+  ),
+  description = "Получите презентацию проекта и узнайте все детали о клубном доме: от уникальной концепции и локации до планировочных решений и премиальных сервисов.",
+  image = "/images/slider-2.png",
+  imageAlt = "Клубный дом k711",
+  ctaLabel = "Скачать презентацию",
+  ctaHref = "/pdf/klimashkina711.pdf",
+}: PresentationProps = {}) {
   const ref = useRef<HTMLElement>(null);
   const unfoldRef = useRef<HTMLDivElement>(null);
 
@@ -57,8 +80,8 @@ export function Presentation() {
       <div className={styles.media}>
         <div className={styles.unfold} ref={unfoldRef}>
           <Image loading="eager"
-            src="/images/slider-2.png"
-            alt="Клубный дом k711"
+            src={image}
+            alt={imageAlt}
             fill
             sizes="(min-width: 768px) 58vw, 100vw"
             className={styles.image}
@@ -67,24 +90,15 @@ export function Presentation() {
       </div>
 
       <div className={styles.content}>
-        <h2 className={styles.title}>
-          Презентация
-          <br />о проекте
-        </h2>
+        <h2 className={styles.title}>{title}</h2>
         <div className={styles.info}>
-          <p className={styles.desc}>
-            Получите презентацию проекта и узнайте все детали о клубном доме: от
-            уникальной концепции и локации до планировочных решений и премиальных
-            сервисов.
-          </p>
+          <p className={styles.desc}>{description}</p>
           <a
-            href="/pdf/klimashkina711.pdf"
+            href={ctaHref}
             target="_blank"
             rel="noopener noreferrer"
             className={styles.cta}
-          >
-            Скачать презентацию
-          </a>
+          >{ctaLabel}</a>
         </div>
       </div>
     </section>

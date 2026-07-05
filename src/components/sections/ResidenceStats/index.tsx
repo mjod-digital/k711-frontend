@@ -13,7 +13,7 @@ export type ResidenceStat = {
   alt: string;
   /** Мелкий текст перед числом (например «до»). */
   prefix?: string;
-  /** Само число — крупно, анимируется 0→значение. Может быть диапазоном «2-4». */
+  /** Само число — крупно. Может быть диапазоном «2-4». */
   number: string;
   /** Мелкий текст после числа (например «м²», «квартиры»). */
   suffix?: ReactNode;
@@ -33,41 +33,28 @@ type ResidenceStatsProps = {
   className?: string;
 };
 
-// Все цифры в строке умножаем на прогресс p (0→1): «157»→«0»…«157», «2-4»→«0-0»…«2-4».
-const lerpNumbers = (s: string, p: number) =>
-  s.replace(/\d+/g, (d) => String(Math.round(p * Number(d))));
-
 // Три фото-карточки со статистикой (Figma 373-9535): крупное число + мелкая
-// подпись снизу-слева. Числа считаются от 0 при появлении секции в виде.
+// подпись снизу-слева. Число и подпись проявляются реил-шторкой при входе секции
+// в вид (счётчика 0→значение нет — число показывается сразу финальным).
 export function ResidenceStats({ items, className }: ResidenceStatsProps) {
   const ref = useRef<HTMLElement>(null);
-  const [p, setP] = useState(0); // общий прогресс счётчика 0..1
   const [revealed, setRevealed] = useState(false); // раскрытие подписей-шторок
 
-  // ОДИН триггер на шторку и счёт. Счёт стартует ПОСЛЕ того, как шторка открыла
-  // число (DELAY ≈ длительность реил-шторки) — иначе цифры досчитывались бы за
-  // закрытой шторкой и пользователь видел уже финал. Так число «0» проявляется,
-  // затем на глазах считается 0→значение.
+  // ОДИН триггер на шторку: при входе секции в вид открываем число и подпись.
   useIsomorphicLayoutEffect(() => {
     const el = ref.current;
     if (!el) return;
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      setP(1);
       setRevealed(true);
       return;
     }
     const mqMobile = window.matchMedia("(max-width: 767.98px)");
-    let raf = 0;
-    let timer = 0;
     let io: IntersectionObserver | null = null;
     let played = false; // сыграл один раз — не пересобираем наблюдатель
-    const DELAY = 900; // ждём, пока реил-шторка раскроет число
-    const DUR = 1500;
     const arm = () => {
       io?.disconnect();
-      // Уже отсчитали — не пересобираем IO при смене брейкпоинта (resize/поворот
-      // через 767.98px): новый наблюдатель для уже-видимой секции сразу выстрелил
-      // бы снова и перезапустил счёт с 0.
+      // Уже сыграл — не пересобираем IO при смене брейкпоинта (resize/поворот
+      // через 767.98px): новый наблюдатель для уже-видимой секции сразу выстрелил бы.
       if (played) return;
       const margin = mqMobile.matches ? "0px 0px -10% 0px" : "0px 0px -20% 0px";
       io = new IntersectionObserver(
@@ -76,15 +63,6 @@ export function ResidenceStats({ items, className }: ResidenceStatsProps) {
           played = true;
           obs.disconnect();
           setRevealed(true); // открываем шторки
-          timer = window.setTimeout(() => {
-            const start = performance.now();
-            const tick = (now: number) => {
-              const t = Math.min(1, (now - start) / DUR);
-              setP(1 - Math.pow(1 - t, 3)); // easeOutCubic
-              if (t < 1) raf = requestAnimationFrame(tick);
-            };
-            raf = requestAnimationFrame(tick);
-          }, DELAY);
         },
         { threshold: 0.2, rootMargin: margin },
       );
@@ -95,8 +73,6 @@ export function ResidenceStats({ items, className }: ResidenceStatsProps) {
     return () => {
       io?.disconnect();
       mqMobile.removeEventListener("change", arm);
-      cancelAnimationFrame(raf);
-      clearTimeout(timer);
     };
   }, []);
 
@@ -121,9 +97,7 @@ export function ResidenceStats({ items, className }: ResidenceStatsProps) {
                   style={{ "--i": 0 } as CSSProperties}
                 >
                   {it.prefix && <span className={styles.qual}>{it.prefix}</span>}
-                  <span className={styles.num}>
-                    {p >= 1 ? it.number : lerpNumbers(it.number, p)}
-                  </span>
+                  <span className={styles.num}>{it.number}</span>
                   {it.suffix && (
                     <span className={cn(styles.qual, it.suffixBelow && styles.qualBelow)}>
                       {it.suffix}

@@ -16,29 +16,22 @@ import { TextDuo } from "@/components/sections/TextDuo";
 import { Contact } from "@/components/sections/Contact";
 import { Slider, type Slide } from "@/components/ui/Slider";
 import { GalleryStrip, type GalleryItem } from "@/components/ui/GalleryStrip";
+import { fetchPage, txt, cmsSlides, cmsGallery } from "@/lib/api";
 
-// SEO-метаданные главной берём из API (MODX): /api/index → meta.title/description.
-// Абсолютный URL (как в lib/api.ts) — на сервере петлёй через nginx → MODX.
-// Если API недоступен — возвращаем {}, тогда действуют дефолты из layout.
+const ALIAS = "home";
+
+// SEO-метаданные главной берём из MODX (/api/home → meta), фолбэк — дефолты layout.
 export async function generateMetadata(): Promise<Metadata> {
-  try {
-    const res = await fetch("https://www.klimashkina711.ru/api/index", {
-      next: { revalidate: 60 },
-    });
-    if (!res.ok) return {};
-    const data = (await res.json()) as {
-      meta?: { title?: string; description?: string };
-    };
-    const meta = data.meta;
-    if (!meta?.title && !meta?.description) return {};
-    return {
-      title: meta.title || undefined,
-      description: meta.description || undefined,
-    };
-  } catch {
-    return {};
-  }
+  const c = await fetchPage(ALIAS);
+  return {
+    title: c.meta.title || undefined,
+    description: c.meta.description || undefined,
+  };
 }
+
+// «Презентация\nо проекте» → строки с <br/> (сохраняет двухстрочный заголовок).
+const multiline = (s: string) =>
+  s.split("\n").flatMap((line, i) => (i === 0 ? [line] : [<br key={i} />, line]));
 
 const slidesSpa: Slide[] = [
   { src: "/images/slider-1.png", caption: "SPA, где забота о себе превращается в ритуал" },
@@ -73,11 +66,12 @@ const slidesViews: Slide[] = [
 ];
 
 const spaceParagraphs: [string, string] = [
-  "В k 7/11 каждая зона за пределами квартиры — продолжение личного мира резидентов. Лобби с кофейной и барной зонами под пятиметровыми потолками становится местом неспешных встреч.",
-  "Фитнес-зал с видом на сад и приватное SPA — пространствами для заботы о себе. Отдельные входы для доставки и сервисного персонала позволяют не замечать бытовых хлопот — всё устроено так, чтобы дни оставались для главного.",
+  "В k 7/11 каждая зона за пределами квартиры — продолжение личного мира резидентов. Лобби с кофейной и барной зонами под пятиметровыми потолками становится местом неспешных встреч.",
+  "Фитнес-зал с видом на сад и приватное SPA — пространствами для заботы о себе. Отдельные входы для доставки и сервисного персонала позволяют не замечать бытовых хлопот — всё устроено так, чтобы дни оставались для главного.",
 ];
 
 // Residences + 2×FeatureScreen — один scroll-lock блок (Showcase).
+// Каскадные заголовки шагов 2–3 остаются в коде (не выносятся в CMS).
 const showcaseSteps: ShowcaseStep[] = [
   {
     image: "/images/residences.png",
@@ -126,35 +120,102 @@ const showcaseSteps: ShowcaseStep[] = [
       { parts: [{ text: "Чобана", big: true }] },
     ],
     description: (
-      <>Современная архитектура, которая не спорит с прошлым, а продолжает его.</>
+      <>Современная архитектура, которая не спорит с прошлым, а продолжает его.</>
     ),
     ctaLabel: "выбрать резиденцию",
     ctaHref: "/residences",
   },
 ];
 
-export default function HomePage() {
+export default async function HomePage() {
+  const content = await fetchPage(ALIAS);
+
+  const spaSlides = cmsSlides(content, "slider_spa", slidesSpa);
+  const viewsSlides = cmsSlides(content, "slider_views", slidesViews);
+  const interiorSlides = cmsSlides(content, "slider_interior", slidesInterior);
+  const gallery = cmsGallery(content, "gallery", galleryInteriors);
+
+  const statementP1 = content.texts.statement_p1;
+  const terracesP1 = content.texts.terraces_p1;
+  const presTitle = content.texts.presentation_title;
+  const space: [string, string] = [
+    txt(content, "space_p1", spaceParagraphs[0]),
+    txt(content, "space_p2", spaceParagraphs[1]),
+  ];
+
+  // Заголовки Statement/TextDuo редактируемы из CMS (строка на строку).
+  const statementLines = content.texts.statement_heading
+    ? content.texts.statement_heading.split("\n").map((t) => t.trim()).filter(Boolean)
+    : undefined;
+  const toLines = (s: string | undefined, big: boolean) =>
+    s
+      ? s.split("\n").map((t) => ({ parts: [{ text: t.trim(), big }] }))
+      : undefined;
+  const space1Lines = toLines(content.texts.space1_heading, false) ?? [
+    { parts: [{ text: "пространство," }] },
+    { parts: [{ text: "с которого" }] },
+    { parts: [{ text: "начинается дом" }] },
+  ];
+  const space2Lines = toLines(content.texts.space2_heading, true) ?? [
+    { parts: [{ text: "продуманное", big: true }] },
+    { parts: [{ text: "пространство", big: true }] },
+  ];
+
+  // Showcase: из CMS редактируем фото и описание; заголовки-каунтеры/каскады — в коде.
+  const steps = showcaseSteps.map((s, i) => {
+    const c = content.lists.showcase?.[i];
+    return c
+      ? {
+          ...s,
+          image: (c.image as string) || s.image,
+          imageAlt: (c.imageAlt as string) || s.imageAlt,
+          description: c.description ? multiline(String(c.description)) : s.description,
+        }
+      : s;
+  });
+
   return (
     <>
-      <Hero />
-      <Statement />
-      <Showcase steps={showcaseSteps} />
+      <Hero
+        image={content.images.hero_image || undefined}
+        imageAlt={content.texts.hero_alt || undefined}
+      />
+      <Statement
+        headingLines={statementLines}
+        paragraphs={
+          statementP1 ? [statementP1, content.texts.statement_p2 ?? ""] : undefined
+        }
+      />
+      <Showcase steps={steps} />
 
       <HistoricCenter />
-      <Slider slides={slidesSpa} />
+      <Slider slides={spaSlides} />
       <Location />
       <Surroundings />
-      <Presentation />
+      <Presentation
+        title={presTitle ? multiline(presTitle) : undefined}
+        description={content.texts.presentation_desc || undefined}
+        image={content.images.presentation_image || undefined}
+        imageAlt={content.texts.presentation_alt || undefined}
+        ctaLabel={content.texts.presentation_cta_label || undefined}
+        ctaHref={content.texts.presentation_pdf || undefined}
+      />
       <Scenario />
 
-      <GalleryStrip items={galleryInteriors} />
-      <Terraces />
+      <GalleryStrip items={gallery} />
+      <Terraces
+        image={content.images.terraces_image || undefined}
+        imageAlt={content.texts.terraces_alt || undefined}
+        paragraphs={
+          terracesP1 ? [terracesP1, content.texts.terraces_p2 ?? ""] : undefined
+        }
+      />
 
       <ImageHeading image="/images/garden.png" imageAlt="Камерный скандинавский сад k711">
         <GardenHeading />
       </ImageHeading>
 
-      <Slider slides={slidesViews} />
+      <Slider slides={viewsSlides} />
 
       <CreamHeading />
 
@@ -166,28 +227,13 @@ export default function HomePage() {
         <LobbyHeading />
       </ImageHeading>
 
-      <TextDuo
-        variant="right"
-        lines={[
-          { parts: [{ text: "пространство," }] },
-          { parts: [{ text: "с которого" }] },
-          { parts: [{ text: "начинается дом" }] },
-        ]}
-        paragraphs={spaceParagraphs}
-      />
+      <TextDuo variant="right" lines={space1Lines} paragraphs={space} />
 
-      <Slider slides={slidesSpa} />
+      <Slider slides={spaSlides} />
 
-      <TextDuo
-        variant="full"
-        lines={[
-          { parts: [{ text: "продуманное", big: true }] },
-          { parts: [{ text: "пространство", big: true }] },
-        ]}
-        paragraphs={spaceParagraphs}
-      />
+      <TextDuo variant="full" lines={space2Lines} paragraphs={space} />
 
-      <Slider slides={slidesInterior} />
+      <Slider slides={interiorSlides} />
       <Contact />
     </>
   );

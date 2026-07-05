@@ -315,6 +315,12 @@
   font-size: var(--fs-button);
   letter-spacing: var(--ls-button);
   text-transform: uppercase;
+
+  @include mobile {
+    display: flex;
+    gap: fluid(4);
+    -webkit-text-stroke-width: fluid(0.3);
+  }
 }
 
 .dropdownCount {
@@ -389,6 +395,7 @@
   line-height: 1;
   letter-spacing: var(--ls-button);
   text-transform: uppercase;
+  -webkit-text-stroke-width: fluid(0.3);
 }
 
 .dropdownItemCount {

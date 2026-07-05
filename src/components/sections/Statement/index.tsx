@@ -1,12 +1,29 @@
 "use client";
 
 import { useRef, useState } from "react";
-import type { CSSProperties } from "react";
+import type { CSSProperties, ReactNode } from "react";
 import { Reveal } from "@/components/ui/Reveal";
 import { useIsomorphicLayoutEffect } from "@/lib/useIsomorphicLayoutEffect";
 import styles from "./Statement.module.scss";
 
-export function Statement() {
+// Абзацы редактируемы из CMS; дефолт = текущий текст (fallback-first).
+const DEFAULT_PARAGRAPHS: [ReactNode, ReactNode] = [
+  "Пресня — район, где Москва говорит вполголоса. Старомосковские улицы, тенистые аллеи, посольские особняки и тихие переулки сохраняют ритм города, в котором есть место паузе.",
+  "k 7/11 встроен в эту ткань так, будто стоял здесь всегда — между историей и сегодняшним днём, между движением столицы и собственной тишиной.",
+];
+
+// Заголовок: по строке на визуальную строку (каждая — reveal-line). Редактируем из CMS.
+const DEFAULT_HEADING = ["В центре", "культурной Москвы,", "вдали от шума"];
+
+type StatementProps = {
+  paragraphs?: [ReactNode, ReactNode];
+  headingLines?: string[];
+};
+
+export function Statement({
+  paragraphs = DEFAULT_PARAGRAPHS,
+  headingLines = DEFAULT_HEADING,
+}: StatementProps = {}) {
   const innerRef = useRef<HTMLDivElement>(null);
   const [revealed, setRevealed] = useState(false);
 
@@ -51,37 +68,26 @@ export function Statement() {
             строка переносится и из-за шторки снизу-вверх её нижняя часть
             появляется раньше верхней (последовательность ломается 1→3→2). */}
         <Reveal as="h2" variant="lines" active={revealed} className={styles.heading}>
-          <span className="reveal-line" style={{ "--i": 0 } as CSSProperties}>
-            В центре
-          </span>
-          <span className="reveal-line" style={{ "--i": 1 } as CSSProperties}>
-            культурной Москвы,
-          </span>
-          <span className="reveal-line" style={{ "--i": 2 } as CSSProperties}>
-            вдали от шума
-          </span>
+          {headingLines.map((line, i) => (
+            <span key={i} className="reveal-line" style={{ "--i": i } as CSSProperties}>
+              {line}
+            </span>
+          ))}
         </Reveal>
 
         {/* Абзацы — мягкий «выезд» снизу вверх (как тексты Elyse), от ТОГО ЖЕ
-            триггера, что и заголовок. delay ≈ время анимации заголовка (3 строки:
-            старт 3-й в +440мс + клип) → абзацы стартуют сразу ПОСЛЕ заголовка. */}
+            триггера, что и заголовок. delay подобран так, чтобы абзацы
+            подхватывали, пока заголовок ещё «доезжает» (expo-out раскрывает
+            строки в первую треть) — без ощущения паузы после заголовка. */}
         <Reveal
           variant="fade"
           active={revealed}
           className={styles.body}
-          delay={1150}
+          delay={800}
           duration={1000}
         >
-          <p className={styles.paragraph}>
-            Пресня — район, где Москва говорит вполголоса. Старомосковские улицы,
-            тенистые аллеи, посольские особняки и тихие переулки сохраняют ритм
-            города, в котором есть место паузе.
-          </p>
-          <p className={styles.paragraph}>
-            k 7/11 встроен в эту ткань так, будто стоял здесь всегда — между
-            историей и сегодняшним днём, между движением столицы и собственной
-            тишиной.
-          </p>
+          <p className={styles.paragraph}>{paragraphs[0]}</p>
+          <p className={styles.paragraph}>{paragraphs[1]}</p>
         </Reveal>
       </div>
     </section>
