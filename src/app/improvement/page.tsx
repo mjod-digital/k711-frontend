@@ -53,6 +53,7 @@ export default async function ImprovementPage() {
     <>
       <PageHero
         image={img(content, "hero_image", "/images/improvement-hero.png")}
+        imageMobile={content.images.hero_image_mobile || undefined}
         imageAlt={txt(
           content,
           "hero_alt",

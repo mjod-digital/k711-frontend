@@ -32,6 +32,11 @@
 }
 
 .image {
+  // fill: работает и для next/image (fill), и для <img> в ветке <picture>
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
   object-fit: cover;
   object-position: center;
 }

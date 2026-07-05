@@ -59,6 +59,7 @@ export default async function AmenitiesPage() {
     <>
       <PageHero
         image={img(content, "hero_image", "/images/amenities-hero.png")}
+        imageMobile={content.images.hero_image_mobile || undefined}
         imageAlt={txt(
           content,
           "hero_alt",

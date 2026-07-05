@@ -56,6 +56,7 @@ export default async function ResidencesPage() {
     <>
       <PageHero
         image={img(content, "hero_image", "/images/residences-hero.png")}
+        imageMobile={content.images.hero_image_mobile || undefined}
         imageAlt={txt(content, "hero_alt", "Резиденции клубного дома k 7/11 — редкость клубного формата")}
         breadcrumb={[
           { label: "…", href: "/", ariaLabel: "Главная" },

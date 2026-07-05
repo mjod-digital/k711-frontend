@@ -1,7 +1,7 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
+import { HeroImage } from "@/components/ui/HeroImage";
 import { useRef, useState } from "react";
 import type { CSSProperties } from "react";
 import { Reveal } from "@/components/ui/Reveal";
@@ -9,10 +9,11 @@ import { siteConfig } from "@/config/site";
 import { useIsomorphicLayoutEffect } from "@/lib/useIsomorphicLayoutEffect";
 import styles from "./Hero.module.scss";
 
-type HeroProps = { image?: string; imageAlt?: string };
+type HeroProps = { image?: string; imageMobile?: string; imageAlt?: string };
 
 export function Hero({
   image = "/images/hero.jpg",
+  imageMobile,
   imageAlt = "Клубный дом k711 на тихой Пресне",
 }: HeroProps = {}) {
   const mediaRef = useRef<HTMLDivElement>(null);
@@ -66,13 +67,10 @@ export function Hero({
     <section className={styles.hero}>
       <div className={styles.media} ref={mediaRef}>
         <div className={styles.parallax} ref={parallaxRef}>
-          <Image
-            src={image}
-            alt={imageAlt}
-            fill
-            priority
-            data-hero
-            sizes="100vw"
+          <HeroImage
+            image={image}
+            imageMobile={imageMobile}
+            imageAlt={imageAlt}
             className={styles.image}
           />
         </div>

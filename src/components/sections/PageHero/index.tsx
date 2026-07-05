@@ -1,9 +1,9 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { useRef } from "react";
 import type { CSSProperties, ReactNode } from "react";
+import { HeroImage } from "@/components/ui/HeroImage";
 import { Reveal } from "@/components/ui/Reveal";
 import { useIsomorphicLayoutEffect } from "@/lib/useIsomorphicLayoutEffect";
 import styles from "./PageHero.module.scss";
@@ -17,6 +17,8 @@ export type Crumb = {
 
 type PageHeroProps = {
   image: string;
+  /** Мобильное фото (опц.). Если не задано — на мобиле берётся десктопное. */
+  imageMobile?: string;
   imageAlt: string;
   /** Хлебные крошки: «… / Архитектура». Последний элемент — текущая страница. */
   breadcrumb: Crumb[];
@@ -38,6 +40,7 @@ type PageHeroProps = {
 // страницами — уникален только сам заголовок (передаётся как children).
 export function PageHero({
   image,
+  imageMobile,
   imageAlt,
   breadcrumb,
   children,
@@ -112,13 +115,10 @@ export function PageHero({
         }
       >
         <div className={styles.parallax} ref={parallaxRef}>
-          <Image
-            src={image}
-            alt={imageAlt}
-            fill
-            priority
-            data-hero
-            sizes="100vw"
+          <HeroImage
+            image={image}
+            imageMobile={imageMobile}
+            imageAlt={imageAlt}
             className={styles.image}
           />
         </div>
