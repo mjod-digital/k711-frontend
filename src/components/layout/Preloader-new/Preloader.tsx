@@ -65,6 +65,10 @@ function Preloader() {
             getLenis()?.start?.();
             window.scrollTo(0, 0);
             setPhase('closing');
+            // Сигнал hero: прелоудер уходит — только теперь запускаем шторку
+            // заголовка (иначе она отыгрывает «вслепую» под прелоудером).
+            (window as Window & { __preloaderDone?: boolean }).__preloaderDone = true;
+            window.dispatchEvent(new Event('preloader:done'));
             closeT = window.setTimeout(() => setPhase('done'), 500); // = fade в CSS
         };
 

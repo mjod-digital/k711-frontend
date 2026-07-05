@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useRef } from "react";
-import type { CSSProperties } from "react";
+import type { CSSProperties, ReactNode } from "react";
 import { Reveal } from "@/components/ui/Reveal";
 import { useIsomorphicLayoutEffect } from "@/lib/useIsomorphicLayoutEffect";
 import styles from "./DesignBureau.module.scss";
@@ -13,7 +13,13 @@ type DesignBureauProps = {
   imageAlt: string;
   ctaHref?: string;
   ctaLabel?: string;
+  /** Абзац о бюро (редактируется из CMS). */
+  paragraph?: ReactNode;
 };
+
+// Дефолт = текущий текст (fallback-first).
+const DEFAULT_PARAGRAPH: ReactNode =
+  "L.BURO рассматривают садовое искусство как способ организации жизни. Авторский метод студии — «Скандинавские сады» — соединяет нордическую сдержанность с петербургской традицией. Результат — лаконичные формы, выверенные пространства и среда для созерцания.";
 
 // Блок об авторах концепции благоустройства (Figma 373-9364 / 397-10276):
 // портрет дизайн-бюро, «разбросанный» заголовок «Авторы концепции
@@ -25,6 +31,7 @@ export function DesignBureau({
   imageAlt,
   ctaHref = "/residences",
   ctaLabel = "О дизайн-бюро",
+  paragraph = DEFAULT_PARAGRAPH,
 }: DesignBureauProps) {
   const sectionRef = useRef<HTMLElement>(null);
   const triggerRef = useRef<HTMLParagraphElement>(null);
@@ -92,12 +99,7 @@ export function DesignBureau({
       </div>
 
       <div className={styles.body}>
-        <p ref={triggerRef} className={styles.para}>
-          L.BURO рассматривают садовое искусство как способ организации жизни.
-          Авторский метод студии — «Скандинавские сады» — соединяет нордическую
-          сдержанность с петербургской традицией. Результат — лаконичные формы,
-          выверенные пространства и среда для созерцания.
-        </p>
+        <p ref={triggerRef} className={styles.para}>{paragraph}</p>
         <Link href={ctaHref} className={styles.cta}>
           {ctaLabel}
         </Link>

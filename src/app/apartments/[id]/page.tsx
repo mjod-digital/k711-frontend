@@ -20,7 +20,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { id } = await params;
   const data = await fetchApartmentById(id).catch(() => null);
-  if (!data) return { title: "Квартира не найдена" };
+  if (!data?.flat) return { title: "Квартира не найдена" };
   const { flat } = data;
   return {
     title: `Квартира №${flat.number}`,
@@ -35,7 +35,7 @@ export default async function ApartmentDetailPage({
 }) {
   const { id } = await params;
   const data = await fetchApartmentById(id).catch(() => null);
-  if (!data) notFound();
-  console.log(`[apartment ${id}] API response:`, JSON.stringify(data, null, 2));
+  // Некорректный/неполный ответ CRM (нет flat) → 404, а не краш пре-рендера сборки.
+  if (!data?.flat) notFound();
   return <ApartmentCard apt={flatToDetail(data.flat)} />;
 }

@@ -54,8 +54,10 @@ export function TextDuo({ lines, paragraphs, variant = "right", className }: Tex
     };
   }, []);
 
-  // Задержка абзацев ≈ длительности анимации заголовка (зависит от числа строк).
-  const headingDelay = (lines.length - 1) * 220 + 780;
+  // Абзацы стартуют на 360мс после старта ПОСЛЕДНЕЙ строки заголовка — то же
+  // соотношение, что в Statement (там 3 строки: старт 3-й 2×220=440мс + 360 = 800мс).
+  // Масштабируется по числу строк, но появление раннее (подхватывает заголовок).
+  const headingDelay = (lines.length - 1) * 220 + 360;
 
   return (
     <section className={cn(styles.section, variant === "full" ? styles.full : styles.right, className)}>

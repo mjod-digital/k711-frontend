@@ -68,7 +68,7 @@ export function ContactForm() {
 
         <div className={styles.checks}>
           <label className={styles.check}>
-            <input type="checkbox" name="consent" defaultChecked required />
+            <input type="checkbox" name="consent" required />
             <span>
               Соглашаюсь с{" "}
               <a href="#" className={styles.link}>

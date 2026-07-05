@@ -7,15 +7,26 @@ import { PhotoCards } from "@/components/sections/PhotoCards";
 import { CenterHeading } from "@/components/sections/CenterHeading";
 import { ConnectBlock } from "@/components/sections/ConnectBlock";
 import { Slider, type Slide } from "@/components/ui/Slider";
+import { fetchPage, txt, img, cmsSlides } from "@/lib/api";
 import styles from "./amenities.module.scss";
 
-export const metadata: Metadata = {
+const ALIAS = "amenities";
+
+const FALLBACK_META: Metadata = {
   title: "Аменитис",
   description:
     "Аменитис клубного дома k 7/11: SPA, фитнес с видом на зелёный двор, лобби камерного клуба и сервис, продуманный до мелочей.",
 };
 
-const slides: Slide[] = [
+export async function generateMetadata(): Promise<Metadata> {
+  const c = await fetchPage(ALIAS);
+  return {
+    title: c.meta.title || FALLBACK_META.title,
+    description: c.meta.description || FALLBACK_META.description,
+  };
+}
+
+const FALLBACK_SLIDES: Slide[] = [
   {
     src: "/images/amenities-slider-1.png",
     caption: "SPA, где забота о себе превращается в ритуал",
@@ -30,12 +41,29 @@ const slides: Slide[] = [
   },
 ];
 
-export default function AmenitiesPage() {
+const FALLBACK_INTRO: [string, string] = [
+  "В глубине дома прячется уголок для тела и души: зал с видом на зелёный двор и приватное SPA, где забота о себе превращается в ритуал.",
+  "Панорамные окна открывают вид на тихий внутренний двор, а интерьер выдержан в спокойных тонах камерного клуба.",
+];
+
+const FALLBACK_TERRACES: [string, string] = [
+  "Под высокими потолками лобби с кофейной и барной зоной звучит тишина камерного клуба, где можно на мгновение остановиться, встретиться с другом или просто насладиться атмосферой.",
+  "Отдельные входы для доставки и сервисного персонала продуманы так, чтобы не вмешиваться в жизнь резидентов. Хозяйственные потоки идут своими маршрутами — общественные зоны остаются местом тишины и встреч.",
+];
+
+export default async function AmenitiesPage() {
+  const content = await fetchPage(ALIAS);
+  const slides = cmsSlides(content, "slider", FALLBACK_SLIDES);
+
   return (
     <>
       <PageHero
-        image="/images/amenities-hero.png"
-        imageAlt="Аменитис клубного дома k 7/11 — фитнес-зал с видом на внутренний двор"
+        image={img(content, "hero_image", "/images/amenities-hero.png")}
+        imageAlt={txt(
+          content,
+          "hero_alt",
+          "Аменитис клубного дома k 7/11 — фитнес-зал с видом на внутренний двор",
+        )}
         breadcrumb={[
           { label: "…", href: "/", ariaLabel: "Главная" },
           { label: "Аменитис" },
@@ -60,16 +88,20 @@ export default function AmenitiesPage() {
           { parts: [{ text: "внутренний двор" }] },
         ]}
         paragraphs={[
-          "В глубине дома прячется уголок для тела и души: зал с видом на зелёный двор и приватное SPA, где забота о себе превращается в ритуал.",
-          "Панорамные окна открывают вид на тихий внутренний двор, а интерьер выдержан в спокойных тонах камерного клуба.",
+          txt(content, "intro_p1", FALLBACK_INTRO[0]),
+          txt(content, "intro_p2", FALLBACK_INTRO[1]),
         ]}
       />
 
       <Slider slides={slides} />
 
       <Terraces
-        image="/images/amenities-lobby.png"
-        imageAlt="Лобби клубного дома k 7/11 — кофейная и барная зона"
+        image={img(content, "terraces_image", "/images/amenities-lobby.png")}
+        imageAlt={txt(
+          content,
+          "terraces_alt",
+          "Лобби клубного дома k 7/11 — кофейная и барная зона",
+        )}
         rowPadTop={290}
         desktopLines={[
           { parts: [{ text: "Дом,", big: true }] },
@@ -83,8 +115,8 @@ export default function AmenitiesPage() {
           { parts: [{ text: "снаружи", big: true }] },
         ]}
         paragraphs={[
-          "Под высокими потолками лобби с кофейной и барной зоной звучит тишина камерного клуба, где можно на мгновение остановиться, встретиться с другом или просто насладиться атмосферой.",
-          "Отдельные входы для доставки и сервисного персонала продуманы так, чтобы не вмешиваться в жизнь резидентов. Хозяйственные потоки идут своими маршрутами — общественные зоны остаются местом тишины и встреч.",
+          txt(content, "terraces_p1", FALLBACK_TERRACES[0]),
+          txt(content, "terraces_p2", FALLBACK_TERRACES[1]),
         ]}
       />
 

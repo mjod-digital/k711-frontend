@@ -1,11 +1,18 @@
+import type { ReactNode } from "react";
 import { CascadeHeading } from "@/components/ui/CascadeHeading";
 import { Reveal } from "@/components/ui/Reveal";
 import styles from "./ResidenceIntro.module.scss";
 
+type ResidenceIntroProps = { paragraph?: ReactNode };
+
+// Дефолт = текущий текст (fallback-first).
+const DEFAULT_PARAGRAPH: ReactNode =
+  "Всего 46 резиденций — ни одной лишней, ни одной случайной. На этаже — от двух до четырёх квартир, что создаёт исключительную приватность, редкую даже для элитного сегмента.";
+
 // Page-local второй блок /residences «резиденции с вашим сценарием жизни»
 // (Figma 373-9515). Как TextDuo (правая колонка), но заголовок без крупного
 // слова и ОДИН абзац (690) — поэтому отдельный компонент под страницу.
-export function ResidenceIntro() {
+export function ResidenceIntro({ paragraph = DEFAULT_PARAGRAPH }: ResidenceIntroProps = {}) {
   return (
     <section className={styles.section}>
       <div className={styles.inner}>
@@ -20,11 +27,7 @@ export function ResidenceIntro() {
             ]}
           />
         </Reveal>
-        <Reveal as="p" variant="fade" className={styles.paragraph}>
-          Всего 46 резиденций — ни одной лишней, ни одной случайной. На этаже —
-          от двух до четырёх квартир, что создаёт исключительную приватность,
-          редкую даже для элитного сегмента.
-        </Reveal>
+        <Reveal as="p" variant="fade" className={styles.paragraph}>{paragraph}</Reveal>
       </div>
     </section>
   );

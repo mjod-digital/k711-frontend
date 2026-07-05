@@ -34,6 +34,46 @@ const initialFilters = (r: Ranges): Filters => ({
 
 const within = (v: number, [lo, hi]: Range) => v >= lo && v <= hi;
 
+// ----- URL ↔ фильтры: shareable-ссылка на отфильтрованный каталог -----
+// Пары [ключ фильтра, имя query-параметра]. Диапазон пишем в URL только если он
+// сужен относительно полного — иначе адресная строка остаётся чистой.
+const RANGE_PARAMS = [
+  ["floor", "floor"],
+  ["area", "area"],
+  ["pricePerM2", "price"],
+  ["cost", "cost"],
+] as const;
+
+function filtersToQuery(f: Filters, r: Ranges): string {
+  const p = new URLSearchParams();
+  if (f.bedrooms !== null) p.set("beds", String(f.bedrooms));
+  for (const [key, name] of RANGE_PARAMS) {
+    const [lo, hi] = f[key];
+    const [flo, fhi] = r[key];
+    if (lo !== flo || hi !== fhi) p.set(name, `${lo}-${hi}`);
+  }
+  return p.toString();
+}
+
+function parseFiltersFromQuery(search: string, r: Ranges, beds: number[]): Filters | null {
+  const p = new URLSearchParams(search);
+  if (![...p.keys()].length) return null; // нет параметров — фильтры не трогаем
+  const f = initialFilters(r);
+  const b = Number(p.get("beds"));
+  if (p.has("beds") && beds.includes(b)) f.bedrooms = b;
+  for (const [key, name] of RANGE_PARAMS) {
+    const raw = p.get(name);
+    if (!raw) continue;
+    const [lo, hi] = raw.split("-").map(Number);
+    if (!Number.isFinite(lo) || !Number.isFinite(hi)) continue;
+    // Клампим в допустимый диапазон и упорядочиваем (защита от битых ссылок).
+    const [flo, fhi] = r[key];
+    const clamp = (v: number) => Math.min(fhi, Math.max(flo, v));
+    f[key] = [clamp(Math.min(lo, hi)), clamp(Math.max(lo, hi))] as Range;
+  }
+  return f;
+}
+
 function HeartIcon() {
   return (
     <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -173,6 +213,7 @@ export function ApartmentCatalog({ apartments }: { apartments: Apartment[] }) {
 
   const [filters, setFilters] = useState<Filters>(() => initialFilters(ranges));
   const [filtersOpen, setFiltersOpen] = useState(false);
+  const [ready, setReady] = useState(false); // URL-инициализация завершена
 
   // Избранное — глобально (zustand). До гидратации считаем пустым.
   const favIds = useFavorites((s) => s.ids);
@@ -180,6 +221,30 @@ export function ApartmentCatalog({ apartments }: { apartments: Apartment[] }) {
   const hydrated = useHydrated();
 
   const reset = () => setFilters(initialFilters(ranges));
+
+  // URL → фильтры (один раз при монтировании): открытие ссылки с query-параметрами
+  // восстанавливает отфильтрованный список. На сервере window нет → стартуем с
+  // дефолтов (совпадает с SSR, без hydration-mismatch), URL применяем после гидратации.
+  // setState здесь — намеренная инициализация из browser-only источника (не каскад
+  // ре-рендеров); ranges/bedOptions стабильны (из пропа apartments), читаем один раз.
+  useEffect(() => {
+    const parsed = parseFiltersFromQuery(window.location.search, ranges, bedOptions);
+    /* eslint-disable react-hooks/set-state-in-effect */
+    if (parsed) setFilters(parsed);
+    setReady(true);
+    /* eslint-enable react-hooks/set-state-in-effect */
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Фильтры → URL (после инициализации): держим адресную строку в актуальном
+  // состоянии через History API — без навигации и рефетча серверного компонента,
+  // чтобы ссылку на отфильтрованный каталог можно было скопировать и открыть.
+  useEffect(() => {
+    if (!ready) return;
+    const qs = filtersToQuery(filters, ranges);
+    const url = qs ? `${window.location.pathname}?${qs}` : window.location.pathname;
+    window.history.replaceState(null, "", url);
+  }, [filters, ready, ranges]);
 
   // Десктоп: масштабируем панель фильтров под высоту окна (zoom, как в меню) —
   // на невысоких экранах панель ужимается целиком, а не срезается кнопка «сбросить».
