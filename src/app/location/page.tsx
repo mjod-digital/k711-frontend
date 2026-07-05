@@ -54,6 +54,7 @@ export default async function LocationPage() {
     <>
       <PageHero
         image={img(content, "hero_image", "/images/location-hero.png")}
+        imageMobile={content.images.hero_image_mobile || undefined}
         imageAlt={txt(content, "hero_alt", "Клубный дом k 7/11 — локация в тихом центре Москвы")}
         breadcrumb={[
           { label: "…", href: "/", ariaLabel: "Главная" },

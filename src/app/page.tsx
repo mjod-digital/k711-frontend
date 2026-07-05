@@ -178,6 +178,7 @@ export default async function HomePage() {
     <>
       <Hero
         image={content.images.hero_image || undefined}
+        imageMobile={content.images.hero_image_mobile || undefined}
         imageAlt={content.texts.hero_alt || undefined}
       />
       <Statement
