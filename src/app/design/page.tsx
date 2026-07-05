@@ -51,6 +51,7 @@ export default async function DesignPage() {
     <>
       <PageHero
         image={img(content, "hero_image", "/images/design/hero.png")}
+        imageMobile={content.images.hero_image_mobile || undefined}
         imageAlt={txt(content, "hero_alt", "Дизайнерское лобби клубного дома k 7/11")}
         breadcrumb={[
           { label: "…", href: "/", ariaLabel: "Главная" },
