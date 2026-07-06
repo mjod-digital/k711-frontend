@@ -21,11 +21,18 @@ import { fetchPage, txt, cmsSlides, cmsGallery } from "@/lib/api";
 const ALIAS = "home";
 
 // SEO-метаданные главной берём из MODX (/api/home → meta), фолбэк — дефолты layout.
+// Фолбэк SEO главной, если CMS/API недоступны (или /api/home ещё не заведён).
+const FALLBACK_META: Metadata = {
+  title: "К7/11 — клубный семейный дом с ультрасовременной архитектурой.",
+  description:
+    "К7/11 — клубный дом на Тихой Пресне. Всего 46 резиденций, собственный скандинавский сад. Архитектура от бюро СПИЧ Сергея Чобана.",
+};
+
 export async function generateMetadata(): Promise<Metadata> {
   const c = await fetchPage(ALIAS);
   return {
-    title: c.meta.title || undefined,
-    description: c.meta.description || undefined,
+    title: c.meta.title || FALLBACK_META.title,
+    description: c.meta.description || FALLBACK_META.description,
   };
 }
 
