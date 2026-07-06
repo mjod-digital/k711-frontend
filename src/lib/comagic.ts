@@ -15,6 +15,9 @@ type ComagicOfflineRequest = {
   email?: string;
   phone?: string;
   message?: string;
+  // Кастомные поля заявки (ext_id из CoMagic, метод get.offline_message_user_fields):
+  sopd?: string; // «Согласие о ПД»
+  mailing?: string; // «Согласие на рассылки»
 };
 
 type ComagicApi = {
@@ -67,16 +70,13 @@ function apartmentLine(a: LeadApartment): string {
   return parts.join(", ");
 }
 
-const yesNo = (v: boolean) => (v ? "да" : "нет");
-
+// Согласия (ПД/рассылка) больше НЕ пишем в текст — они уходят в отдельные
+// поля sopd/mailing. В message остаются источник, квартира и комментарий
+// (для них выделенных полей в аккаунте нет).
 function buildMessage(lead: Lead): string {
   const lines = [SOURCE_LABEL[lead.source]];
   if (lead.apartment) lines.push(`Квартира: ${apartmentLine(lead.apartment)}`);
   if (lead.comment) lines.push(`Комментарий: ${lead.comment}`);
-  if (lead.consent !== undefined)
-    lines.push(`Согласие на обработку ПД: ${yesNo(lead.consent)}`);
-  if (lead.marketing !== undefined)
-    lines.push(`Согласие на рассылку: ${yesNo(lead.marketing)}`);
   return lines.join("\n");
 }
 
@@ -102,6 +102,9 @@ export function sendLead(lead: Lead): void {
     email: lead.email?.trim() || "",
     message: buildMessage(lead),
   };
+  // Согласия — в отдельные поля CoMagic по ext_id (sopd / mailing).
+  if (lead.consent !== undefined) req.sopd = lead.consent ? "Да" : "Нет";
+  if (lead.marketing !== undefined) req.mailing = lead.marketing ? "Да" : "Нет";
 
   withComagic((api) => {
     try {
