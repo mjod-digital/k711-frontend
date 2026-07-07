@@ -16,7 +16,7 @@ type ConnectBlockProps = {
 // Тёмный CTA-баннер «Перейти к выбору резиденции» (Figma 373-9316).
 // Переиспользуемый кросс-страничный блок; вся плашка — ссылка.
 export function ConnectBlock({
-  href = "/residences",
+  href = "/apartments",
   image = "/images/arch-connect.png",
   imageAlt = "",
   className,
