@@ -88,18 +88,7 @@ mindbox('create', { endpointId: 'Mr-group.klimashkina711' });`}
           strategy="afterInteractive"
         />
 
-        {/* Временно возвращены в код, пока не переедут в GTM: без виджета
-            CoMagic форма не долетает до CoMagic (window.Comagic отсутствует). */}
-        <Script
-          src="https://app.comagic.ru/static/cs.min.js?k=73BuuR7GIfkuSo9mcbRkDiEMEQ5olI7P"
-          strategy="afterInteractive"
-        />
-
-        <Script
-          src="//smartcallback.ru/api/SmartCallBack.js?t=kUp43RtwmYtq46zaqKrtyh"
-          strategy="afterInteractive"
-          charSet="utf-8"
-        />
+        {/* CoMagic и SmartCallBack переустанавливаются через GTM — из кода убраны. */}
 
         <Script id="ym-init" strategy="afterInteractive">
           {`(function(m,e,t,r,i,k,a){
