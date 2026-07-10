@@ -164,6 +164,8 @@
   padding: 0 fluid(24) fluid(60);
 
   @include mobile {
+    // Низ 0: место под кнопкой даёт липкая полка .filtersDock (высота 80 по
+    // макету) — она последний ребёнок списка и сама держит отступ.
     padding: fluid(20) fluid(8) 0;
   }
 }
@@ -306,18 +308,47 @@
 }
 
 // ----- Мобайл: закреплённая внизу кнопка «Фильтры» -----
+// Мобайл: липкая полка с кнопкой «Фильтры» (Figma 399:13138 — 360×80).
+// Градиент из прозрачного в цвет фона гасит строки, уезжающие под кнопку.
+// sticky + bottom: 0 → полка держится у низа экрана, пока виден список, и
+// «оседает» в его конце. Sticky-контейнер — .list (она его последний ребёнок),
+// поэтому в футер полка не заходит.
+.filtersDock {
+  display: none;
+
+  @include mobile {
+    display: block;
+    position: sticky;
+    bottom: 0;
+    z-index: 80;
+    height: fluid(80);
+    // во всю ширину экрана — гасим боковой padding .list
+    margin-inline: calc(-1 * #{fluid(8)});
+    // прозрачная точка задана явным rgba цвета фона: `transparent` тянул бы
+    // градиент через чёрный и дал грязную кромку.
+    background: linear-gradient(
+      to bottom,
+      rgb(244 242 234 / 0%) 25%,
+      var(--color-badge-light) 100%
+    );
+    pointer-events: none; // кликабельна только кнопка
+  }
+}
+
 .filtersTrigger {
   display: none;
 
   @include mobile {
-    display: inline-flex;
+    display: flex;
     align-items: center;
     justify-content: center;
-    position: fixed;
+    // Кнопка прижата к низу полки (Figma). 10 — требуемый зазор до футера
+    // в «осевшем» состоянии и над низом экрана, пока полка залипла.
+    position: absolute;
     left: 50%;
-    bottom: fluid(24);
+    bottom: fluid(10);
     transform: translateX(-50%);
-    z-index: 80;
+    pointer-events: auto; // полка кликов не ловит, кнопка — ловит
     height: fluid(48);
     padding-inline: fluid(40);
     background: var(--color-brown-dark);

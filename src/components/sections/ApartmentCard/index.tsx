@@ -23,13 +23,18 @@ function Compass() {
 }
 
 // Иконка скачивания PDF (Figma 527-13810) — документ со стрелкой вниз.
+// viewBox 13.8 растягивается до 20px (×1.45), у соседнего сердца 24 сжимается до
+// 20px (×0.83) — при одинаковом stroke-width линии выглядели бы вдвое толще.
+// 0.8 × 1.45 ≈ 1.4 × 0.83: обводки совпадают по итоговой толщине на экране.
+const DL_STROKE = 0.8;
+
 function DownloadIcon() {
   return (
     <svg viewBox="0 0 13.2 13.8" fill="none" aria-hidden="true">
-      <path d="M3.6 13.2H0.6L0.6 0.6H9L12.6 4.2V13.2H9.6" stroke="currentColor" strokeWidth="1.2" />
-      <path d="M6.6 6.6L6.6 12.6" stroke="currentColor" strokeWidth="1.2" />
-      <path d="M9 10.2L6.6 12.6L4.2 10.2" stroke="currentColor" strokeWidth="1.2" />
-      <path d="M9 0.6V4.2H12.6" stroke="currentColor" strokeWidth="1.2" />
+      <path d="M3.6 13.2H0.6L0.6 0.6H9L12.6 4.2V13.2H9.6" stroke="currentColor" strokeWidth={DL_STROKE} />
+      <path d="M6.6 6.6L6.6 12.6" stroke="currentColor" strokeWidth={DL_STROKE} />
+      <path d="M9 10.2L6.6 12.6L4.2 10.2" stroke="currentColor" strokeWidth={DL_STROKE} />
+      <path d="M9 0.6V4.2H12.6" stroke="currentColor" strokeWidth={DL_STROKE} />
     </svg>
   );
 }
