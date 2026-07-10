@@ -29,8 +29,8 @@ const DEFAULT_PARAGRAPH: ReactNode =
 export function DesignBureau({
   image,
   imageAlt,
-  ctaHref = "/residences",
-  ctaLabel = "О дизайн-бюро",
+  ctaHref = "/apartments",
+  ctaLabel = "выбрать резиденцию",
   paragraph = DEFAULT_PARAGRAPH,
 }: DesignBureauProps) {
   const sectionRef = useRef<HTMLElement>(null);

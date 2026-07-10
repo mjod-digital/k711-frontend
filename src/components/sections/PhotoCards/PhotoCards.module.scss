@@ -63,6 +63,23 @@
   clip-path: polygon(0 0, 90% 0, 100% 25%, 100% 100%, 0 100%);
 }
 
+// Затемнение снизу поверх фото (Figma). Отдельный элемент, а не ::after:
+// на мобайле ::after карточки занят миксином cornerFade (блик в срезанном углу).
+// Клип повторяет срез картинки — иначе тёмный треугольник вылезет в угол.
+// z-index 1: выше фото, ниже подписи (.label — z-index 2).
+.scrim {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  clip-path: polygon(0 0, 90% 0, 100% 25%, 100% 100%, 0 100%);
+  background: linear-gradient(
+    0deg,
+    rgba(33, 3, 3, 0.5) 0%,
+    rgba(33, 3, 3, 0) 62.06%
+  );
+}
+
 .label {
   position: absolute;
   left: fluid(40);
@@ -75,16 +92,25 @@
 
 .top .label {
   top: fluid(40);
-
-  @include mobile {
-    top: fluid(20);
-  }
 }
 
 .bottom .label {
   bottom: fluid(40);
+}
 
-  @include mobile {
-    bottom: fluid(20);
+// Мобайл: положение подписи, как и «лесенка», зависит от ПОРЯДКА карточки, а не
+// от пропа position. Верхняя (нечётная) — подпись сверху, нижняя (чётная) — снизу.
+// Иначе на страницах, где у первой карточки position=bottom (напр. /improvement),
+// подписи съезжаются к середине колонки и упираются друг в друга.
+// Специфичность (3 класса) перебивает .top/.bottom .label — сбрасываем парную ось.
+@include mobile {
+  .card:nth-child(odd) .label {
+    top: fluid(12);
+    bottom: auto;
+  }
+
+  .card:nth-child(even) .label {
+    top: auto;
+    bottom: fluid(12);
   }
 }

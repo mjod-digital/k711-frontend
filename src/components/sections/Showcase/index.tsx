@@ -207,15 +207,32 @@ export function Showcase({ steps }: { steps: ShowcaseStep[] }) {
       return;
     }
 
-    // ---- МОБАЙЛ: построчная шторка заголовков при входе в вид ----
-    // На мобайле .textClip не клипает, поэтому каскадные заголовки оживляем
-    // штатным механизмом [data-reveal] .reveal-line (CascadeHeading уже ставит
-    // .reveal-line/--i). Счётчик-число анимируется отдельно (CountUp).
-    const headings = stepRefs.current
-      .map((el) => el?.querySelector("h2") as HTMLElement | null)
-      .filter((h): h is HTMLElement => !!h);
-    headings.forEach((h) => {
-      h.dataset.reveal = "hidden";
+    // ---- МОБАЙЛ: реveal по входу в вид ----
+    // На мобайле .textClip не клипает, поэтому оживляем через [data-reveal]:
+    //  • каскадные заголовки — глобальным .reveal-line (CascadeHeading ставит --i);
+    //  • шаг-счётчик (.count) — шторкой снизу-вверх (h2 у него нет);
+    //  • блок .info (описание + кнопка) — тем же «выездом» снизу, что и в пине
+    //    (стили в Showcase.module.scss). Раньше desc/cta на мобайле были статичны.
+    // Атрибут ставим только здесь, поэтому при reduced-motion (ранний return выше)
+    // и в SSR текст виден сразу — без скрытого состояния.
+    const revealTargets: HTMLElement[] = [];
+    stepRefs.current.forEach((el) => {
+      if (!el) return;
+      const h2 = el.querySelector<HTMLElement>("h2");
+      if (h2) revealTargets.push(h2);
+      // Шаг-счётчик: шторку клипаем на .count, но НАБЛЮДАЕМ его контейнер.
+      // У элемента, полностью скрытого собственным clip-path, intersectionRatio
+      // равен 0 (проверено: 0 на .count против 1 на .textClip), поэтому порог
+      // 0.2 не пересекается и колбэк IO никогда не приходит.
+      if (el.querySelector(`.${styles.count}`)) {
+        const host = el.querySelector<HTMLElement>(`.${styles.textClip}`);
+        if (host) revealTargets.push(host);
+      }
+      const info = el.querySelector<HTMLElement>(`.${styles.info}`);
+      if (info) revealTargets.push(info);
+    });
+    revealTargets.forEach((t) => {
+      t.dataset.reveal = "hidden";
     });
     const revealIO = new IntersectionObserver(
       (entries) => {
@@ -228,7 +245,7 @@ export function Showcase({ steps }: { steps: ShowcaseStep[] }) {
       },
       { threshold: 0.2, rootMargin: "0px 0px -20% 0px" },
     );
-    headings.forEach((h) => revealIO.observe(h));
+    revealTargets.forEach((t) => revealIO.observe(t));
 
     // ---- МОБАЙЛ: у каждой картинки свой параллакс (центрированный -0.5..0.5) ----
     let raf = 0;
@@ -253,8 +270,8 @@ export function Showcase({ steps }: { steps: ShowcaseStep[] }) {
       window.removeEventListener("resize", onScroll);
       cancelAnimationFrame(raf);
       revealIO.disconnect();
-      headings.forEach((h) => {
-        delete h.dataset.reveal;
+      revealTargets.forEach((t) => {
+        delete t.dataset.reveal;
       });
     };
   }, [pinned, steps.length]);
@@ -305,6 +322,8 @@ export function Showcase({ steps }: { steps: ShowcaseStep[] }) {
                       end={step.count}
                       className={styles.num}
                       play={pinned ? i === active : undefined}
+                      // На мобайле счётчик 0→N не крутим — сразу конечное число.
+                      animate={!mobile}
                     />
                     <span className={styles.word}>{step.word}</span>
                   </div>

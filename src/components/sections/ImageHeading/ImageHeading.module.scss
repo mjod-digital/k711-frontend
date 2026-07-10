@@ -126,6 +126,7 @@
     gap: unset;
     font-size: fluid(28);
     flex-wrap: wrap;
+    align-items: flex-start;
   }
 }
 
@@ -156,5 +157,6 @@
   margin-left: fluid(10); // отступ от «5» до «метров»
   @include mobile {
     font-size: fluid(28);
+    line-height: unset;
   }
 }
