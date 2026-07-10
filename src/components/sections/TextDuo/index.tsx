@@ -10,7 +10,8 @@ import styles from "./TextDuo.module.scss";
 
 type TextDuoProps = {
   lines: CascadeLine[];
-  paragraphs: [ReactNode, ReactNode];
+  /** Один или два абзаца. Второй опционален (напр. на /amenities он убран). */
+  paragraphs: [ReactNode] | [ReactNode, ReactNode];
   /** right — правая колонка (как Statement); full — заголовок и текст на всю ширину. */
   variant?: "right" | "full";
   /** Доп. класс на секцию (напр. переопределить --inner-mobile-width на странице). */
@@ -72,8 +73,11 @@ export function TextDuo({ lines, paragraphs, variant = "right", className }: Tex
           delay={headingDelay}
           duration={1000}
         >
-          <p className={styles.paragraph}>{paragraphs[0]}</p>
-          <p className={styles.paragraph}>{paragraphs[1]}</p>
+          {paragraphs.map((p, i) => (
+            <p key={i} className={styles.paragraph}>
+              {p}
+            </p>
+          ))}
         </Reveal>
       </div>
     </section>

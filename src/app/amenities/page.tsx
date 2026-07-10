@@ -26,24 +26,14 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
+// amenities-slider-3 — портрет 1440×1804, в ландшафтный слайдер не годится.
 const FALLBACK_SLIDES: Slide[] = [
-  {
-    src: "/images/amenities-slider-1.png",
-    caption: "SPA, где забота о себе превращается в ритуал",
-  },
-  {
-    src: "/images/amenities-slider-2.png",
-    caption: "Лобби",
-  },
-  {
-    src: "/images/amenities-slider-3.png",
-    caption: "SPA, где забота о себе превращается в ритуал",
-  },
+  { src: "/images/amenities-slider-1.png", caption: "Красный салон с винной коллекцией" },
+  { src: "/images/amenities-slider-2.png", caption: "Панорамный фитнес в тёплых тонах" },
 ];
 
-const FALLBACK_INTRO: [string, string] = [
-  "В глубине дома прячется уголок для тела и души: зал с видом на зелёный двор и приватное SPA, где забота о себе превращается в ритуал.",
-  "Панорамные окна открывают вид на тихий внутренний двор, а интерьер выдержан в спокойных тонах камерного клуба.",
+const FALLBACK_INTRO: [string, string?] = [
+  "В глубине дома прячется уголок для тела и души: зал с видом на зелёный двор и приватное SPA, где забота о себе превращается в ритуал.",
 ];
 
 const FALLBACK_TERRACES: [string, string] = [
@@ -54,6 +44,11 @@ const FALLBACK_TERRACES: [string, string] = [
 export default async function AmenitiesPage() {
   const content = await fetchPage(ALIAS);
   const slides = cmsSlides(content, "slider", FALLBACK_SLIDES);
+
+  const introP2 = content.texts.intro_p2?.trim();
+  const introParagraphs: [string] | [string, string] = introP2
+    ? [txt(content, "intro_p1", FALLBACK_INTRO[0]), introP2]
+    : [txt(content, "intro_p1", FALLBACK_INTRO[0])];
 
   return (
     <>
@@ -88,10 +83,7 @@ export default async function AmenitiesPage() {
           { parts: [{ text: "с видом на зелёный" }] },
           { parts: [{ text: "внутренний двор" }] },
         ]}
-        paragraphs={[
-          txt(content, "intro_p1", FALLBACK_INTRO[0]),
-          txt(content, "intro_p2", FALLBACK_INTRO[1]),
-        ]}
+        paragraphs={introParagraphs}
       />
 
       <Slider slides={slides} />
@@ -123,6 +115,7 @@ export default async function AmenitiesPage() {
 
       <PhotoCards
         className={styles.photoCards}
+        scrim
         items={[
           {
             src: "/images/amenities-spa.png",

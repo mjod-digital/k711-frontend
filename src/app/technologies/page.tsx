@@ -26,10 +26,11 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
+// Кадры из Figma (105:13684 / 13686). Прежние slider-spa и photo-left —
+// портреты, в ландшафтный слайдер не годятся.
 const FALLBACK_SLIDES: Slide[] = [
-  { src: "/images/technologies/slider-spa.png", caption: "SPA, где забота о себе превращается в ритуал" },
-  { src: "/images/technologies/photo-right.png", caption: "Паркинг" },
-  { src: "/images/technologies/photo-left.png", caption: "Инженерия дома" },
+  { src: "/images/technologies/parking-hall.png", caption: "Свет и порядок под землёй" },
+  { src: "/images/technologies/parking-bays.png", caption: "Место для каждого автомобиля" },
 ];
 
 const FALLBACK_INTRO: [string, string] = [

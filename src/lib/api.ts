@@ -1,4 +1,5 @@
 import type { Apartment, ApartmentDetail } from "./apartments";
+import { MOCK_FLATS } from "./flats.mock";
 
 // ============================================================
 //   API клубного дома Климашкина 7/11.
@@ -9,6 +10,16 @@ import type { Apartment, ApartmentDetail } from "./apartments";
 const API_BASE_URL =
   process.env.API_BASE_URL ?? "https://www.klimashkina711.ru/api";
 const REVALIDATE_TIME = 60;
+
+// Источник каталога квартир: "api" — живой CRM, "mock" — снимок в коде
+// (src/lib/flats.mock.ts). На превью-деплое CRM не нужен: каталог собирается из
+// снимка, без сетевых зависимостей. Переменную VERCEL платформа выставляет сама,
+// поэтому превью переключается без ручной настройки.
+// Прод и локальная разработка не меняются: ни APARTMENTS_SOURCE, ни VERCEL там нет → "api".
+// Явный APARTMENTS_SOURCE перекрывает автоопределение в обе стороны.
+const APARTMENTS_SOURCE =
+  process.env.APARTMENTS_SOURCE ?? (process.env.VERCEL ? "mock" : "api");
+const USE_MOCK_FLATS = APARTMENTS_SOURCE === "mock";
 
 // Форма квартиры из CRM (/flats, /flat).
 export type Flat = {
@@ -33,6 +44,7 @@ export type Flat = {
 };
 
 export async function fetchApartments(): Promise<Flat[]> {
+  if (USE_MOCK_FLATS) return MOCK_FLATS;
   const res = await fetch(`${API_BASE_URL}/flats`, {
     next: { revalidate: REVALIDATE_TIME },
   });
@@ -43,6 +55,13 @@ export async function fetchApartments(): Promise<Flat[]> {
 export async function fetchApartmentById(
   id: string,
 ): Promise<{ flat: Flat; relatedFlats: Flat[] }> {
+  if (USE_MOCK_FLATS) {
+    const flat = MOCK_FLATS.find((f) => f.number === id);
+    // Бросаем, а не возвращаем пустое: вызывающая страница ловит и отдаёт 404 —
+    // ровно как при 404 от CRM.
+    if (!flat) throw new Error("Failed to fetch apartment data");
+    return { flat, relatedFlats: MOCK_FLATS.filter((f) => f.number !== id) };
+  }
   const res = await fetch(`${API_BASE_URL}/flat?id=${encodeURIComponent(id)}`, {
     next: { revalidate: REVALIDATE_TIME },
   });
@@ -51,6 +70,7 @@ export async function fetchApartmentById(
 }
 
 export async function fetchFloorData(id: string) {
+  if (USE_MOCK_FLATS) return null; // плана этажа в снимке нет — UI берёт свой
   try {
     const res = await fetch(`${API_BASE_URL}/floor?id=${encodeURIComponent(id)}`, {
       next: { revalidate: REVALIDATE_TIME },

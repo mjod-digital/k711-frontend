@@ -40,20 +40,30 @@ export async function generateMetadata(): Promise<Metadata> {
 const multiline = (s: string) =>
   s.split("\n").flatMap((line, i) => (i === 0 ? [line] : [<br key={i} />, line]));
 
+// ВАЖНО: слайд — ландшафт ~1.62:1 (76vw × 680px), object-fit: cover.
+// Портретные рендеры (1380×1440, 3277×4096 и т.п.) сюда не годятся — их режет
+// и мылит. Берём только ландшафт с шириной ≥2200px.
+
+// «Сервисы и забота». Красный салон переехал в «Жизнь внутри» (по макету),
+// amenities-hero убран — это hero-кадр своей страницы.
 const slidesSpa: Slide[] = [
-  { src: "/images/slider-1.png", caption: "SPA, где забота о себе превращается в ритуал" },
-  { src: "/images/lobby.png", caption: "Лобби с кофейной и барной зонами" },
-  { src: "/images/garden.png", caption: "Камерный скандинавский сад" },
-  { src: "/images/slider-2.png", caption: "Фитнес-зал с видом на сад" },
-  { src: "/images/terraces.png", caption: "Приватные террасы резиденций" },
+  { src: "/images/amenities-slider-2.png", caption: "Панорамный фитнес в тёплых тонах" },
 ];
 
+// «Сад и благоустройство» — второй слайдер, сразу после блока
+// «Камерный скандинавский сад». Годных ландшафтов по саду всего два,
+// пока один слайд.
+const slidesGarden: Slide[] = [
+  { src: "/images/improvement-slider-courtyard.png", caption: "Приватный двор для семейных прогулок" },
+  { src: "/images/garden-courtyard.png", caption: "Прогулка с питомцем среди клёнов" },
+];
+
+// «Жизнь внутри». Все интерьерные рендеры (gallery-*, residences-stat-*,
+// residences-space/hero) — портретные, в слайдер не годятся. Ландшафт один.
 const slidesInterior: Slide[] = [
-  { src: "/images/scenario.png", caption: "Интерьеры с вашим сценарием жизни" },
-  { src: "/images/residences.png", caption: "От 2 до 4 квартир на этаже" },
-  { src: "/images/contact.png", caption: "Панорамные окна в пол" },
-  { src: "/images/facade.png", caption: "Фрагмент фасада 1905 года" },
-  { src: "/images/architect.png", caption: "Проект Сергея Чобана" },
+  { src: "/images/residences-scenario.png", caption: "Сценарий неспешного дня дома" },
+  { src: "/images/amenities-slider-1.png", caption: "Красный салон с винной коллекцией" },
+  { src: "/images/lounge-red.png", caption: "Красная гостиная с баром" },
 ];
 
 // Лента-галерея перед Terraces (макет 373-10064): чередование широких/узких кадров.
@@ -64,12 +74,13 @@ const galleryInteriors: GalleryItem[] = [
   { src: "/images/gallery-bath.png", caption: "Ванная", variant: "narrow" },
 ];
 
+// «Дом и окружение» — кадры из Figma (105:13636 / 13648 / 13635).
+// arch-hero.png и slider-1.png не берём: это те же два рендера (шире кроп /
+// без человека), рядом смотрелись бы дублями.
 const slidesViews: Slide[] = [
-  { src: "/images/terraces.png", caption: "Вид на исторический центр" },
-  { src: "/images/garden.png", caption: "Зелёный двор-сад" },
-  { src: "/images/slider-1.png", caption: "Тихая Пресня за окном" },
-  { src: "/images/lobby.png", caption: "Пятиметровые потолки лобби" },
-  { src: "/images/slider-2.png", caption: "Свет Серебряного века" },
+  { src: "/images/facade-front.png", caption: "Историческая база и медный верх" },
+  { src: "/images/facade-corner.png", caption: "Медный объём над историческим карнизом" },
+  { src: "/images/terrace-lounge.png", caption: "Приватная терраса над историческим центром" },
 ];
 
 const spaceParagraphs: [string, string] = [
@@ -139,6 +150,8 @@ export default async function HomePage() {
 
   const spaSlides = cmsSlides(content, "slider_spa", slidesSpa);
   const viewsSlides = cmsSlides(content, "slider_views", slidesViews);
+  // TV slider_garden в MODX пока нет — cmsSlides сам падёт на код-фолбэк.
+  const gardenSlides = cmsSlides(content, "slider_garden", slidesGarden);
   const interiorSlides = cmsSlides(content, "slider_interior", slidesInterior);
   const gallery = cmsGallery(content, "gallery", galleryInteriors);
 
@@ -197,7 +210,7 @@ export default async function HomePage() {
       <Showcase steps={steps} />
 
       <HistoricCenter />
-      <Slider slides={spaSlides} />
+      <Slider slides={viewsSlides} />
       <Location />
       <Surroundings />
       <Presentation
@@ -223,7 +236,7 @@ export default async function HomePage() {
         <GardenHeading />
       </ImageHeading>
 
-      <Slider slides={viewsSlides} />
+      <Slider slides={gardenSlides} />
 
       <CreamHeading />
 

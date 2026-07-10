@@ -223,10 +223,58 @@
 
 // .static .parallax — параллакс оставлен включённым (мобайл): сдвиг по --par из JS.
 
-// Мобайл / reduced-motion (.static): без шторки — текст статичен, заголовки
-// оживляет построчная шторка (data-reveal на h2).
+// Мобайл / reduced-motion (.static): без шторки — заголовки оживляет построчная
+// шторка (data-reveal на h2), описание и кнопка — «выезд» снизу (ниже).
 .static .textClip {
   clip-path: none;
+}
+
+// Вне пина desc/cta проявляются тем же мягким «выездом» снизу, что и в пин-режиме,
+// но по входу в вьюпорт: data-reveal ставит JS (Showcase/index.tsx). Без атрибута
+// (SSR / no-JS) и при reduced-motion текст виден сразу — скрытого состояния нет.
+@media (prefers-reduced-motion: no-preference) {
+  // Шаг-счётчик «46 / резиденций»: h2 у него нет, поэтому шторку снизу-вверх
+  // (ту же, что в пине ведёт --rTitle) вешаем на .count. Атрибут при этом стоит
+  // на контейнере .textClip — наблюдать сам .count нельзя: клипнутый элемент даёт
+  // intersectionRatio = 0, и порог IO не пересекается. Само число на мобайле
+  // не крутится (CountUp animate=false), но блок раскрывается.
+  .static .textClip[data-reveal="hidden"] .count {
+    clip-path: inset(100% 0 0 0);
+    will-change: clip-path;
+  }
+
+  .static .textClip[data-reveal="visible"] .count {
+    clip-path: inset(0 0 0 0);
+    transition: clip-path var(--reveal-line-duration, 1300ms)
+      var(--reveal-ease, cubic-bezier(0.22, 1, 0.36, 1));
+  }
+
+  // Скрытое состояние — БЕЗ transition (иначе текст на глазах гаснет в первом
+  // кадре, пока JS проставляет атрибут). Анимация только на переходе в visible.
+  .static .info[data-reveal="hidden"] {
+    .desc,
+    .cta {
+      opacity: 0;
+      transform: translate3d(0, fluid(40), 0);
+      will-change: opacity, transform;
+    }
+  }
+
+  .static .info[data-reveal="visible"] {
+    .desc,
+    .cta {
+      opacity: 1;
+      transform: none;
+      transition:
+        opacity 700ms ease,
+        transform 700ms var(--reveal-ease, cubic-bezier(0.22, 1, 0.36, 1));
+    }
+
+    // Кнопка — следом за описанием, как постадийность в десктопе.
+    .cta {
+      transition-delay: 140ms;
+    }
+  }
 }
 
 // ----- Мобайл-раскладка (всегда .static на мобайле): фото сверху, текст ниже -----

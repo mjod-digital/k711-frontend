@@ -10,10 +10,18 @@ type CountUpProps = {
   /** Контролируемый запуск: считать, когда станет true. Если не задан —
    *  запускается сам по IntersectionObserver (наблюдает ближайшую section). */
   play?: boolean;
+  /** false — показать конечное значение сразу, без счётчика (напр. мобайл). */
+  animate?: boolean;
 };
 
 // Считает 0 → end (easeOutCubic). reduced-motion → сразу конечное значение.
-export function CountUp({ end, duration = 1400, className, play }: CountUpProps) {
+export function CountUp({
+  end,
+  duration = 1400,
+  className,
+  play,
+  animate = true,
+}: CountUpProps) {
   const ref = useRef<HTMLSpanElement>(null);
   const [value, setValue] = useState(0);
   const started = useRef(false);
@@ -36,12 +44,14 @@ export function CountUp({ end, duration = 1400, className, play }: CountUpProps)
 
   // Контролируемый режим
   useEffect(() => {
+    if (!animate) return;
     if (play) run();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [play]);
+  }, [play, animate]);
 
   // Самостоятельный режим (play не задан) — по видимости ближайшей section.
   useEffect(() => {
+    if (!animate) return;
     if (play !== undefined) return;
     const el = ref.current;
     if (!el) return;
@@ -58,11 +68,11 @@ export function CountUp({ end, duration = 1400, className, play }: CountUpProps)
     io.observe(target);
     return () => io.disconnect();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [play]);
+  }, [play, animate]);
 
   return (
     <span ref={ref} className={className}>
-      {value}
+      {animate ? value : end}
     </span>
   );
 }

@@ -269,6 +269,12 @@
 
   @include mobile {
     order: 2;
+    // На мобайле .card — флекс-колонка, и align-self: center сжимал бы .plan по
+    // ГОРИЗОНТАЛИ до ширины картинки; тогда max-width у .planFrame (100% - 64)
+    // отсчитывался бы от неё же и оказывался уже картинки — та вылезала за экран,
+    // а вертикальные подписи улиц ложились на чертёж. (В гриде на десктопе то же
+    // align-self центрирует по вертикали — там всё в порядке.)
+    align-self: stretch;
     padding-block: fluid(50) fluid(28);
   }
 }
@@ -290,7 +296,11 @@
   display: block;
   width: auto;
   height: fluid(470);
-  max-width: fluid(440);
+  // Ширину задаёт высота × пропорции файла: планировки приходят из CRM, их реальный
+  // размер (384×535) не совпадает с width/height у <Image> — на узком экране бокс
+  // получался шире рамки. 100% удерживает его в .planFrame; лишнюю высоту съедает
+  // object-fit: contain, а чертёж остаётся вписанным по ширине — вплотную к подписям.
+  max-width: min(#{fluid(440)}, 100%);
   object-fit: contain;
   // Планировки из CRM — тёмный чертёж на белом фоне. multiply «вмешивает»
   // белый в кремовый фон страницы (он исчезает), а линии остаются тёмными.
@@ -343,7 +353,7 @@
   margin-right: fluid(10);
 
   @include mobile {
-    margin-right: fluid(2);
+    margin-right: fluid(8);
   }
 }
 .streetRight {
@@ -351,7 +361,7 @@
   margin-left: fluid(10);
 
   @include mobile {
-    margin-left: fluid(2);
+    margin-left: fluid(8);
   }
 }
 

@@ -330,19 +330,24 @@ export function ApartmentCatalog({ apartments }: { apartments: Apartment[] }) {
             <p className={styles.empty}>Нет квартир по заданным параметрам</p>
           )}
         </div>
-      </div>
 
-      {/* Мобайл: кнопка «Фильтры» закреплена внизу экрана + выезжающий оверлей.
-          Пока оверлей открыт — кнопку убираем (в макете её нет). */}
-      {!filtersOpen && (
-        <button
-          type="button"
-          className={styles.filtersTrigger}
-          onClick={() => setFiltersOpen(true)}
-        >
-          Фильтры
-        </button>
-      )}
+        {/* Мобайл: липкая «полка» с кнопкой «Фильтры» (Figma 399:13138).
+            Градиент гасит строки, уезжающие под кнопку. Полка ЛЕЖИТ ВНУТРИ
+            .list — тогда её sticky-контейнер сам список, и она останавливается
+            в конце таблицы, а не уезжает в футер. Пока оверлей открыт —
+            убираем целиком (в макете её нет). */}
+        {!filtersOpen && (
+          <div className={styles.filtersDock}>
+            <button
+              type="button"
+              className={styles.filtersTrigger}
+              onClick={() => setFiltersOpen(true)}
+            >
+              Фильтры
+            </button>
+          </div>
+        )}
+      </div>
 
       <div
         className={cn(styles.overlay, filtersOpen && styles.overlayOpen)}

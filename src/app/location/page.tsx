@@ -26,19 +26,9 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
+// location-slide-1 и -3 — всего 1016px по ширине (нужно ≥2200), мылят на retina.
 const FALLBACK_SLIDES: Slide[] = [
-  {
-    src: "/images/location-slide-1.png",
-    caption: "SPA, где забота о себе превращается в ритуал",
-  },
-  {
-    src: "/images/location-slide-2.png",
-    caption: "Музей импрессионизма",
-  },
-  {
-    src: "/images/location-slide-3.png",
-    caption: "SPA, где забота о себе превращается в ритуал",
-  },
+  { src: "/images/location-slide-2.png", caption: "Музей русского импрессионизма" },
 ];
 
 const FALLBACK_INTRO: [string, string] = [
@@ -90,6 +80,7 @@ export default async function LocationPage() {
       <Location className={styles.locationBottom} />
 
       <PhotoCards
+        className={styles.photoCards}
         items={[
           {
             src: "/images/location-kremlin.png",
@@ -98,6 +89,11 @@ export default async function LocationPage() {
             lines: [
               { parts: [{ text: "в" }, { text: "10", big: true }] },
               { parts: [{ text: "минутах" }] },
+              { parts: [{ text: "от Кремля" }] },
+            ],
+            // Мобайл: «в 10 минутах» одной строкой — как у соседней карточки.
+            linesMobile: [
+              { parts: [{ text: "в" }, { text: "10", big: true }, { text: "минутах" }] },
               { parts: [{ text: "от Кремля" }] },
             ],
           },

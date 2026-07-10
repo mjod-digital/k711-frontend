@@ -39,6 +39,9 @@ export function Slider({ slides, className, mobileGallery = false }: SliderProps
       ? Array.from({ length: Math.ceil(6 / slides.length) }).flatMap(() => slides)
       : slides;
 
+  // Единственный слайд — листать некуда, стрелки только мешают.
+  const showNav = slides.length > 1;
+
   // Решаем, показывать ли «шахматку» вместо карусели (только если mobileGallery).
   useIsomorphicLayoutEffect(() => {
     if (!mobileGallery) return;
@@ -127,7 +130,7 @@ export function Slider({ slides, className, mobileGallery = false }: SliderProps
             <SwiperSlide key={i} className={styles.slide}>
               <div className={styles.imageBox}>
                 <div className={styles.parallax}>
-                  <Image
+                  <Image 
                     src={slide.src}
                     alt={slide.alt ?? slide.caption ?? ""}
                     fill
@@ -147,22 +150,26 @@ export function Slider({ slides, className, mobileGallery = false }: SliderProps
         <div className={styles.fadeLeft} aria-hidden />
         <div className={styles.fadeRight} aria-hidden />
 
-        <button
-          ref={setPrevEl}
-          type="button"
-          className={cn(styles.arrow, styles.prev)}
-          aria-label="Предыдущий слайд"
-        >
-          <ArrowIcon />
-        </button>
-        <button
-          ref={setNextEl}
-          type="button"
-          className={cn(styles.arrow, styles.next)}
-          aria-label="Следующий слайд"
-        >
-          <ArrowIcon />
-        </button>
+        {showNav && (
+          <>
+            <button
+              ref={setPrevEl}
+              type="button"
+              className={cn(styles.arrow, styles.prev)}
+              aria-label="Предыдущий слайд"
+            >
+              <ArrowIcon />
+            </button>
+            <button
+              ref={setNextEl}
+              type="button"
+              className={cn(styles.arrow, styles.next)}
+              aria-label="Следующий слайд"
+            >
+              <ArrowIcon />
+            </button>
+          </>
+        )}
       </div>
     </section>
   );

@@ -48,6 +48,10 @@
 .lg {
   font-size: var(--fs-lead); // 28 → 68
   line-height: 1.1;
+
+  @include mobile {
+    line-height: normal;
+  }
 }
 
 .big {

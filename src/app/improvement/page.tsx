@@ -26,19 +26,10 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
+// improvement-slider-greenery — портрет 1380×1440, в ландшафтный слайдер не годится.
 const FALLBACK_SLIDES: Slide[] = [
-  {
-    src: "/images/improvement-slider-courtyard.png",
-    caption: "Закрытый двор-сад с природным ландшафтом",
-  },
-  {
-    src: "/images/improvement-slider-terrace.png",
-    caption: "Видовая терраса над историческим центром",
-  },
-  {
-    src: "/images/improvement-slider-greenery.png",
-    caption: "Камерные зоны отдыха среди многолетников",
-  },
+  { src: "/images/improvement-slider-courtyard.png", caption: "Приватный двор для семейных прогулок" },
+  { src: "/images/improvement-slider-terrace.png", caption: "Терраса с видом на московские шпили" },
 ];
 
 export default async function ImprovementPage() {
