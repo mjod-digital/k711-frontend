@@ -27,19 +27,11 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
+// ВСЕ интерьерные рендеры резиденций (gallery-1/2/3, stat-*, space, hero) —
+// портретные ~0.79. Годного ландшафтного кадра под слайдер на странице нет.
+// Временно ставим один ландшафт; нужны нормальные слайдер-рендеры от клиента.
 const FALLBACK_SLIDES: Slide[] = [
-  {
-    src: "/images/residences-gallery-1.png",
-    caption: "Гостиная",
-  },
-  {
-    src: "/images/residences-gallery-2.png",
-    caption: "Гостиная с панорамным остеклением",
-  },
-  {
-    src: "/images/residences-gallery-3.png",
-    caption: "Спальня",
-  },
+  { src: "/images/apartments-hero.png", caption: "Дубовый холл с почтовыми ячейками" },
 ];
 
 const FALLBACK_SPACE: [string, string] = [

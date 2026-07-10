@@ -26,23 +26,10 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
+// Слайдер ландшафтный (~1.62:1, ≥2200px). Все «свои» кадры архитектуры
+// (facade, residences, arch-facade, arch-choban) — портретные, не годятся.
 const FALLBACK_SLIDES: Slide[] = [
-  {
-    src: "/images/slider-2.png",
-    caption: "Ритм панорамных окон и чёткая геометрия фасада",
-  },
-  {
-    src: "/images/facade.png",
-    caption: "Сохранённая стена «тучереза» 1905 года",
-  },
-  {
-    src: "/images/terraces.png",
-    caption: "Видовые террасы верхних этажей",
-  },
-  {
-    src: "/images/residences.png",
-    caption: "Современные линии в историческом контексте",
-  },
+  { src: "/images/slider-2.png", caption: "Медный фасад в свете заката" },
 ];
 
 // Дефолтные абзацы intro (fallback-first: если CMS пусто — этот текст).
@@ -118,6 +105,7 @@ export default async function ArchitecturePage() {
       <Slider slides={slides} />
 
       <CenterHeading
+        className={styles.centerHeading}
         lines={[
           { parts: [{ text: "выразительный облик" }], align: "center" },
           { parts: [{ text: "вне" }, { text: "времени", big: true }], align: "center" },

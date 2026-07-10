@@ -27,10 +27,10 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
+// design/pair-* — портреты 3277×4096, в ландшафтный слайдер не годятся.
 const FALLBACK_SLIDES: Slide[] = [
-  { src: "/images/design/pair-soft-zone.png", caption: "SPA, где забота о себе превращается в ритуал" },
-  { src: "/images/design/slider-lobby.png", caption: "Лобби" },
-  { src: "/images/design/pair-lobby.png", caption: "Кухня-гостиная" },
+  { src: "/images/design/slider-lobby.png", caption: "Утопленный лаунж, залитый солнцем" },
+  { src: "/images/design/lobby.png", caption: "Красный лаунж с характером" },
 ];
 
 const FALLBACK_INTRO: [string, string] = [

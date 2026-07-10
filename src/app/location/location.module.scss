@@ -63,3 +63,13 @@
     margin-bottom: fluid(60);
   }
 }
+
+// PhotoCards на /location: в ПЕРВОЙ строке подписи («в 10 минутах» / «в 5 минутах»)
+// мелкие слова прижимаем к низу крупного числа. По умолчанию .line в CascadeHeading
+// имеет align-items: flex-start. Строки — глобальный .reveal-line, первая строка
+// каждой подписи; скоуп только этой страницы (на других такие же карточки есть).
+.photoCards {
+  figcaption :global(.reveal-line):first-child {
+    align-items: flex-end;
+  }
+}

@@ -61,3 +61,16 @@
     display: inline;
   }
 }
+
+// «Выразительный облик / вне времени» (CenterHeading). На мобиле вторую строку
+// прижимаем вправо с зазором 8: margin-left:auto перебивает align-self:center
+// у .alignCenter. Строки — прямые span-дети h2 внутри CascadeHeading.
+// Скоуп только этой страницы: такие же CenterHeading есть и на других.
+.centerHeading {
+  @include mobile {
+    h2 > span:nth-child(2) {
+      margin-left: auto;
+      margin-right: fluid(8);
+    }
+  }
+}
