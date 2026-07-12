@@ -1,11 +1,14 @@
 "use client";
 
 import Link from "next/link";
+import { useState } from "react";
 import { useBooking } from "@/store/booking";
 import { sendLead, type LeadApartment } from "@/lib/comagic";
 import { Modal } from "@/components/ui/Modal";
-import { PhoneInput } from "@/components/ui/PhoneInput";
+import { PhoneInput, isPhoneComplete } from "@/components/ui/PhoneInput";
 import styles from "./Popups.module.scss";
+
+const isNameOk = (v: string) => v.trim().length >= 2 && !/\d/.test(v);
 
 // Попап «Забронировать резиденцию №N» (Figma 547-24961). Квартира — из карточки.
 function BookingForm({
@@ -15,6 +18,37 @@ function BookingForm({
   apartment: LeadApartment | null;
   onDone: () => void;
 }) {
+  const [name, setName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [comment, setComment] = useState("");
+  const [consent, setConsent] = useState(false);
+  const [marketing, setMarketing] = useState(false);
+
+  const [dirty, setDirty] = useState({ name: false, phone: false, consent: false });
+  const touch = (f: keyof typeof dirty) => setDirty((d) => ({ ...d, [f]: true }));
+
+  const nameErr = !isNameOk(name);
+  const phoneErr = !isPhoneComplete(phone);
+  const consentErr = !consent;
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setDirty({ name: true, phone: true, consent: true });
+    if (nameErr || phoneErr || consentErr) return;
+
+    // Заявка с инфой о квартире → CoMagic (fire-and-forget — попап сразу).
+    sendLead({
+      source: "booking",
+      apartment,
+      name,
+      phone,
+      comment,
+      consent,
+      marketing,
+    });
+    onDone();
+  };
+
   return (
     <>
       <h2 id="booking-title" className={styles.title}>
@@ -23,26 +57,7 @@ function BookingForm({
         резиденцию{apartment ? ` №${apartment.number}` : ""}
       </h2>
 
-      <form
-        className={styles.form}
-        // Гасим нативную подсказку браузера — оставляем свою подсветку (:user-invalid).
-        onInvalidCapture={(e) => e.preventDefault()}
-        onSubmit={(e) => {
-          e.preventDefault();
-          const fd = new FormData(e.currentTarget);
-          // Заявка с инфой о квартире → CoMagic (fire-and-forget — попап сразу).
-          sendLead({
-            source: "booking",
-            apartment,
-            name: fd.get("name") as string,
-            phone: fd.get("phone") as string,
-            comment: fd.get("comment") as string,
-            consent: !!fd.get("consent"),
-            marketing: !!fd.get("marketing"),
-          });
-          onDone();
-        }}
-      >
+      <form className={styles.form} noValidate onSubmit={handleSubmit}>
         <div className={styles.fieldset}>
           <div className={styles.fields}>
             <div className={styles.row}>
@@ -52,14 +67,21 @@ function BookingForm({
                 name="name"
                 placeholder="Имя"
                 aria-label="Имя"
-                required
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                onBlur={() => touch("name")}
+                data-invalid={dirty.name && nameErr ? "true" : undefined}
+                aria-invalid={(dirty.name && nameErr) || undefined}
               />
               <PhoneInput
                 className={styles.input}
                 name="phone"
                 placeholder="+7 (9__) ___-__-__"
                 aria-label="Телефон"
-                required
+                value={phone}
+                onValueChange={setPhone}
+                onBlur={() => touch("phone")}
+                error={dirty.phone && phoneErr}
               />
             </div>
             <input
@@ -68,12 +90,23 @@ function BookingForm({
               name="comment"
               placeholder="Комментарий"
               aria-label="Комментарий"
+              value={comment}
+              onChange={(e) => setComment(e.target.value)}
             />
           </div>
 
           <div className={styles.checks}>
             <label className={styles.check}>
-              <input type="checkbox" name="consent" required />
+              <input
+                type="checkbox"
+                name="consent"
+                checked={consent}
+                onChange={(e) => {
+                  setConsent(e.target.checked);
+                  touch("consent");
+                }}
+                data-invalid={dirty.consent && consentErr ? "true" : undefined}
+              />
               <span>
                 Соглашаюсь с{" "}
                 <a href="#" className={styles.link}>
@@ -83,7 +116,12 @@ function BookingForm({
               </span>
             </label>
             <label className={styles.check}>
-              <input type="checkbox" name="marketing" />
+              <input
+                type="checkbox"
+                name="marketing"
+                checked={marketing}
+                onChange={(e) => setMarketing(e.target.checked)}
+              />
               <span>Подписаться на маркетинговые и рекламные рассылки</span>
             </label>
           </div>

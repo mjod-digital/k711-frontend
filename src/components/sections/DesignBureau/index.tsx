@@ -73,7 +73,7 @@ export function DesignBureau({
     <section ref={sectionRef} className={styles.section}>
       <div className={styles.stage}>
         <div className={styles.photo}>
-          <Image loading="eager"
+          <Image
             src={image}
             alt={imageAlt}
             fill

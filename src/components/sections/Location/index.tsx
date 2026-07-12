@@ -165,7 +165,7 @@ export function Location({ className }: { className?: string }) {
 
   // Считаем перерасход карты над контейнером и центрируем (mount + resize).
   useIsomorphicLayoutEffect(() => {
-    const setup = () => {
+    const setup = (center: boolean) => {
       const pan = panRef.current;
       const map = mapRef.current;
       if (!pan || !map) return;
@@ -176,15 +176,25 @@ export function Location({ className }: { className?: string }) {
       pan.style.setProperty("--map-h", `${map.clientHeight}px`);
       d.maxX = Math.max(0, pan.offsetWidth - map.clientWidth);
       d.maxY = Math.max(0, pan.offsetHeight - map.clientHeight);
-      d.x = clamp(-d.maxX / 2, -d.maxX, 0); // старт по центру карты
-      d.y = clamp(-d.maxY / 2, -d.maxY, 0);
+      if (center) {
+        d.x = clamp(-d.maxX / 2, -d.maxX, 0); // старт по центру карты
+        d.y = clamp(-d.maxY / 2, -d.maxY, 0);
+      } else {
+        // Ресайз (в т.ч. показ/скрытие адресной строки при скролле на мобиле
+        // меняет высоту вьюпорта → resize) НЕ сбрасывает пользовательский пан:
+        // только переклампливаем под новые границы. Иначе карту «сдёргивало»
+        // в центр при скролле после того, как её пролистали.
+        d.x = clamp(d.x, -d.maxX, 0);
+        d.y = clamp(d.y, -d.maxY, 0);
+      }
       pan.style.setProperty("--px", `${d.x}px`);
       pan.style.setProperty("--py", `${d.y}px`);
       map.dataset.pannable = d.maxX > 1 || d.maxY > 1 ? "1" : "";
     };
-    setup();
-    window.addEventListener("resize", setup);
-    return () => window.removeEventListener("resize", setup);
+    setup(true);
+    const onResize = () => setup(false);
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
   }, []);
 
   // Сменили категорию — если открытый пин отфильтровался, закрываем карточку.

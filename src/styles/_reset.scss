@@ -75,6 +75,16 @@ select {
   background-color: transparent;
 }
 
+/* Мобильный WebKit (iOS Safari) рисует инпутам свою рамку: скруглённые углы +
+   внутренняя тень. Гасим нативный вид, чтобы поля были плоскими как в макете. */
+input,
+textarea,
+select {
+  appearance: none;
+  -webkit-appearance: none;
+  border-radius: 0;
+}
+
 input::-ms-clear {
   display: none;
 }

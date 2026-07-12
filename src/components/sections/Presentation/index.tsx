@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useRef } from "react";
 import type { ReactNode } from "react";
 import { useIsomorphicLayoutEffect } from "@/lib/useIsomorphicLayoutEffect";
+import { safeUrl } from "@/lib/url";
 import styles from "./Presentation.module.scss";
 
 // Контент редактируем из CMS; дефолты = текущие значения (fallback-first).
@@ -44,13 +45,18 @@ export function Presentation({
     }
 
     let v = 0; // сглаженное значение
+    let maxTarget = 0; // ратчет: развернувшись, картинка назад не сворачивается
     let raf = 0;
     let ticking = false;
 
     const tick = () => {
       const rect = el.getBoundingClientRect();
       const vh = window.innerHeight || 1;
-      const target = Math.min(1, Math.max(0, (vh - rect.top) / (vh * 0.7)));
+      const raw = Math.min(1, Math.max(0, (vh - rect.top) / (vh * 0.7)));
+      // Прогресс только растёт: на скролле вверх target держит достигнутый
+      // максимум, поэтому раскрытие односторонее (не сворачивается обратно).
+      const target = Math.max(maxTarget, raw);
+      maxTarget = target;
       v += (target - v) * 0.085; // демпфирование
       const settled = Math.abs(target - v) < 0.0004;
       if (settled) v = target;
@@ -79,7 +85,7 @@ export function Presentation({
     <section ref={ref} className={styles.presentation}>
       <div className={styles.media}>
         <div className={styles.unfold} ref={unfoldRef}>
-          <Image loading="eager"
+          <Image
             src={image}
             alt={imageAlt}
             fill
@@ -94,7 +100,7 @@ export function Presentation({
         <div className={styles.info}>
           <p className={styles.desc}>{description}</p>
           <a
-            href={ctaHref}
+            href={safeUrl(ctaHref)}
             target="_blank"
             rel="noopener noreferrer"
             className={styles.cta}

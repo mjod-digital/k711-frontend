@@ -1,5 +1,6 @@
 import type { Apartment, ApartmentDetail } from "./apartments";
 import { MOCK_FLATS } from "./flats.mock";
+import { safeUrl } from "./url";
 
 // ============================================================
 //   API клубного дома Климашкина 7/11.
@@ -120,9 +121,12 @@ export function flatToDetail(f: Flat): ApartmentDetail {
     totalPrice: hasDiscount ? f.amountDiscount : f.amount,
     oldPrice: hasDiscount ? f.amount : 0,
     tags: [],
-    plan: f.layoutUrl,
-    keyPlan: f.floorPlan ? fixSvgDataUri(f.floorPlan) : "/images/apartment/keyplan-floor.png",
-    pdf: f.pdf,
+    // SEC-005: валидируем схему URL из CRM перед выводом в src/href.
+    plan: safeUrl(f.layoutUrl),
+    keyPlan: f.floorPlan
+      ? safeUrl(fixSvgDataUri(f.floorPlan))
+      : "/images/apartment/keyplan-floor.png",
+    pdf: safeUrl(f.pdf),
   };
 }
 

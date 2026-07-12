@@ -1,4 +1,4 @@
-import Image from "next/image";
+import Image, { getImageProps } from "next/image";
 
 type HeroImageProps = {
   /** Десктопное фото (обязательное). */
@@ -10,25 +10,27 @@ type HeroImageProps = {
 };
 
 // Фото hero-секции с арт-дирекшеном.
-// Есть мобильное → <picture> с <source media> (браузер качает ОДИН вариант,
-//   фолбэк на десктоп через <img>); теряем next-оптимизацию, но получаем
-//   раздельный кроп моб/десктоп.
-// Нет мобильного → обычный оптимизированный next/image (как было).
-// data-hero обязателен: прелоудер ждёт загрузку именно hero-картинки.
+// Есть мобильное → <picture>, но ОБА источника прогоняем через next-оптимизатор
+//   (getImageProps): браузер качает ОДИН оптимизированный вариант (AVIF/WebP,
+//   ресайз под ширину экрана), раздельный кроп моб/десктоп сохранён (PERF-001).
+// Нет мобильного → обычный оптимизированный next/image.
+// data-hero обязателен: прелоудер ждёт загрузку именно hero-картинки (<img data-hero>).
 export function HeroImage({ image, imageMobile, imageAlt, className }: HeroImageProps) {
   if (imageMobile) {
+    const common = { alt: imageAlt, sizes: "100vw", fill: true, priority: true } as const;
+    const {
+      props: { srcSet: desktopSrcSet },
+    } = getImageProps({ ...common, src: image });
+    const {
+      props: { srcSet: mobileSrcSet, ...rest },
+    } = getImageProps({ ...common, src: imageMobile });
+
     return (
       <picture>
-        <source media="(max-width: 767.98px)" srcSet={imageMobile} />
+        <source media="(min-width: 768px)" srcSet={desktopSrcSet} sizes="100vw" />
+        {/* Фолбэк-источник (<768px) = мобильный srcSet, лежит на самом <img>. */}
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={image}
-          alt={imageAlt}
-          data-hero
-          fetchPriority="high"
-          decoding="async"
-          className={className}
-        />
+        <img {...rest} srcSet={mobileSrcSet} data-hero alt={imageAlt} className={className} />
       </picture>
     );
   }

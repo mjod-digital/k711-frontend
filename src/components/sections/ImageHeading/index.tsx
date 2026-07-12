@@ -23,7 +23,7 @@ export function ImageHeading({
   return (
     <section className={styles.section}>
       <div className={styles.media}>
-        <Image loading="eager" src={image} alt={imageAlt} fill sizes="100vw" className={styles.image} />
+        <Image src={image} alt={imageAlt} fill sizes="100vw" className={styles.image} />
         <div
           className={styles.overlay}
           style={{ "--overlay": overlay } as CSSProperties}

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { memo, useEffect, useMemo, useRef, useState } from "react";
 import type { Dispatch, ReactNode, RefObject, SetStateAction } from "react";
 import { RangeSlider } from "@/components/ui/RangeSlider";
 import {
@@ -173,7 +173,10 @@ function FilterPanel({
 }
 
 // ----- Строка/таблица -----
-function ApartmentRow({
+// memo: избранное — глобальный стор, но переключение одной квартиры не должно
+// перерисовывать все 46+ строк. Пропы стабильны (примитивы + стабильный action),
+// поэтому ре-рендерится только строка, у которой изменился `fav`.
+const ApartmentRow = memo(function ApartmentRow({
   a,
   fav,
   onFav,
@@ -205,7 +208,7 @@ function ApartmentRow({
       </button>
     </div>
   );
-}
+});
 
 export function ApartmentCatalog({ apartments }: { apartments: Apartment[] }) {
   const ranges = useMemo(() => catalogRanges(apartments), [apartments]);
@@ -219,6 +222,10 @@ export function ApartmentCatalog({ apartments }: { apartments: Apartment[] }) {
   const favIds = useFavorites((s) => s.ids);
   const toggleFav = useFavorites((s) => s.toggle);
   const hydrated = useHydrated();
+  // O(1)-проверка избранного вместо .includes() на каждую строку; пересобирается
+  // только при смене списка избранного. `fav` в строку уходит примитивом, а
+  // toggleFav — стабильный action zustand, поэтому memo(ApartmentRow) работает.
+  const favSet = useMemo(() => new Set(favIds), [favIds]);
 
   const reset = () => setFilters(initialFilters(ranges));
 
@@ -312,9 +319,9 @@ export function ApartmentCatalog({ apartments }: { apartments: Apartment[] }) {
         <div className={styles.thead}>
           <span className={styles.floor}>Этаж</span>
           <span className={styles.bed}>Спальни</span>
-          <span>площадь</span>
+          <span>Площадь</span>
           <span>Стоимость м²</span>
-          <span>стоимость</span>
+          <span>Стоимость</span>
           <span aria-hidden="true" />
         </div>
         <div className={styles.tbody}>
@@ -322,7 +329,7 @@ export function ApartmentCatalog({ apartments }: { apartments: Apartment[] }) {
             <ApartmentRow
               key={a.id}
               a={a}
-              fav={hydrated && favIds.includes(a.id)}
+              fav={hydrated && favSet.has(a.id)}
               onFav={toggleFav}
             />
           ))}

@@ -44,7 +44,7 @@
   gap: fluid(200);
 
   @include mobile {
-    gap: fluid(40);
+    gap: fluid(60);
   }
 }
 
@@ -132,7 +132,7 @@
     margin-top: fluid(24);
     margin-left: 0; // на мобайле — по левому краю, как остальной контент
     position: absolute;
-    bottom: fluid(255);
+    bottom: fluid(252);
     right: fluid(70);
     width: fluid(105);
   }

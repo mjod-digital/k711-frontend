@@ -62,9 +62,12 @@ export async function modxFetch<T>(
   const response = await fetch(url, init);
 
   if (!response.ok) {
-    throw new Error(
+    // Детали (внутренний путь) — только в серверный лог (SEC-011). Наружу —
+    // общий текст без раскрытия структуры бэкенда, если error.message утечёт.
+    console.error(
       `MODX API ${response.status} ${response.statusText} — ${url.pathname}`,
     );
+    throw new Error(`MODX API request failed (${response.status})`);
   }
 
   return response.json() as Promise<T>;

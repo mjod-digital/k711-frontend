@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { ru, type ApartmentDetail } from "@/lib/apartments";
+import { safeUrl } from "@/lib/url";
 import { FavoriteButton } from "@/components/ui/FavoriteButton";
 import { BookButton } from "@/components/ui/BookButton";
 import styles from "./ApartmentCard.module.scss";
@@ -74,7 +75,7 @@ export function ApartmentCard({ apt }: { apt: ApartmentDetail }) {
         {/* Аside: мини-план этажа + компас. Десктоп — правый столбец, мобайл —
             оверлей в правом верхнем углу плана. */}
         <div className={styles.aside}>
-          <Image loading="eager"
+          <Image
             className={styles.keyplan}
             src={apt.keyPlan}
             alt="Расположение квартиры на этаже"
@@ -90,7 +91,7 @@ export function ApartmentCard({ apt }: { apt: ApartmentDetail }) {
           <span className={`${styles.street} ${styles.streetTop}`}>ул. Климашкина</span>
           <div className={styles.planFrame}>
             <span className={`${styles.street} ${styles.streetLeft}`}>ул. Пресненский Вал</span>
-            <Image loading="eager"
+            <Image
               className={styles.planImg}
               src={apt.plan}
               alt={`Планировка квартиры №${apt.number}`}
@@ -130,7 +131,7 @@ export function ApartmentCard({ apt }: { apt: ApartmentDetail }) {
 
           <div className={styles.cta}>
             <a
-              href={apt.pdf}
+              href={safeUrl(apt.pdf)}
               download
               target="_blank"
               rel="noopener noreferrer"

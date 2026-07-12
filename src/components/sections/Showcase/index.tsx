@@ -303,7 +303,7 @@ export function Showcase({ steps }: { steps: ShowcaseStep[] }) {
             <div className={styles.media}>
               <div className={styles.unfold}>
                 <div className={styles.parallax}>
-                  <Image loading="eager"
+                  <Image
                     src={step.image}
                     alt={step.imageAlt ?? ""}
                     fill
