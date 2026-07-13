@@ -90,37 +90,34 @@ export function Reveal({
     // порогам тут ненадёжен (порог 1 у высокого элемента недостижим, доля
     // пересечения «застывает») — считаем по rect на скролле.
     if ((threshold ?? 0) >= 1) {
-      let raf = 0;
-      const check = () => {
-        cancelAnimationFrame(raf);
-        raf = requestAnimationFrame(() => {
-          const r = el.getBoundingClientRect();
-          const vh = window.innerHeight || 0;
+      // «Целиком в кадре» без scroll-листенера, дёргающего getBoundingClientRect
+      // на каждом кадре (layout thrash). Берём IntersectionObserver с мелкой
+      // сеткой порогов: у высокого элемента порог 1 недостижим, поэтому факт
+      // «весь в кадре» считаем по данным самого entry (boundingClientRect/
+      // rootBounds), которые IO отдаёт БЕЗ принудительного reflow. Колбэк
+      // срабатывает только на пересечении порога, а не каждый кадр. Начальное
+      // состояние (напр. h1 уже в вид) IO доставляет первым же вызовом.
+      const io = new IntersectionObserver(
+        ([entry], obs) => {
+          const r = entry.boundingClientRect;
+          const vh = entry.rootBounds?.height ?? window.innerHeight ?? 0;
           // Помещается во вьюпорт — ждём весь в кадре; выше вьюпорта — когда
-          // заполнил ~весь экран (широкое окно, чтобы быстрый скролл не «перепрыгнул»).
+          // заполнил ~весь экран.
           const whole =
             r.height > vh
               ? Math.min(r.bottom, vh) - Math.max(r.top, 0) >= vh * 0.9
               : r.top >= -1 && r.bottom <= vh + 1;
           if (whole) {
             el.dataset.reveal = "visible";
-            if (once) {
-              window.removeEventListener("scroll", check);
-              window.removeEventListener("resize", check);
-            }
+            if (once) obs.disconnect();
           } else if (!once) {
             el.dataset.reveal = "hidden";
           }
-        });
-      };
-      check();
-      window.addEventListener("scroll", check, { passive: true });
-      window.addEventListener("resize", check);
-      return () => {
-        window.removeEventListener("scroll", check);
-        window.removeEventListener("resize", check);
-        cancelAnimationFrame(raf);
-      };
+        },
+        { threshold: Array.from({ length: 21 }, (_, i) => i / 20) },
+      );
+      io.observe(el);
+      return () => io.disconnect();
     }
 
     // По умолчанию запуск ближе к центру (десктоп), на мобилке — чуть раньше

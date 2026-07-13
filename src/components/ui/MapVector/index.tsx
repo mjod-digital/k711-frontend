@@ -6,6 +6,9 @@ type MapVectorProps = { className?: string };
 // (база-улицы + парки/вода + кольцо + подписи). Заменяет растр map-empty.png:
 // чёткая на любом зуме, темизируема, без сетевого запроса. Подписи берут
 // шрифт сайта (--font-body). Контент статичный → dangerouslySetInnerHTML безопасен.
+// ⚠️ SEC-010: MAP_INNER — только билд-тайм константа из mapData.ts. Если сюда
+// когда-нибудь попадёт контент из CMS/CRM/пользователя — это XSS-дыра: тогда
+// санитизировать (DOMPurify с SVG-профилем) ЛИБО отдавать как статический .svg.
 export function MapVector({ className }: MapVectorProps) {
   return (
     <svg

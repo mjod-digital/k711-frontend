@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import Image from "next/image";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation } from "swiper/modules";
@@ -34,10 +34,13 @@ export function Slider({ slides, className, mobileGallery = false }: SliderProps
   // slides for loop». Дублируем набор до ≥6 — это та же бесконечная лента
   // (визуально неотличимо), но соседи выглядывают с ОБЕИХ сторон на любом слайде.
   const wantsLoop = slides.length > 2;
-  const loopSlides =
-    wantsLoop && slides.length < 6
-      ? Array.from({ length: Math.ceil(6 / slides.length) }).flatMap(() => slides)
-      : slides;
+  const loopSlides = useMemo(
+    () =>
+      slides.length > 2 && slides.length < 6
+        ? Array.from({ length: Math.ceil(6 / slides.length) }).flatMap(() => slides)
+        : slides,
+    [slides],
+  );
 
   // Единственный слайд — листать некуда, стрелки только мешают.
   const showNav = slides.length > 1;
@@ -109,6 +112,40 @@ export function Slider({ slides, className, mobileGallery = false }: SliderProps
           variant: i % 2 === 0 ? "wide" : "narrow",
         }))}
       />
+    );
+  }
+
+  // Один слайд (напр. slider_spa) — листать некуда, а Swiper с loop только
+  // дублирует единственную картинку и тянет лишний рантайм. Рендерим статичный
+  // кадр в той же обёртке (те же классы → раскладка/стили не меняются): .swiper
+  // даёт слайду ширину (.swiper .slide), .single центрирует его как centeredSlides,
+  // swiper-slide-active проявляет подпись тем же правилом, что и у активного слайда.
+  if (slides.length <= 1) {
+    const slide = slides[0];
+    return (
+      <section className={cn(styles.slider, className)}>
+        <div className={styles.viewport} ref={viewportRef}>
+          {slide && (
+            <div className={cn(styles.swiper, styles.single)}>
+              <div className={cn(styles.slide, "swiper-slide-active")}>
+                <div className={styles.imageBox}>
+                  <div className={styles.parallax}>
+                    <Image
+                      src={slide.src}
+                      alt={slide.alt ?? slide.caption ?? ""}
+                      fill
+                      loading="eager"
+                      sizes="(min-width: 768px) 76vw, 86vw"
+                      className={styles.image}
+                    />
+                  </div>
+                </div>
+                {slide.caption && <p className={styles.caption}>{slide.caption}</p>}
+              </div>
+            </div>
+          )}
+        </div>
+      </section>
     );
   }
 

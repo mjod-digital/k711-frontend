@@ -45,7 +45,6 @@
   letter-spacing: -0.02em;
 
   @include mobile {
-    line-height: 1.1;
     padding-left: fluid(130);
   }
 }

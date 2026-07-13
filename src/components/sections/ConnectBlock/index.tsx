@@ -28,7 +28,7 @@ export function ConnectBlock({
         className={styles.banner}
         aria-label="Перейти к выбору резиденции"
       >
-        <Image loading="eager"
+        <Image
           src={image}
           alt={imageAlt}
           fill

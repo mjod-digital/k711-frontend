@@ -94,6 +94,19 @@
   display: flex;
   flex-direction: column;
   align-items: center; // строки-спаны по центру (под построчную шторку)
+
+  // «на тихой пресне»: десктоп — одной строкой, мобайл — двумя (см. Hero/index).
+  .lineDesktop {
+    @include mobile {
+      display: none;
+    }
+  }
+  .lineMobile {
+    display: none;
+    @include mobile {
+      display: block;
+    }
+  }
   // шторка заголовка hero — вдвое медленнее остальных (по умолчанию 1300ms)
   --reveal-line-duration: 2600ms;
   max-width: fluid(1236);

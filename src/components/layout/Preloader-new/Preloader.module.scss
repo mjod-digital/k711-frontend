@@ -57,7 +57,9 @@
   width: 0;
   height: 100%;
   background-color: var(--color-brown-medium);
-  transition: width 0.3s ease;
+  // Без transition: ширина = проценту точь-в-точь. С ease-переходом 0.3s при
+  // обновлении % каждые 24мс полоса «не успевала» и отставала ~на треть
+  // (на середине полосы уже показывалось 90%). Шаг 1%/24мс и так плавный.
 }
 
 @keyframes fadeInUp {

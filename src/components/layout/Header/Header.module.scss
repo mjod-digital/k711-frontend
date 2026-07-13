@@ -103,9 +103,12 @@
   border: 0;
   cursor: pointer;
   transition: color 0.45s ease;
-  
-  &:hover {
-    color: var(--color-brown-dark);
+
+  // Ховер только на десктопе: на тач-устройствах он «залипает» после тапа.
+  @include desktop {
+    &:hover {
+      color: var(--color-brown-dark);
+    }
   }
 
   svg {
@@ -131,8 +134,11 @@
     transition: fill 0.45s ease;
   }
 
-  &:hover svg {
-    fill: currentColor;
+  // Заливка сердца — только на десктопе (на мобиле ховер залипает после тапа).
+  @include desktop {
+    &:hover svg {
+      fill: currentColor;
+    }
   }
 }
 .favDot {

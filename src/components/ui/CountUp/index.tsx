@@ -25,6 +25,8 @@ export function CountUp({
   const ref = useRef<HTMLSpanElement>(null);
   const [value, setValue] = useState(0);
   const started = useRef(false);
+  const rafId = useRef(0);
+  const mounted = useRef(true);
 
   const run = () => {
     if (started.current) return;
@@ -35,12 +37,26 @@ export function CountUp({
     }
     const start = performance.now();
     const tick = (now: number) => {
+      // Компонент размонтирован — прекращаем цикл, не трогаем state.
+      if (!mounted.current) return;
       const p = Math.min(1, (now - start) / duration);
       setValue(Math.round((1 - Math.pow(1 - p, 3)) * end));
-      if (p < 1) requestAnimationFrame(tick);
+      if (p < 1) rafId.current = requestAnimationFrame(tick);
     };
-    requestAnimationFrame(tick);
+    rafId.current = requestAnimationFrame(tick);
   };
+
+  // Отменяем rAF-цикл при размонтировании — без setValue на «мёртвом»
+  // компоненте. started сбрасываем, чтобы после ремонтирования счётчик сыграл
+  // заново (real remount / StrictMode dev double-invoke).
+  useEffect(() => {
+    mounted.current = true;
+    return () => {
+      mounted.current = false;
+      cancelAnimationFrame(rafId.current);
+      started.current = false;
+    };
+  }, []);
 
   // Контролируемый режим
   useEffect(() => {

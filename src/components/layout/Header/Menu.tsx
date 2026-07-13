@@ -11,8 +11,8 @@ import styles from "./Menu.module.scss";
 // Эффект «матовое стекло» задаём ИНЛАЙНОМ: CSS-оптимизатор Next 16 выкидывает
 // backdrop-filter из скомпилированного правила (баг), инлайн он не трогает.
 const FROST: CSSProperties = {
-  backdropFilter: "blur(40px)",
-  WebkitBackdropFilter: "blur(40px)",
+  backdropFilter: "blur(20px)",
+  WebkitBackdropFilter: "blur(20px)",
 };
 
 // Названия пунктов совпадают с футером (единый нейминг по страницам).
@@ -22,8 +22,8 @@ const NAV = [
   { label: "Локация", href: "/location" },
   { label: "Архитектура", href: "/architecture" },
   { label: "Дизайн и искусство", href: "/design" },
-  { label: "Аменитис", href: "/amenities" },
   { label: "Благоустройство", href: "/improvement" },
+  { label: "Аменитис", href: "/amenities" },
   { label: "Резиденции", href: "/residences" },
   { label: "Передовые технологии", href: "/technologies" },
   { label: "Офис продаж", href: "/contact" },

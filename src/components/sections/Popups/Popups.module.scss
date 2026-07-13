@@ -93,8 +93,9 @@
     transition: background-color 600000s 0s;
   }
 
-  // Незаполненное обязательное поле (после попытки отправки) — подсветка бордера.
-  &:user-invalid {
+  // Невалидное поле (после попытки отправки) — подсветка бордера.
+  &:user-invalid,
+  &[data-invalid="true"] {
     border-bottom-color: var(--color-error);
   }
 }
@@ -133,11 +134,14 @@
   }
 
   // Обязательный, но не отмеченный (после отправки) — подсветка рамки и лейбла.
-  input:user-invalid {
+  input:user-invalid,
+  input[data-invalid="true"] {
     border-color: var(--color-error);
   }
   input:user-invalid ~ span,
-  input:user-invalid ~ span .link {
+  input:user-invalid ~ span .link,
+  input[data-invalid="true"] ~ span,
+  input[data-invalid="true"] ~ span .link {
     color: var(--color-error);
   }
 }

@@ -14,10 +14,10 @@ export function FavoriteButton({
   className?: string;
   activeClassName?: string;
 }) {
-  const favIds = useFavorites((s) => s.ids);
+  const favSelected = useFavorites((s) => s.ids.includes(id));
   const toggle = useFavorites((s) => s.toggle);
   const hydrated = useHydrated();
-  const fav = hydrated && favIds.includes(id);
+  const fav = hydrated && favSelected;
 
   return (
     <button

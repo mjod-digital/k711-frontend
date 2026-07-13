@@ -26,6 +26,12 @@
   width: 100%;
 }
 
+// Один слайд без Swiper: центрируем кадр так же, как centeredSlides у карусели.
+.single {
+  display: flex;
+  justify-content: center;
+}
+
 // .swiper .slide — повышаем специфичность, чтобы ширина слайда била
 // глобальный swiper/css `.swiper-slide { width: 100% }` независимо от порядка.
 .swiper .slide {
@@ -77,24 +83,6 @@
   @include mobile {
     margin-top: fluid(8);
     font-size: fluid(12);
-  }
-}
-
-// Подпись активного слайда проявляется при переключении (fade + сдвиг вверх).
-// reduced-motion → правило не применяется, подпись сразу видна.
-@media (prefers-reduced-motion: no-preference) {
-  .caption {
-    opacity: 0;
-    transform: translateY(fluid(16));
-    transition:
-      opacity 0.6s ease,
-      transform 0.6s ease;
-  }
-
-  :global(.swiper-slide-active) .caption {
-    opacity: 1;
-    transform: none;
-    transition-delay: 0.15s; // подпись догоняет уже «осевший» слайд
   }
 }
 

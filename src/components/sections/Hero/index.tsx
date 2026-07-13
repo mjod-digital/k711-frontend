@@ -87,8 +87,27 @@ export function Hero({
             <span className="reveal-line" style={{ "--i": 0 } as CSSProperties}>
               Клубный дом
             </span>
-            <span className="reveal-line" style={{ "--i": 1 } as CSSProperties}>
+            {/* «на тихой пресне»: на десктопе — одной строкой, на мобиле — двумя
+                отдельными reveal-line. Так каждая визуальная строка раскрывается
+                СНИЗУ-ВВЕРХ по порядку чтения. (Единая шторка на переносе ломала
+                порядок 1→3→2, а reveal-line-down давал разнонаправленную анимацию.) */}
+            <span
+              className={`reveal-line ${styles.lineDesktop}`}
+              style={{ "--i": 1 } as CSSProperties}
+            >
               на тихой пресне
+            </span>
+            <span
+              className={`reveal-line ${styles.lineMobile}`}
+              style={{ "--i": 1 } as CSSProperties}
+            >
+              на тихой
+            </span>
+            <span
+              className={`reveal-line ${styles.lineMobile}`}
+              style={{ "--i": 2 } as CSSProperties}
+            >
+              пресне
             </span>
           </Reveal>
 

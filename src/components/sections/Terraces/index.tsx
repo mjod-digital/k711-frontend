@@ -160,7 +160,7 @@ export function Terraces({
       >
         <div className={styles.media}>
           <div className={styles.unfold}>
-            <Image loading="eager"
+            <Image
               src={image}
               alt={imageAlt}
               fill

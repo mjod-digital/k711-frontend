@@ -23,8 +23,9 @@ type PhotoCardsProps = {
   items: PhotoCard[];
   /** Доп. класс на секцию — для постраничных отступов (напр. amenities). */
   className?: string;
-  /** Затемнение снизу поверх фото (по макету — на /amenities). */
-  scrim?: boolean;
+  /** Затемнение поверх фото: true — «уголковый» скрим (amenities);
+   *  "soft" — мягкое затемнение снизу (improvement). */
+  scrim?: boolean | "soft";
 };
 
 // Пара фото-карточек с заголовком поверх (Figma 373-9288). Десктоп — две в ряд;
@@ -88,14 +89,19 @@ export function PhotoCards({ items, className, scrim = false }: PhotoCardsProps)
               key={i}
               className={cn(styles.card, bottom ? styles.bottom : styles.top)}
             >
-              <Image loading="eager"
+              <Image
                 src={it.src}
                 alt={it.alt}
                 fill
                 sizes="(min-width: 768px) 48vw, 84vw"
                 className={styles.image}
               />
-              {scrim && <span className={styles.scrim} aria-hidden="true" />}
+              {scrim && (
+                <span
+                  className={scrim === "soft" ? styles.scrimSoft : styles.scrim}
+                  aria-hidden="true"
+                />
+              )}
               <figcaption className={styles.label}>
                 <Reveal variant="lines" active={revealed}>
                   <CascadeHeading

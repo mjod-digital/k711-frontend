@@ -80,6 +80,15 @@
   );
 }
 
+// Равномерное затемнение ВСЕЙ картинки (improvement) — не только низа.
+.scrimSoft {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: rgba(0, 0, 0, 0.2);
+}
+
 .label {
   position: absolute;
   left: fluid(40);

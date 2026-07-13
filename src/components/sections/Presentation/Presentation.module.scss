@@ -112,9 +112,6 @@
   letter-spacing: -0.02em;
   text-transform: uppercase;
 
-  @include mobile {
-    line-height: 1.1;
-  }
 }
 
 .info {

@@ -77,6 +77,7 @@ export default async function ImprovementPage() {
       <SilenceHeading />
 
       <PhotoCards
+        scrim="soft"
         items={[
           {
             src: "/images/improvement-card-greenery.png",
