@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import type { CSSProperties, ReactNode } from "react";
 import { HeroImage } from "@/components/ui/HeroImage";
 import { Reveal } from "@/components/ui/Reveal";
@@ -51,6 +51,27 @@ export function PageHero({
 }: PageHeroProps) {
   const mediaRef = useRef<HTMLDivElement>(null);
   const parallaxRef = useRef<HTMLDivElement>(null);
+
+  // Заголовок первого экрана раскрываем СРАЗУ на загрузке (это первый экран), а не
+  // по «весь h1 в кадре»: иначе на невысоких экранах низ h1 за фолдом → заголовок
+  // появляется только после скролла. Ждём сигнал прелоудера, чтобы шторка не
+  // отыграла «вслепую» под ним; при клиентской навигации прелоудера уже нет
+  // (__preloaderDone) → раскрываем немедленно. Страховка — таймаут.
+  const [revealed, setRevealed] = useState(false);
+  useIsomorphicLayoutEffect(() => {
+    const w = window as Window & { __preloaderDone?: boolean };
+    if (w.__preloaderDone) {
+      setRevealed(true);
+      return;
+    }
+    const onDone = () => setRevealed(true);
+    window.addEventListener("preloader:done", onDone, { once: true });
+    const fallback = window.setTimeout(() => setRevealed(true), 12000);
+    return () => {
+      window.removeEventListener("preloader:done", onDone);
+      window.clearTimeout(fallback);
+    };
+  }, []);
 
   // Лёгкий параллакс фото при скролле (как в Hero главной).
   useIsomorphicLayoutEffect(() => {
@@ -127,10 +148,10 @@ export function PageHero({
           <Reveal
             as="h1"
             variant="lines"
-            // запускаем шторку, когда ВЕСЬ h1 попал в видимую область (threshold>=1),
-            // без сдвига рамки — считаем от чистого вьюпорта.
-            rootMargin="0px 0px 0px 0px"
-            threshold={1}
+            // Первый экран: ведём шторку извне (active) — раскрываем на загрузке по
+            // сигналу прелоудера, а не по «весь h1 в кадре» (тот прятал заголовок
+            // на невысоких экранах до скролла).
+            active={revealed}
             className={styles.title}
           >
             {children}

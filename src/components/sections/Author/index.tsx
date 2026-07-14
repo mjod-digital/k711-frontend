@@ -30,7 +30,7 @@ const DEFAULT_PARAGRAPHS: [ReactNode, ReactNode] = [
 export function Author({
   image,
   imageAlt,
-  ctaHref = "/residences",
+  ctaHref = "/apartments",
   ctaLabel = "выбрать резиденцию",
   paragraphs = DEFAULT_PARAGRAPHS,
 }: AuthorProps) {

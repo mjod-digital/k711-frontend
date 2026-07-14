@@ -104,7 +104,7 @@ const showcaseSteps: ShowcaseStep[] = [
       </>
     ),
     ctaLabel: "выбрать резиденцию",
-    ctaHref: "/residences",
+    ctaHref: "/apartments",
   },
   {
     image: "/images/facade.png",
@@ -122,7 +122,7 @@ const showcaseSteps: ShowcaseStep[] = [
     description:
       "Фрагмент Москвы Серебряного века, ставший фундаментом современного дома.",
     ctaLabel: "выбрать резиденцию",
-    ctaHref: "/residences",
+    ctaHref: "/apartments",
   },
   {
     image: "/images/architect.png",
@@ -141,7 +141,7 @@ const showcaseSteps: ShowcaseStep[] = [
       <>Современная архитектура, которая не спорит с прошлым, а продолжает его.</>
     ),
     ctaLabel: "выбрать резиденцию",
-    ctaHref: "/residences",
+    ctaHref: "/apartments",
   },
 ];
 

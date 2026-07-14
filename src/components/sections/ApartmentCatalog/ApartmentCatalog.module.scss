@@ -199,11 +199,15 @@
   text-align: center; // десктоп: заголовок ровно по центру колонки, над значением (Figma)
 
   @include mobile {
-    // на мобайле шапка не липкая (свой компактный вид) — сбрасываем
-    position: static;
-    background: none;
+    // Липкая и на мобайле (как на десктопе): едет под фикс-хедером, чтобы при
+    // прокрутке списка всегда было видно, к чему относятся цифры. Непрозрачный
+    // фон страницы — строки уходят ПОД шапку.
+    position: sticky;
+    top: var(--header-h);
+    z-index: 3;
+    background: var(--color-bg);
     // тот же горизонтальный padding, что и у строки-карточки, — колонки шапки и значений совпадают
-    padding: 0 fluid(6) fluid(12) fluid(0);
+    padding: fluid(10) fluid(6) fluid(12) fluid(0);
     font-size: fluid(8);
     letter-spacing: 0.01em;
     color: var(--color-brown-dark);
