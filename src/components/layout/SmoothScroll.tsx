@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { usePathname } from "next/navigation";
 import Lenis from "lenis";
 import "lenis/dist/lenis.css";
 
@@ -11,6 +12,19 @@ import "lenis/dist/lenis.css";
 // - Lenis сам обновляет нативную позицию скролла, поэтому sticky-пин галереи,
 //   скролл-скраб секций и прячущийся хедер продолжают работать (читают window/rect).
 export function SmoothScroll() {
+  const pathname = usePathname();
+
+  // Скролл наверх при переходе между страницами. Lenis держит СВОЮ внутреннюю
+  // позицию и каждый кадр переписывает ею нативный скролл, поэтому дефолтный
+  // scroll-to-top Next не срабатывает — на новой странице оказываемся не сверху.
+  // Сбрасываем и Lenis (immediate — без анимации), и нативный скролл (fallback
+  // для reduced-motion, где Lenis не создан).
+  useEffect(() => {
+    const lenis = (window as Window & { __lenis?: Lenis }).__lenis;
+    if (lenis) lenis.scrollTo(0, { immediate: true });
+    else window.scrollTo(0, 0);
+  }, [pathname]);
+
   useEffect(() => {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
