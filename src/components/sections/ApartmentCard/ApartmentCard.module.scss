@@ -146,11 +146,28 @@
   justify-content: flex-end;
 
   @include mobile {
-    margin-top: fluid(35);
-    font-size: fluid(24);
-    gap: fluid(10);
-    justify-content: flex-start;
+    // На мобайле цена вынесена ПОД планировку (.priceMobile) — здесь скрыта.
+    display: none;
+  }
+}
+
+// Цена под планировкой — только мобайл (макет 433-15174). Отдельный элемент,
+// т.к. .price лежит внутри .info и CSS-order не поднимет её над колонкой.
+.priceMobile {
+  display: none;
+
+  @include mobile {
+    order: 2; // .plan тоже order:2 → в DOM после плана → рисуется сразу под ним
+    display: flex;
     flex-direction: column;
+    align-items: flex-start;
+    gap: fluid(10);
+    margin-top: fluid(40);
+    -webkit-text-stroke-width: fluid(0.3);
+    color: var(--color-brown-dark-2);
+    font-family: var(--font-display);
+    font-size: fluid(24);
+    line-height: 1;
   }
 }
 
@@ -201,7 +218,7 @@
 
   @include mobile {
     order: -1; // на мобайле кнопки сразу под планировкой (до характеристик)
-    margin-top: fluid(40);
+    margin-top: fluid(20);
     margin-bottom: fluid(35);
   }
 }

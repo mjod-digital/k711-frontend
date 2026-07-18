@@ -103,6 +103,15 @@ export function ApartmentCard({ apt }: { apt: ApartmentDetail }) {
           <span className={`${styles.street} ${styles.streetBottom}`}>Внутренний двор</span>
         </div>
 
+        {/* Цена под планировкой — только мобайл (макет 433-15174). На десктопе
+            цена остаётся в колонке .info ниже — этот элемент там скрыт. */}
+        <p className={styles.priceMobile}>
+          {ru(apt.totalPrice)} ₽
+          {apt.oldPrice > 0 && (
+            <span className={styles.oldPrice}>{ru(apt.oldPrice)} ₽</span>
+          )}
+        </p>
+
         {/* Левый столбец: характеристики, цена, теги, действия. */}
         <div className={styles.info}>
           <dl className={styles.specs}>
