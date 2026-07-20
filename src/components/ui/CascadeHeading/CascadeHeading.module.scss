@@ -56,4 +56,9 @@
 
 .big {
   font-size: var(--fs-h1);
+  line-height: 90%;
+  
+  @include mobile {
+    line-height: 110%;
+  }
 }

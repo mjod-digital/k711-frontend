@@ -126,11 +126,48 @@
   color: var(--color-brown-dark-2);
 }
 
+// Вариант, невозможный при остальных фильтрах. pointer-events гасит заодно hover,
+// чтобы погашенная вкладка не подсвечивалась под курсором.
+.tabOff {
+  opacity: 0.35;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+// Обёртка ползунка нужна только ради состояния «фасет схлопнулся»: RangeSlider —
+// общий компонент без пропа disabled, и погасить его можно лишь снаружи.
+.sliderWrap {
+  display: block;
+}
+
+.sliderWrapOff {
+  pointer-events: none;
+  opacity: 0.5;
+}
+
+// Кнопки применения не должны уезжать за пределы экрана: на десктопе панель
+// скроллится внутри себя, на мобайле — растянута во весь экран.
+.actions {
+  position: sticky;
+  bottom: 0;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  margin-top: fluid(20); // прежний отступ .reset — суммарный зазор сохранён
+  margin-inline: calc(-1 * #{fluid(20)});
+  padding: fluid(12) fluid(20) fluid(20);
+  background: var(--color-brown-dark-2);
+
+  @include mobile {
+    margin-inline: calc(-1 * #{fluid(16)});
+    padding-inline: fluid(16);
+  }
+}
+
 .reset {
-  align-self: flex-start;
-  margin-top: fluid(20);
+  align-self: stretch; // full-width — стыкуется с «Показать N» ниже (Figma 373-9580)
+  margin-top: 0; // отступ переехал на .actions
   flex-shrink: 0;
-  // в мобильном оверлее кнопка сброса по центру (Figma 399-13142)
   height: fluid(48);
   padding-inline: fluid(20);
   -webkit-text-stroke-width: fluid(0.3);
@@ -152,9 +189,45 @@
   }
 
   @include mobile {
-    align-self: center;
     font-size: fluid(14);
   }
+}
+
+// «Показать N резиденций» — залитая светлая кнопка под «сбросить» (Figma 373-9580).
+.showResults {
+  align-self: stretch;
+  margin-top: fluid(12);
+  flex-shrink: 0;
+  height: fluid(48);
+  padding-inline: fluid(20);
+  -webkit-text-stroke-width: fluid(0.3);
+  background: var(--color-badge-light);
+  color: var(--color-brown-dark-2);
+  font-family: var(--font-display);
+  font-size: fluid(16);
+  line-height: 1;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  transition:
+    outline-color 0.3s ease,
+    background-color 0.45s ease,
+    color 0.45s ease;
+
+  &:hover {
+    background: var(--color-brown-dark);
+    color: var(--color-badge-light);
+  }
+
+  @include mobile {
+    font-size: fluid(14);
+  }
+}
+
+// Черновик разошёлся с применённым: фильтры применяются только по этой кнопке,
+// поэтому расхождение панели и таблицы надо явно показать.
+.showResultsDirty {
+  outline: fluid(2) solid var(--color-brown-medium);
+  outline-offset: fluid(2);
 }
 
 // ----- Таблица -----
@@ -167,6 +240,72 @@
     // Низ 0: место под кнопкой даёт липкая полка .filtersDock (высота 80 по
     // макету) — она последний ребёнок списка и сама держит отступ.
     padding: fluid(20) fluid(8) 0;
+  }
+}
+
+// ----- Бейджи активных фильтров над списком (Figma 373-9580) -----
+// По бейджу на каждый применённый фильтр: «Название: значение ✕», клик = снять
+// именно его. Блок рендерится условно — ниже на нём висит соседский селектор.
+.badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: fluid(8);
+  padding-top: fluid(40); // на уровень с верхом панели фильтров
+
+  @include mobile {
+    padding: fluid(20) fluid(6) 0;
+    gap: fluid(12); // пять бейджей подряд — при gap 8 палец промахивается
+  }
+}
+
+// Когда бейдж есть — шапка таблицы идёт сразу под ним (без своего верхнего 40).
+.badges + .thead {
+  padding-top: fluid(20);
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: fluid(10);
+  height: fluid(38);
+  padding: 0 fluid(10) 0 fluid(16);
+  border: fluid(1) solid var(--color-brown-medium);
+  background: transparent;
+  color: var(--color-brown-medium);
+  font-family: var(--font-body);
+  font-size: fluid(14);
+  line-height: 1;
+  white-space: nowrap;
+  max-width: 100%;
+  min-width: 0;
+  cursor: pointer;
+  transition:
+    color 0.3s ease,
+    border-color 0.3s ease;
+
+  &:hover {
+    color: var(--color-brown-dark-2);
+    border-color: var(--color-brown-dark-2);
+  }
+
+  @include mobile {
+    height: fluid(36);
+    font-size: fluid(12);
+    padding: 0 fluid(8) 0 fluid(12);
+  }
+}
+
+.badgeLabel {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.badgeX {
+  display: inline-flex;
+
+  svg {
+    width: fluid(16);
+    height: fluid(16);
   }
 }
 
@@ -309,6 +448,19 @@
   color: var(--color-brown-medium);
   font-family: var(--font-body);
   font-size: var(--fs-body);
+}
+
+// Выход из пустого результата прямо на месте: на мобайле панель фильтров скрыта
+// за оверлеем, и без этой ссылки экран выглядел бы тупиковым.
+.emptyReset {
+  margin-left: fluid(12);
+  border: 0;
+  padding: 0;
+  background: none;
+  color: var(--color-brown-medium);
+  font: inherit;
+  text-decoration: underline;
+  cursor: pointer;
 }
 
 // ----- Мобайл: закреплённая внизу кнопка «Фильтры» -----
