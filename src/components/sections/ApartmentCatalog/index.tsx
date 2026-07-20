@@ -31,12 +31,10 @@ type FilterKey = "bedrooms" | RangeKey;
 const RANGE_KEYS: readonly RangeKey[] = RANGE_PARAMS.map(([k]) => k);
 
 type Ranges = ReturnType<typeof catalogRanges>;
-// Доступные значения при текущем черновике — то, что физически можно выбрать.
-type Avail = { bedrooms: number[] } & Record<RangeKey, Range>;
 
-// null = фильтр не задан. Именно null, а не «диапазон во всю ширину»: границы
-// ползунков теперь сужаются под остальные фильтры, поэтому «равен полному
-// диапазону» больше не значит «ничего не отсекает».
+// null = фильтр не задан. Отдельное «не задан» вместо «диапазон во всю ширину»
+// нужно бейджам и URL: иначе нетронутый ползунок порождал бы бейдж и параметр
+// в адресе для фильтра, который пользователь не выбирал.
 type Filters = {
   bedrooms: number | null;
   floor: Range | null;
@@ -86,64 +84,6 @@ const plural = (n: number, one: string, few: string, many: string) => {
   if (m10 >= 2 && m10 <= 4 && (m100 < 10 || m100 >= 20)) return few;
   return many;
 };
-
-// ----- Взаимозависимость фильтров -----
-// Подмножество, проходящее все активные фильтры КРОМЕ excluded. Исключать сам
-// ключ обязательно: иначе границы ползунка ехали бы под пальцем, которым его тянут.
-const subsetExcluding = (items: Apartment[], f: Filters, excluded: FilterKey) => {
-  const rest = setKey(f, excluded, null);
-  return items.filter((a) => matches(a, rest));
-};
-
-// 5 проходов по списку на рендер (~20N сравнений, N≈46) — заметно дешевле любого
-// индекса и на порядок проще; строить битовые маски здесь незачем.
-function availFor(items: Apartment[], f: Filters, global: Ranges): Avail {
-  const out = { bedrooms: bedroomOptions(subsetExcluding(items, f, "bedrooms")) } as Avail;
-  for (const k of RANGE_KEYS) {
-    const sub = subsetExcluding(items, f, k);
-    // catalogRanges, а не Math.min/max: нужно то же округление наружу, иначе
-    // дробная граница не ляжет на step=1 и «дотянул до края → фильтр снят» не
-    // сработает никогда. Пустое подмножество даёт [0,0] — берём глобальный диапазон.
-    out[k] = sub.length ? catalogRanges(sub)[k] : global[k];
-  }
-  return out;
-}
-
-// Приводит набор фильтров к согласованному виду: активное значение всегда лежит
-// внутри своих доступных границ, а фильтр, который ничего не отсекает, снимается.
-// Нормализуем в состоянии, а не при отрисовке ползунка: иначе таблица, счётчик,
-// бейджи и URL читали бы сырое значение, а слайдер показывал бы зажатое.
-// Завершаемость: за проход активные ключи только снимаются, а диапазоны только
-// сужаются — обе величины монотонны на конечном множестве. Лимит проходов — страховка.
-function normalize(items: Apartment[], f: Filters, global: Ranges): Filters {
-  let cur = f;
-  for (let pass = 0; pass < 5; pass++) {
-    const av = availFor(items, cur, global);
-    let next: Filters = { ...cur };
-
-    if (next.bedrooms !== null && !av.bedrooms.includes(next.bedrooms)) {
-      next = setKey(next, "bedrooms", null);
-    }
-    for (const k of RANGE_KEYS) {
-      const v = next[k];
-      if (!v) continue;
-      const [lo, hi] = av[k];
-      // Пересечения нет — снимаем фильтр целиком. Схлопывать в точку нельзя:
-      // получился бы диапазон, которого пользователь не выбирал и который к тому
-      // же зажимает оба ползунка друг об друга.
-      if (v[1] < lo || v[0] > hi) {
-        next = setKey(next, k, null);
-        continue;
-      }
-      const c: Range = [Math.max(v[0], lo), Math.min(v[1], hi)];
-      next = setKey(next, k, c[0] === lo && c[1] === hi ? null : c);
-    }
-
-    if (filtersEqual(next, cur)) return cur;
-    cur = next;
-  }
-  return cur;
-}
 
 function filtersToQuery(f: Filters, search: string): string {
   // Строим поверх существующих параметров: пересборка с нуля сносила из адресной
@@ -225,7 +165,7 @@ function HeartIcon() {
 // Панель правит ТОЛЬКО черновик; в таблицу он уходит по кнопке «Показать».
 function FilterPanel({
   draft,
-  avail,
+  ranges,
   bedOptions,
   count,
   dirty,
@@ -237,8 +177,8 @@ function FilterPanel({
   panelRef,
 }: {
   draft: Filters;
-  /** Границы, доступные при остальных активных фильтрах (отсечение невозможного). */
-  avail: Avail;
+  /** Полные границы каталога — ползунки всегда показывают их целиком. */
+  ranges: Ranges;
   bedOptions: number[];
   /** Сколько лотов подходит под ЧЕРНОВИК (предпросмотр для кнопки «Показать N»). */
   count: number;
@@ -251,23 +191,16 @@ function FilterPanel({
   onClose?: () => void;
   panelRef?: RefObject<HTMLDivElement | null>;
 }) {
-  const slider = (key: RangeKey, label: ReactNode) => {
-    const [lo, hi] = avail[key];
-    const off = lo === hi; // фасет схлопнулся в точку — управлять нечем
-    // Обёртка рендерится всегда (меняется только класс): zoom-эффект меряет
-    // высоту панели один раз, и появляющиеся/исчезающие узлы его ломают.
-    return (
-      <div className={cn(styles.sliderWrap, off && styles.sliderWrapOff)}>
-        <RangeSlider
-          label={label}
-          min={lo}
-          max={hi}
-          value={draft[key] ?? avail[key]}
-          onChange={(v) => onRange(key, v)}
-        />
-      </div>
-    );
-  };
+  // Незаданный фильтр показываем как полный диапазон — ползунки «во всю ширину».
+  const slider = (key: RangeKey, label: ReactNode) => (
+    <RangeSlider
+      label={label}
+      min={ranges[key][0]}
+      max={ranges[key][1]}
+      value={draft[key] ?? ranges[key]}
+      onChange={(v) => onRange(key, v)}
+    />
+  );
 
   return (
     <div className={styles.filters}>
@@ -288,22 +221,14 @@ function FilterPanel({
         <div className={styles.bedGroup}>
           <p className={styles.bedLabel}>Количество спален</p>
           <div className={styles.tabs}>
-            {/* Недоступные варианты гасим, но НЕ убираем: zoom-эффект панели
-                меряет высоту один раз, а .tabs с flex-wrap переехал бы между
-                одной и двумя строками. */}
             {bedOptions.map((n) => {
               const active = draft.bedrooms === n;
-              // avail.bedrooms считается БЕЗ учёта самого фильтра спален, поэтому
-              // выбранное значение может из него выпасть — выбранную вкладку
-              // никогда не блокируем, иначе снять её будет нечем.
-              const off = !active && !avail.bedrooms.includes(n);
               return (
                 <button
                   key={n}
                   type="button"
-                  className={cn(styles.tab, active && styles.tabActive, off && styles.tabOff)}
+                  className={cn(styles.tab, active && styles.tabActive)}
                   aria-pressed={active}
-                  disabled={off}
                   onClick={() => onBedrooms(n)}
                 >
                   {n}
@@ -335,13 +260,22 @@ function FilterPanel({
             сбросить фильтры
           </button>
 
+          {/* Нулевое состояние: применять нечего, поэтому кнопка гаснет — иначе
+              она предлагала бы «Показать 0 резиденций» и опустошала таблицу. */}
           <button
             type="button"
-            className={cn(styles.showResults, dirty && styles.showResultsDirty)}
+            className={cn(styles.showResults, dirty && count > 0 && styles.showResultsDirty)}
+            disabled={count === 0}
             onClick={onShow}
           >
-            Показать {count}{" "}
-            {plural(count, "резиденцию", "резиденции", "резиденций")}
+            {count === 0 ? (
+              "Нет подходящих резиденций"
+            ) : (
+              <>
+                Показать {count}{" "}
+                {plural(count, "резиденцию", "резиденции", "резиденций")}
+              </>
+            )}
           </button>
         </div>
       </div>
@@ -407,16 +341,16 @@ export function ApartmentCatalog({ apartments }: { apartments: Apartment[] }) {
   // toggleFav — стабильный action zustand, поэтому memo(ApartmentRow) работает.
   const favSet = useMemo(() => new Set(favIds), [favIds]);
 
-  // Границы считаем от ЧЕРНОВИКА: отсекать невозможные комбинации нужно в момент,
-  // когда их составляют, а не после применения. Считаем один раз на рендер —
-  // вызывать availFor внутри slider() значило бы пересчитать всё четырежды.
-  const avail = useMemo(() => availFor(apartments, draft, ranges), [apartments, draft, ranges]);
-
   const setRange = (key: RangeKey, v: Range) =>
-    setDraft((d) => normalize(apartments, setKey(d, key, v), ranges));
+    setDraft((d) => {
+      const [lo, hi] = ranges[key];
+      // Дотянул до обоих краёв — фильтр ничего не отсекает, снимаем его совсем,
+      // иначе он бы висел бейджем и параметром в URL, не сужая выборку.
+      return setKey(d, key, v[0] === lo && v[1] === hi ? null : v);
+    });
 
   const setBedrooms = (n: number) =>
-    setDraft((d) => normalize(apartments, setKey(d, "bedrooms", d.bedrooms === n ? null : n), ranges));
+    setDraft((d) => setKey(d, "bedrooms", d.bedrooms === n ? null : n));
 
   const apply = () => setApplied(draft);
 
@@ -432,7 +366,7 @@ export function ApartmentCatalog({ apartments }: { apartments: Apartment[] }) {
   // Снятие лишнего фильтра может не изменить таблицу (другой фильтр уже отбирает
   // то же подмножество) — это не рассинхрон.
   const removeFilter = (k: FilterKey) => {
-    setApplied((a) => normalize(apartments, setKey(a, k, null), ranges));
+    setApplied((a) => setKey(a, k, null));
     // Черновик правим, только если по этому ключу он не был изменён отдельно —
     // иначе крестик молча отменил бы правку, которую только что сделали в панели.
     setDraft((d) => {
@@ -440,7 +374,7 @@ export function ApartmentCatalog({ apartments }: { apartments: Apartment[] }) {
         k === "bedrooms"
           ? d.bedrooms === applied.bedrooms
           : eqRange(d[k], applied[k]);
-      return untouched ? normalize(apartments, setKey(d, k, null), ranges) : d;
+      return untouched ? setKey(d, k, null) : d;
     });
   };
 
@@ -476,10 +410,10 @@ export function ApartmentCatalog({ apartments }: { apartments: Apartment[] }) {
     const parsed = parseFiltersFromQuery(window.location.search, ranges, bedOptions);
     /* eslint-disable react-hooks/set-state-in-effect */
     if (parsed) {
-      // Нормализуем сразу: parse → normalize → query должно быть неподвижной точкой.
-      const f = normalize(apartments, parsed, ranges);
-      setApplied(f);
-      setDraft(f);
+      // parseFiltersFromQuery уже зажал границы и обнулил диапазоны во всю ширину,
+      // так что parse → query — неподвижная точка, доводить нечего.
+      setApplied(parsed);
+      setDraft(parsed);
     }
     setReady(true);
     /* eslint-enable react-hooks/set-state-in-effect */
@@ -566,7 +500,7 @@ export function ApartmentCatalog({ apartments }: { apartments: Apartment[] }) {
       <aside className={styles.sidebar}>
         <FilterPanel
           draft={draft}
-          avail={avail}
+          ranges={ranges}
           bedOptions={bedOptions}
           count={previewCount}
           dirty={dirty}
@@ -654,7 +588,7 @@ export function ApartmentCatalog({ apartments }: { apartments: Apartment[] }) {
         <div className={styles.overlayPanel} inert={!filtersOpen}>
           <FilterPanel
             draft={draft}
-            avail={avail}
+            ranges={ranges}
             bedOptions={bedOptions}
             count={previewCount}
             dirty={dirty}

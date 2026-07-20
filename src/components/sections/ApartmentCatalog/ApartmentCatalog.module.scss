@@ -126,25 +126,6 @@
   color: var(--color-brown-dark-2);
 }
 
-// Вариант, невозможный при остальных фильтрах. pointer-events гасит заодно hover,
-// чтобы погашенная вкладка не подсвечивалась под курсором.
-.tabOff {
-  opacity: 0.35;
-  cursor: not-allowed;
-  pointer-events: none;
-}
-
-// Обёртка ползунка нужна только ради состояния «фасет схлопнулся»: RangeSlider —
-// общий компонент без пропа disabled, и погасить его можно лишь снаружи.
-.sliderWrap {
-  display: block;
-}
-
-.sliderWrapOff {
-  pointer-events: none;
-  opacity: 0.5;
-}
-
 // Кнопки применения не должны уезжать за пределы экрана: на десктопе панель
 // скроллится внутри себя, на мобайле — растянута во весь экран.
 .actions {
@@ -213,9 +194,16 @@
     background-color 0.45s ease,
     color 0.45s ease;
 
-  &:hover {
+  &:hover:not(:disabled) {
     background: var(--color-brown-dark);
     color: var(--color-badge-light);
+  }
+
+  // Применять нечего: комбинация невозможна. Гасим вместо того чтобы прятать —
+  // исчезнувшая кнопка сдвинула бы панель и сбила zoom-подгон её высоты.
+  &:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
   }
 
   @include mobile {
