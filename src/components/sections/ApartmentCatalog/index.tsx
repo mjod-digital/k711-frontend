@@ -34,9 +34,10 @@ type Ranges = ReturnType<typeof catalogRanges>;
 
 // null = фильтр не задан. Отдельное «не задан» вместо «диапазон во всю ширину»
 // нужно бейджам и URL: иначе нетронутый ползунок порождал бы бейдж и параметр
-// в адресе для фильтра, который пользователь не выбирал.
+// в адресе для фильтра, который пользователь не выбирал. У спален ту же роль
+// играет пустой массив: значений можно выбрать несколько (1 и 3).
 type Filters = {
-  bedrooms: number | null;
+  bedrooms: number[];
   floor: Range | null;
   area: Range | null;
   pricePerM2: Range | null;
@@ -44,7 +45,7 @@ type Filters = {
 };
 
 const EMPTY_FILTERS: Filters = {
-  bedrooms: null,
+  bedrooms: [],
   floor: null,
   area: null,
   pricePerM2: null,
@@ -64,13 +65,21 @@ const within = (v: number, [lo, hi]: Range) => v >= lo && v <= hi;
 const eqRange = (a: Range | null, b: Range | null) =>
   a === b || (!!a && !!b && a[0] === b[0] && a[1] === b[1]);
 
+// Спальни всегда держим отсортированными, поэтому поэлементного сравнения хватает.
+const eqBeds = (a: number[], b: number[]) =>
+  a.length === b.length && a.every((v, i) => v === b[i]);
+
 const filtersEqual = (a: Filters, b: Filters) =>
-  a.bedrooms === b.bedrooms && RANGE_KEYS.every((k) => eqRange(a[k], b[k]));
+  eqBeds(a.bedrooms, b.bedrooms) && RANGE_KEYS.every((k) => eqRange(a[k], b[k]));
+
+// Сброс одного фильтра к «не задан»: у спален это пустой массив, у диапазонов null.
+const clearKey = (f: Filters, k: FilterKey): Filters =>
+  k === "bedrooms" ? setKey(f, "bedrooms", []) : setKey(f, k, null);
 
 // Единственный предикат отбора: им фильтруется и таблица (applied), и счётчик на
 // кнопке (draft). Две отдельные реализации — это способ разъехаться цифрам.
 const matches = (a: Apartment, f: Filters) =>
-  (f.bedrooms === null || a.bedrooms === f.bedrooms) &&
+  (f.bedrooms.length === 0 || f.bedrooms.includes(a.bedrooms)) &&
   RANGE_KEYS.every((k) => {
     const r = f[k];
     return r === null || within(a[k], r);
@@ -91,7 +100,7 @@ function filtersToQuery(f: Filters, search: string): string {
   const p = new URLSearchParams(search);
   p.delete("beds");
   for (const [, name] of RANGE_PARAMS) p.delete(name);
-  if (f.bedrooms !== null) p.set("beds", String(f.bedrooms));
+  if (f.bedrooms.length) p.set("beds", f.bedrooms.join(","));
   for (const [key, name] of RANGE_PARAMS) {
     const v = f[key];
     if (v) p.set(name, `${v[0]}-${v[1]}`);
@@ -104,8 +113,15 @@ function parseFiltersFromQuery(search: string, r: Ranges, beds: number[]): Filte
   const owned = ["beds", ...RANGE_PARAMS.map(([, n]) => n)];
   if (!owned.some((n) => p.has(n))) return null; // чужие параметры — фильтры не трогаем
   let f: Filters = { ...EMPTY_FILTERS };
-  const b = Number(p.get("beds"));
-  if (p.has("beds") && beds.includes(b)) f = setKey(f, "bedrooms", b);
+  // beds=1,3 — несколько значений. Оставляем только существующие в каталоге и
+  // убираем дубли, иначе битая ссылка родила бы бейдж «Спальни: 9».
+  const rawBeds = p.get("beds");
+  if (rawBeds) {
+    const picked = [...new Set(rawBeds.split(",").map(Number))]
+      .filter((n) => beds.includes(n))
+      .sort((x, y) => x - y);
+    if (picked.length) f = setKey(f, "bedrooms", picked);
+  }
   for (const [key, name] of RANGE_PARAMS) {
     const raw = p.get(name);
     if (!raw) continue;
@@ -141,7 +157,7 @@ const RANGE_UNITS: Record<RangeKey, string> = {
 // Один источник текста и для подписи, и для aria-label — чтобы доступное имя
 // кнопки не разошлось с видимым.
 const describe = (k: FilterKey, f: Filters): string => {
-  if (k === "bedrooms") return `Спальни: ${f.bedrooms}`;
+  if (k === "bedrooms") return `Спальни: ${f.bedrooms.join(", ")}`;
   const r = f[k];
   if (!r) return RANGE_LABELS[k];
   const [lo, hi] = r;
@@ -229,7 +245,7 @@ function FilterPanel({
           <p className={styles.bedLabel}>Количество спален</p>
           <div className={styles.tabs}>
             {bedOptions.map((n) => {
-              const active = draft.bedrooms === n;
+              const active = draft.bedrooms.includes(n);
               return (
                 <button
                   key={n}
@@ -263,10 +279,6 @@ function FilterPanel({
         {/* Кнопки коммита липнут к низу: панель может скроллиться внутри себя,
             а «Показать» — единственный способ применить фильтры. */}
         <div className={styles.actions}>
-          <button type="button" className={styles.reset} onClick={onReset}>
-            сбросить фильтры
-          </button>
-
           {/* Три состояния. Нулевое — комбинация невозможна, гасим (иначе кнопка
               предлагала бы «Показать 0 резиденций» и опустошила бы таблицу).
               Покой — применять нечего: кнопка отдыхает статус-строкой и не зовёт
@@ -287,6 +299,10 @@ function FilterPanel({
                 ? // Согласование глагола: показанА 1, показанЫ 2, показанО 6.
                   `${plural(count, "Показана", "Показаны", "Показано")} ${count} ${plural(count, "резиденция", "резиденции", "резиденций")}`
                 : `Показать ${count} ${plural(count, "резиденцию", "резиденции", "резиденций")}`}
+          </button>
+
+          <button type="button" className={styles.reset} onClick={onReset}>
+            сбросить фильтры
           </button>
         </div>
       </div>
@@ -360,8 +376,19 @@ export function ApartmentCatalog({ apartments }: { apartments: Apartment[] }) {
       return setKey(d, key, v[0] === lo && v[1] === hi ? null : v);
     });
 
+  // Множественный выбор: вкладка переключается независимо от остальных (1 и 3 —
+  // валидный набор). Держим отсортированным — от него зависят и сравнение
+  // черновика с применённым, и порядок в бейдже, и вид ссылки.
   const setBedrooms = (n: number) =>
-    setDraft((d) => setKey(d, "bedrooms", d.bedrooms === n ? null : n));
+    setDraft((d) =>
+      setKey(
+        d,
+        "bedrooms",
+        d.bedrooms.includes(n)
+          ? d.bedrooms.filter((v) => v !== n)
+          : [...d.bedrooms, n].sort((x, y) => x - y),
+      ),
+    );
 
   const apply = () => setApplied(draft);
 
@@ -375,7 +402,7 @@ export function ApartmentCatalog({ apartments }: { apartments: Apartment[] }) {
 
   // Крестик правит только ЧЕРНОВИК: бейдж — такой же орган ввода, как панель, и
   // тоже ничего не применяет. Единственная точка применения — «Показать».
-  const removeFilter = (k: FilterKey) => setDraft((d) => setKey(d, k, null));
+  const removeFilter = (k: FilterKey) => setDraft((d) => clearKey(d, k));
 
   // Синхронизация черновика с применённым — на обеих границах оверлея и только в
   // обработчиках: эффект по filtersOpen сработал бы и на закрытии. Без синхронизации
@@ -487,15 +514,17 @@ export function ApartmentCatalog({ apartments }: { apartments: Apartment[] }) {
     [rows, favSet, hydrated, toggleFav],
   );
 
-  // Бейджи читают ЧЕРНОВИК, а не применённое: крестик должен убирать чип сразу
-  // (иначе клик выглядит как промах), но таблицу при этом не трогать. Так бейджи
-  // показывают набор, который уйдёт в таблицу по «Показать».
+  // Бейдж живёт на ПЕРЕСЕЧЕНИИ применённого и черновика, и это не перестраховка:
+  // по одному applied он не исчезал бы по крестику (тот правит только черновик) и
+  // клик выглядел бы промахом; по одному draft — появлялся бы сразу при выборе в
+  // панели, до всякого применения. Пересечение даёт и то, и другое: появляется
+  // только после «Показать», исчезает сразу по крестику, а таблица ждёт кнопку.
   const badges = useMemo<FilterKey[]>(() => {
     const out: FilterKey[] = [];
-    if (draft.bedrooms !== null) out.push("bedrooms");
-    for (const k of RANGE_KEYS) if (draft[k]) out.push(k);
+    if (applied.bedrooms.length && draft.bedrooms.length) out.push("bedrooms");
+    for (const k of RANGE_KEYS) if (applied[k] && draft[k]) out.push(k);
     return out;
-  }, [draft]);
+  }, [applied, draft]);
 
   return (
     <section className={styles.catalog}>
@@ -515,38 +544,46 @@ export function ApartmentCatalog({ apartments }: { apartments: Apartment[] }) {
       </aside>
 
       <div className={styles.list}>
-        {badges.length > 0 && (
-          <div className={styles.badges}>
-            {badges.map((k) => {
-              const text = describe(k, draft);
-              return (
-                <button
-                  key={k}
-                  type="button"
-                  className={styles.badge}
-                  onClick={() => removeFilter(k)}
-                  aria-label={`Убрать фильтр: ${text}`}
-                >
-                  <span className={styles.badgeLabel}>{text}</span>
-                  <span className={styles.badgeX} aria-hidden="true">
-                    <svg viewBox="0 0 24 24" fill="none">
-                      <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" strokeWidth="1.5" />
-                    </svg>
-                  </span>
-                </button>
-              );
-            })}
-          </div>
-        )}
+        {/* Бейджи и шапка залипают ОДНИМ блоком: по отдельности top шапки
+            пришлось бы держать равным высоте бейджей, а она переменная —
+            бейджи переносятся на вторую строку. */}
+        <div className={styles.listHead}>
+          {badges.length > 0 && (
+            <div className={styles.badges}>
+              {badges.map((k) => {
+                // Подпись — из ПРИМЕНЁННОГО: бейдж описывает то, что сейчас в
+                // таблице. Правка в панели меняет его только после «Показать».
+                const text = describe(k, applied);
+                return (
+                  <button
+                    key={k}
+                    type="button"
+                    className={styles.badge}
+                    onClick={() => removeFilter(k)}
+                    aria-label={`Убрать фильтр: ${text}`}
+                  >
+                    <span className={styles.badgeLabel}>{text}</span>
+                    <span className={styles.badgeX} aria-hidden="true">
+                      <svg viewBox="0 0 24 24" fill="none">
+                        <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" strokeWidth="1.5" />
+                      </svg>
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          )}
 
-        <div className={styles.thead}>
-          <span>Этаж</span>
-          <span>Спальни</span>
-          <span>Площадь</span>
-          <span>Стоимость м²</span>
-          <span>Стоимость</span>
-          <span aria-hidden="true" />
+          <div className={styles.thead}>
+            <span>Этаж</span>
+            <span>Спальни</span>
+            <span>Площадь</span>
+            <span>Стоимость м²</span>
+            <span>Стоимость</span>
+            <span aria-hidden="true" />
+          </div>
         </div>
+
         <div className={styles.tbody}>
           {body}
           {rows.length === 0 && (
