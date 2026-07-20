@@ -206,6 +206,17 @@
     cursor: not-allowed;
   }
 
+  // Покой: черновик совпадает с применённым. Не мёртвая кнопка, а статус-строка —
+  // снимаем заливку и гашение (0.4 читалось бы как «сломано»). Узел остаётся на
+  // месте по той же причине, что и выше: панель не должна прыгать.
+  // Идёт после :disabled — специфичность та же, побеждает порядком.
+  &.showResultsIdle {
+    opacity: 1;
+    background: transparent;
+    color: var(--color-brown-light);
+    cursor: default;
+  }
+
   @include mobile {
     font-size: fluid(14);
   }

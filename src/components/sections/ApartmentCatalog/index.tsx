@@ -191,6 +191,13 @@ function FilterPanel({
   onClose?: () => void;
   panelRef?: RefObject<HTMLDivElement | null>;
 }) {
+  const empty = count === 0;
+  // Покой = применять нечего (черновик совпадает с применённым). Только на
+  // десктопе: в мобильном оверлее эта же кнопка закрывает панель и ведёт к
+  // списку, поэтому осмысленна всегда. onClose есть только у оверлея — по нему
+  // и различаем, не заводя отдельного пропа.
+  const idle = !dirty && !onClose;
+
   // Незаданный фильтр показываем как полный диапазон — ползунки «во всю ширину».
   const slider = (key: RangeKey, label: ReactNode) => (
     <RangeSlider
@@ -260,22 +267,26 @@ function FilterPanel({
             сбросить фильтры
           </button>
 
-          {/* Нулевое состояние: применять нечего, поэтому кнопка гаснет — иначе
-              она предлагала бы «Показать 0 резиденций» и опустошала таблицу. */}
+          {/* Три состояния. Нулевое — комбинация невозможна, гасим (иначе кнопка
+              предлагала бы «Показать 0 резиденций» и опустошила бы таблицу).
+              Покой — применять нечего: кнопка отдыхает статус-строкой и не зовёт
+              нажать себя впустую. Иначе — призыв применить черновик. */}
           <button
             type="button"
-            className={cn(styles.showResults, dirty && count > 0 && styles.showResultsDirty)}
-            disabled={count === 0}
+            className={cn(
+              styles.showResults,
+              idle && styles.showResultsIdle,
+              dirty && !empty && styles.showResultsDirty,
+            )}
+            disabled={empty || idle}
             onClick={onShow}
           >
-            {count === 0 ? (
-              "Нет подходящих резиденций"
-            ) : (
-              <>
-                Показать {count}{" "}
-                {plural(count, "резиденцию", "резиденции", "резиденций")}
-              </>
-            )}
+            {empty
+              ? "Нет подходящих резиденций"
+              : idle
+                ? // Согласование глагола: показанА 1, показанЫ 2, показанО 6.
+                  `${plural(count, "Показана", "Показаны", "Показано")} ${count} ${plural(count, "резиденция", "резиденции", "резиденций")}`
+                : `Показать ${count} ${plural(count, "резиденцию", "резиденции", "резиденций")}`}
           </button>
         </div>
       </div>
@@ -362,21 +373,9 @@ export function ApartmentCatalog({ apartments }: { apartments: Apartment[] }) {
     setApplied(EMPTY_FILTERS);
   };
 
-  // Крестик на бейдже снимает фильтр немедленно — бейджи живут вне панели.
-  // Снятие лишнего фильтра может не изменить таблицу (другой фильтр уже отбирает
-  // то же подмножество) — это не рассинхрон.
-  const removeFilter = (k: FilterKey) => {
-    setApplied((a) => setKey(a, k, null));
-    // Черновик правим, только если по этому ключу он не был изменён отдельно —
-    // иначе крестик молча отменил бы правку, которую только что сделали в панели.
-    setDraft((d) => {
-      const untouched =
-        k === "bedrooms"
-          ? d.bedrooms === applied.bedrooms
-          : eqRange(d[k], applied[k]);
-      return untouched ? setKey(d, k, null) : d;
-    });
-  };
+  // Крестик правит только ЧЕРНОВИК: бейдж — такой же орган ввода, как панель, и
+  // тоже ничего не применяет. Единственная точка применения — «Показать».
+  const removeFilter = (k: FilterKey) => setDraft((d) => setKey(d, k, null));
 
   // Синхронизация черновика с применённым — на обеих границах оверлея и только в
   // обработчиках: эффект по filtersOpen сработал бы и на закрытии. Без синхронизации
@@ -488,12 +487,15 @@ export function ApartmentCatalog({ apartments }: { apartments: Apartment[] }) {
     [rows, favSet, hydrated, toggleFav],
   );
 
+  // Бейджи читают ЧЕРНОВИК, а не применённое: крестик должен убирать чип сразу
+  // (иначе клик выглядит как промах), но таблицу при этом не трогать. Так бейджи
+  // показывают набор, который уйдёт в таблицу по «Показать».
   const badges = useMemo<FilterKey[]>(() => {
     const out: FilterKey[] = [];
-    if (applied.bedrooms !== null) out.push("bedrooms");
-    for (const k of RANGE_KEYS) if (applied[k]) out.push(k);
+    if (draft.bedrooms !== null) out.push("bedrooms");
+    for (const k of RANGE_KEYS) if (draft[k]) out.push(k);
     return out;
-  }, [applied]);
+  }, [draft]);
 
   return (
     <section className={styles.catalog}>
@@ -516,7 +518,7 @@ export function ApartmentCatalog({ apartments }: { apartments: Apartment[] }) {
         {badges.length > 0 && (
           <div className={styles.badges}>
             {badges.map((k) => {
-              const text = describe(k, applied);
+              const text = describe(k, draft);
               return (
                 <button
                   key={k}
