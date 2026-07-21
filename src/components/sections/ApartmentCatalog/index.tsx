@@ -69,6 +69,8 @@ const eqRange = (a: Range | null, b: Range | null) =>
 const eqBeds = (a: number[], b: number[]) =>
   a.length === b.length && a.every((v, i) => v === b[i]);
 
+const hasAny = (f: Filters) => f.bedrooms.length > 0 || RANGE_KEYS.some((k) => f[k]);
+
 const filtersEqual = (a: Filters, b: Filters) =>
   eqBeds(a.bedrooms, b.bedrooms) && RANGE_KEYS.every((k) => eqRange(a[k], b[k]));
 
@@ -125,7 +127,14 @@ function parseFiltersFromQuery(search: string, r: Ranges, beds: number[]): Filte
   for (const [key, name] of RANGE_PARAMS) {
     const raw = p.get(name);
     if (!raw) continue;
-    const [lo, hi] = raw.split("-").map(Number);
+    // Ровно два числа через дефис. split("-") ломался на минусе: "-5-999" давал
+    // ["","5","999"] → [0,5], истинные величины терялись и каталог опустошался
+    // вырожденным фильтром. Регэксп со знаком разбирает границы однозначно, а
+    // мусор («abc», «5-10-20») просто не матчится и параметр отбрасывается.
+    const m = raw.match(/^(-?\d+(?:\.\d+)?)-(-?\d+(?:\.\d+)?)$/);
+    if (!m) continue;
+    const lo = Number(m[1]);
+    const hi = Number(m[2]);
     if (!Number.isFinite(lo) || !Number.isFinite(hi)) continue;
     // Клампим в допустимый диапазон и упорядочиваем (защита от битых ссылок).
     const [flo, fhi] = r[key];
@@ -185,6 +194,7 @@ function FilterPanel({
   bedOptions,
   count,
   dirty,
+  canReset,
   onBedrooms,
   onRange,
   onReset,
@@ -200,6 +210,8 @@ function FilterPanel({
   count: number;
   /** Черновик разошёлся с применённым — подсвечиваем кнопку применения. */
   dirty: boolean;
+  /** Есть что сбрасывать. Пусто — кнопку сброса не показываем вовсе. */
+  canReset: boolean;
   onBedrooms: (n: number) => void;
   onRange: (key: RangeKey, v: Range) => void;
   onReset: () => void;
@@ -301,9 +313,13 @@ function FilterPanel({
                 : `Показать ${count} ${plural(count, "резиденцию", "резиденции", "резиденций")}`}
           </button>
 
-          <button type="button" className={styles.reset} onClick={onReset}>
-            сбросить фильтры
-          </button>
+          {/* Сбрасывать нечего — кнопки нет. В отличие от «Показать», ей нечего
+              сообщить в покое, поэтому приглушённая она была бы просто мусором. */}
+          {canReset && (
+            <button type="button" className={styles.reset} onClick={onReset}>
+              сбросить фильтры
+            </button>
+          )}
         </div>
       </div>
     </div>
@@ -392,10 +408,16 @@ export function ApartmentCatalog({ apartments }: { apartments: Apartment[] }) {
 
   const apply = () => setApplied(draft);
 
-  // Сброс чистит и черновик, и применённое: «сбросить» ничего не применяет, оно
-  // снимает — как и крестик на бейдже, который тоже действует сразу. Иначе на
-  // десктопе кнопка визуально не делала бы ничего.
-  const resetAll = () => {
+  // Сброс правит только черновик — как панель и крестик на бейдже. Применяет
+  // по-прежнему одна кнопка «Показать». Раньше он чистил ещё и applied, иначе на
+  // десктопе выглядел бы неработающим; теперь работа видна сразу — исчезают бейджи
+  // (они на пересечении с черновиком) и пересчитывается счётчик на «Показать».
+  const resetDraft = () => setDraft(EMPTY_FILTERS);
+
+  // Пустая таблица — тупик, куда можно попасть только по ссылке с параметрами.
+  // Здесь сброс аварийный: чистит сразу и черновик, и применённое, иначе выход из
+  // тупика требовал бы второго клика по кнопке, которой на экране может не быть.
+  const resetEverything = () => {
     setDraft(EMPTY_FILTERS);
     setApplied(EMPTY_FILTERS);
   };
@@ -503,6 +525,10 @@ export function ApartmentCatalog({ apartments }: { apartments: Apartment[] }) {
     [apartments, draft],
   );
   const dirty = !filtersEqual(draft, applied);
+  // Сброс правит только черновик — значит и показываем его ровно тогда, когда в
+  // черновике что-то есть. Сняли все бейджи крестиками → черновик пуст → сбрасывать
+  // нечего, кнопки нет. Таблицу при этом вернёт «Показать», как и всё остальное.
+  const canReset = hasAny(draft);
 
   // Мемоизируем сами элементы строк: applied не меняется, пока тянут ползунок,
   // а родитель при этом перерисовывается на каждый кадр.
@@ -535,9 +561,10 @@ export function ApartmentCatalog({ apartments }: { apartments: Apartment[] }) {
           bedOptions={bedOptions}
           count={previewCount}
           dirty={dirty}
+          canReset={canReset}
           onBedrooms={setBedrooms}
           onRange={setRange}
-          onReset={resetAll}
+          onReset={resetDraft}
           onShow={apply}
           panelRef={panelRef}
         />
@@ -589,7 +616,7 @@ export function ApartmentCatalog({ apartments }: { apartments: Apartment[] }) {
           {rows.length === 0 && (
             <p className={styles.empty}>
               Нет резиденций с такими параметрами
-              <button type="button" className={styles.emptyReset} onClick={resetAll}>
+              <button type="button" className={styles.emptyReset} onClick={resetEverything}>
                 сбросить фильтры
               </button>
             </p>
@@ -631,9 +658,10 @@ export function ApartmentCatalog({ apartments }: { apartments: Apartment[] }) {
             bedOptions={bedOptions}
             count={previewCount}
             dirty={dirty}
+            canReset={canReset}
             onBedrooms={setBedrooms}
             onRange={setRange}
-            onReset={resetAll}
+            onReset={resetDraft}
             onShow={() => {
               apply();
               setFiltersOpen(false);
