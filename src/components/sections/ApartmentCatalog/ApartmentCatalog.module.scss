@@ -45,21 +45,30 @@
   }
 }
 
-// Содержимое панели — его масштабирует zoom (десктоп), см. ApartmentCatalog.tsx.
 .filtersInner {
   display: flex;
   flex-direction: column;
   gap: fluid(20);
 }
 
-// Десктоп: панель фильтров «прилипает» под хедером и видна всегда при прокрутке
-// списка (тёмный сайдбар при этом остаётся фоном на всю высоту колонки). max-height
-// + overflow — страховка для низких окон: высокая панель не упрётся в низ и не
-// «срежется» сверху, а проскроллится внутри. (Мобайл — оверлей, .sidebar скрыт.)
+// Десктоп: панель «прилипает» под хедером и всегда видна при прокрутке списка
+// (тёмный сайдбар остаётся фоном на всю высоту колонки). Панель — flex-колонка
+// высотой в экран: зона ползунков (.filtersInner) скроллится, блок кнопок
+// (.actions) — footer, всегда виден. Так на низком окне уезжают ползунки, а не
+// кнопки, и ничто не наезжает на значения последнего ползунка. (Мобайл —
+// оверлей, .sidebar скрыт.)
 .sidebar .filters {
   position: sticky;
   top: var(--header-h);
   max-height: calc(100vh - var(--header-h));
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.sidebar .filtersInner {
+  flex: 1 1 auto;
+  min-height: 0; // иначе flex-элемент не даёт контенту скроллиться, а растёт
   overflow-y: auto;
 }
 
@@ -126,22 +135,25 @@
   color: var(--color-brown-dark-2);
 }
 
-// Кнопки применения не должны уезжать за пределы экрана: на десктопе панель
-// скроллится внутри себя, на мобайле — растянута во весь экран.
 .actions {
-  position: sticky;
-  bottom: 0;
-  z-index: 1;
+  flex-shrink: 0; // footer flex-колонки .filters — не сжимается, всегда виден
   display: flex;
   flex-direction: column;
-  margin-top: fluid(20); // прежний отступ .reset — суммарный зазор сохранён
-  margin-inline: calc(-1 * #{fluid(20)});
-  padding: fluid(12) fluid(20) fluid(20);
-  background: var(--color-brown-dark-2);
+  margin-top: fluid(20);
 
+  // Десктоп: footer вне прокручиваемого .filtersInner — кнопки всегда видны, а
+  // ползунки уезжают под них при нехватке высоты. Раньше блок был sticky ВНУТРИ
+  // прокрутки и наезжал на значения последнего ползунка (баг).
+  //
+  // Мобайл: оверлей во весь экран — держим кнопку применения у нижнего края,
+  // чтобы не уезжала под список ползунков.
   @include mobile {
+    position: sticky;
+    bottom: 0;
+    z-index: 1;
     margin-inline: calc(-1 * #{fluid(16)});
-    padding-inline: fluid(16);
+    padding: fluid(12) fluid(16) fluid(20);
+    background: var(--color-brown-dark-2);
   }
 }
 

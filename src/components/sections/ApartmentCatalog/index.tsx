@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { memo, useEffect, useMemo, useRef, useState } from "react";
-import type { ReactNode, RefObject } from "react";
+import { memo, useEffect, useMemo, useState } from "react";
+import type { ReactNode } from "react";
 import { RangeSlider } from "@/components/ui/RangeSlider";
 import {
   bedroomOptions,
@@ -200,7 +200,6 @@ function FilterPanel({
   onReset,
   onShow,
   onClose,
-  panelRef,
 }: {
   draft: Filters;
   /** Полные границы каталога — ползунки всегда показывают их целиком. */
@@ -217,7 +216,6 @@ function FilterPanel({
   onReset: () => void;
   onShow: () => void;
   onClose?: () => void;
-  panelRef?: RefObject<HTMLDivElement | null>;
 }) {
   const empty = count === 0;
   // Покой = применять нечего (черновик совпадает с применённым). Только на
@@ -252,7 +250,7 @@ function FilterPanel({
         </button>
       )}
 
-      <div className={styles.filtersInner} ref={panelRef}>
+      <div className={styles.filtersInner}>
         <div className={styles.bedGroup}>
           <p className={styles.bedLabel}>Количество спален</p>
           <div className={styles.tabs}>
@@ -287,40 +285,41 @@ function FilterPanel({
           </>,
         )}
         {slider("cost", "Стоимость (млн руб.)")}
+      </div>
 
-        {/* Кнопки коммита липнут к низу: панель может скроллиться внутри себя,
-            а «Показать» — единственный способ применить фильтры. */}
-        <div className={styles.actions}>
-          {/* Три состояния. Нулевое — комбинация невозможна, гасим (иначе кнопка
-              предлагала бы «Показать 0 резиденций» и опустошила бы таблицу).
-              Покой — применять нечего: кнопка отдыхает статус-строкой и не зовёт
-              нажать себя впустую. Иначе — призыв применить черновик. */}
-          <button
-            type="button"
-            className={cn(
-              styles.showResults,
-              idle && styles.showResultsIdle,
-              dirty && !empty && styles.showResultsDirty,
-            )}
-            disabled={empty || idle}
-            onClick={onShow}
-          >
-            {empty
-              ? "Нет подходящих резиденций"
-              : idle
-                ? // Согласование глагола: показанА 1, показанЫ 2, показанО 6.
-                  `${plural(count, "Показана", "Показаны", "Показано")} ${count} ${plural(count, "резиденция", "резиденции", "резиденций")}`
-                : `Показать ${count} ${plural(count, "резиденцию", "резиденции", "резиденций")}`}
-          </button>
-
-          {/* Сбрасывать нечего — кнопки нет. В отличие от «Показать», ей нечего
-              сообщить в покое, поэтому приглушённая она была бы просто мусором. */}
-          {canReset && (
-            <button type="button" className={styles.reset} onClick={onReset}>
-              сбросить фильтры
-            </button>
+      {/* Блок кнопок — footer ВНЕ прокручиваемого .filtersInner. Так «Показать»
+          всегда виден, а на низком экране прокручиваются ползунки, а не кнопки,
+          и ничто не наезжает на значения последнего ползунка. */}
+      <div className={styles.actions}>
+        {/* Три состояния. Нулевое — комбинация невозможна, гасим (иначе кнопка
+            предлагала бы «Показать 0 резиденций» и опустошила бы таблицу).
+            Покой — применять нечего: кнопка отдыхает статус-строкой и не зовёт
+            нажать себя впустую. Иначе — призыв применить черновик. */}
+        <button
+          type="button"
+          className={cn(
+            styles.showResults,
+            idle && styles.showResultsIdle,
+            dirty && !empty && styles.showResultsDirty,
           )}
-        </div>
+          disabled={empty || idle}
+          onClick={onShow}
+        >
+          {empty
+            ? "Нет подходящих резиденций"
+            : idle
+              ? // Согласование глагола: показанА 1, показанЫ 2, показанО 6.
+                `${plural(count, "Показана", "Показаны", "Показано")} ${count} ${plural(count, "резиденция", "резиденции", "резиденций")}`
+              : `Показать ${count} ${plural(count, "резиденцию", "резиденции", "резиденций")}`}
+        </button>
+
+        {/* Сбрасывать нечего — кнопки нет. В отличие от «Показать», ей нечего
+            сообщить в покое, поэтому приглушённая она была бы просто мусором. */}
+        {canReset && (
+          <button type="button" className={styles.reset} onClick={onReset}>
+            сбросить фильтры
+          </button>
+        )}
       </div>
     </div>
   );
@@ -408,16 +407,11 @@ export function ApartmentCatalog({ apartments }: { apartments: Apartment[] }) {
 
   const apply = () => setApplied(draft);
 
-  // Сброс правит только черновик — как панель и крестик на бейдже. Применяет
-  // по-прежнему одна кнопка «Показать». Раньше он чистил ещё и applied, иначе на
-  // десктопе выглядел бы неработающим; теперь работа видна сразу — исчезают бейджи
-  // (они на пересечении с черновиком) и пересчитывается счётчик на «Показать».
-  const resetDraft = () => setDraft(EMPTY_FILTERS);
-
-  // Пустая таблица — тупик, куда можно попасть только по ссылке с параметрами.
-  // Здесь сброс аварийный: чистит сразу и черновик, и применённое, иначе выход из
-  // тупика требовал бы второго клика по кнопке, которой на экране может не быть.
-  const resetEverything = () => {
+  // «Сбросить фильтры» — единственное исключение из «применяет только Показать»:
+  // чистит и черновик, и таблицу сразу. Это осознанный выбор: сброс — не подбор
+  // фильтра, а выход из него, и требовать после него ещё клик по «Показать» —
+  // лишний шаг. Та же функция обслуживает и аварийный сброс из пустого состояния.
+  const resetAll = () => {
     setDraft(EMPTY_FILTERS);
     setApplied(EMPTY_FILTERS);
   };
@@ -480,42 +474,6 @@ export function ApartmentCatalog({ apartments }: { apartments: Apartment[] }) {
     window.history.replaceState(null, "", url);
   }, [applied, ready]);
 
-  // Десктоп: масштабируем панель фильтров под высоту окна (zoom, как в меню) —
-  // на невысоких экранах панель ужимается целиком, а не срезается кнопка «сбросить».
-  const panelRef = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    const content = panelRef.current;
-    const wrapper = content?.parentElement; // .filters (sticky, max-height)
-    if (!content || !wrapper) return;
-    const mqMobile = window.matchMedia("(max-width: 767.98px)");
-
-    const applyScale = () => {
-      if (mqMobile.matches) {
-        content.style.removeProperty("zoom");
-        return;
-      }
-      content.style.setProperty("zoom", "1"); // сброс перед замером натуральной высоты
-      const natural = content.offsetHeight;
-      const cs = getComputedStyle(wrapper);
-      const vpad = parseFloat(cs.paddingTop) + parseFloat(cs.paddingBottom);
-      const availH = wrapper.clientHeight - vpad;
-      const chrome = window.innerHeight - availH;
-      const availFloor = Math.max(0, 600 - chrome); // пол: ниже — внутренний скролл
-      const scale = Math.min(1, Math.max(availH, availFloor) / Math.max(1, natural));
-      content.style.setProperty("zoom", String(scale));
-    };
-
-    applyScale();
-    void document.fonts?.ready.then(applyScale); // пересчёт после загрузки шрифтов
-    window.addEventListener("resize", applyScale);
-    mqMobile.addEventListener("change", applyScale);
-    return () => {
-      window.removeEventListener("resize", applyScale);
-      mqMobile.removeEventListener("change", applyScale);
-      content.style.removeProperty("zoom");
-    };
-  }, []);
-
   const rows = useMemo(
     () => apartments.filter((a) => matches(a, applied)),
     [apartments, applied],
@@ -564,9 +522,8 @@ export function ApartmentCatalog({ apartments }: { apartments: Apartment[] }) {
           canReset={canReset}
           onBedrooms={setBedrooms}
           onRange={setRange}
-          onReset={resetDraft}
+          onReset={resetAll}
           onShow={apply}
-          panelRef={panelRef}
         />
       </aside>
 
@@ -616,7 +573,7 @@ export function ApartmentCatalog({ apartments }: { apartments: Apartment[] }) {
           {rows.length === 0 && (
             <p className={styles.empty}>
               Нет резиденций с такими параметрами
-              <button type="button" className={styles.emptyReset} onClick={resetEverything}>
+              <button type="button" className={styles.emptyReset} onClick={resetAll}>
                 сбросить фильтры
               </button>
             </p>
@@ -661,7 +618,7 @@ export function ApartmentCatalog({ apartments }: { apartments: Apartment[] }) {
             canReset={canReset}
             onBedrooms={setBedrooms}
             onRange={setRange}
-            onReset={resetDraft}
+            onReset={resetAll}
             onShow={() => {
               apply();
               setFiltersOpen(false);
