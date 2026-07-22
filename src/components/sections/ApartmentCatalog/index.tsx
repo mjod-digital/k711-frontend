@@ -297,11 +297,7 @@ function FilterPanel({
             нажать себя впустую. Иначе — призыв применить черновик. */}
         <button
           type="button"
-          className={cn(
-            styles.showResults,
-            idle && styles.showResultsIdle,
-            dirty && !empty && styles.showResultsDirty,
-          )}
+          className={cn(styles.showResults, idle && styles.showResultsIdle)}
           disabled={empty || idle}
           onClick={onShow}
         >
@@ -416,9 +412,16 @@ export function ApartmentCatalog({ apartments }: { apartments: Apartment[] }) {
     setApplied(EMPTY_FILTERS);
   };
 
-  // Крестик правит только ЧЕРНОВИК: бейдж — такой же орган ввода, как панель, и
-  // тоже ничего не применяет. Единственная точка применения — «Показать».
-  const removeFilter = (k: FilterKey) => setDraft((d) => clearKey(d, k));
+  // Крестик снимает СВОЙ фильтр сразу — и из черновика, и из таблицы: бейдж
+  // описывает применённый фильтр, поэтому его отмена его же и убирает. При этом
+  // незакоммиченные правки в панели (покрученные слайдеры) остаются в черновике
+  // неприменёнными — они и держат кнопку активной. Так после ✕ кнопка гаснет до
+  // «Показано N», если больше применять нечего, и остаётся «Показать N», если в
+  // панели уже что-то набрано.
+  const removeFilter = (k: FilterKey) => {
+    setDraft((d) => clearKey(d, k));
+    setApplied((a) => clearKey(a, k));
+  };
 
   // Синхронизация черновика с применённым — на обеих границах оверлея и только в
   // обработчиках: эффект по filtersOpen сработал бы и на закрытии. Без синхронизации

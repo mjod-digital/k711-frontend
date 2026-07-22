@@ -70,6 +70,13 @@
   flex: 1 1 auto;
   min-height: 0; // иначе flex-элемент не даёт контенту скроллиться, а растёт
   overflow-y: auto;
+  // Прячем нативный скроллбар: на большинстве окон ползунки влезают целиком, и
+  // auto рисовал бы полосу из-за субпиксельного перелива; в тёмной панели она
+  // чужеродна. Прокрутка колесом/тачем/клавиатурой при этом сохраняется.
+  scrollbar-width: none; // Firefox
+  &::-webkit-scrollbar {
+    display: none; // WebKit
+  }
 }
 
 .close {
@@ -202,7 +209,6 @@
   letter-spacing: 0.05em;
   cursor: pointer;
   transition:
-    outline-color 0.3s ease,
     background-color 0.45s ease,
     color 0.45s ease;
 
@@ -232,13 +238,6 @@
   @include mobile {
     font-size: fluid(14);
   }
-}
-
-// Черновик разошёлся с применённым: фильтры применяются только по этой кнопке,
-// поэтому расхождение панели и таблицы надо явно показать.
-.showResultsDirty {
-  outline: fluid(2) solid var(--color-brown-medium);
-  outline-offset: fluid(2);
 }
 
 // ----- Таблица -----
