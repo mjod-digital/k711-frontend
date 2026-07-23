@@ -1,20 +1,21 @@
 import type { Flat } from "./api";
 
 // ============================================================
-//   Снимок каталога квартир — 6 позиций из живого фида CRM (/api/flats).
+//   Снимок каталога квартир — 12 позиций для превью (/api/flats).
 //   Нужен там, где CRM недоступен или не нужен: превью-деплой, локальная
 //   работа без MODX. Включается через APARTMENTS_SOURCE=mock (см. src/lib/api.ts);
 //   на проде источник остаётся прежним — живой API.
 //
-//   Значения (площади, цены, этажи) не выдуманы, а скопированы из CRM, поэтому
-//   каталог и карточки выглядят как боевые. Отличия от фида:
+//   Первые 6 — реальные значения из фида CRM (площади, цены, этажи не выдуманы),
+//   остальные 6 — синтетические (для более длинного списка и «живых» фильтров).
+//   Отличия от фида:
 //   • layoutUrl → локальная копия планировки (public/images/apartment/plans),
 //     чтобы превью не зависело от внешнего s3.mastertel.ru;
 //   • floorPlan: "" — CRM его не отдаёт, UI подставляет свой мини-план этажа.
 //   PDF ведут на боевой домен: файлы там лежат и открываются.
 //
-//   Выборка покрывает все три типа фильтра: 1/2/3 спальни, этажи 2–4,
-//   площади 50–166 м², цена за м² 1.81–2.5 млн ₽.
+//   Выборка покрывает все три типа фильтра: 1/2/3 спальни, этажи 2–5,
+//   площади 50–166 м², цена за м² 1.81–2.41 млн ₽, стоимость 116–370 млн ₽.
 // ============================================================
 export const MOCK_FLATS: Flat[] = [
   {
@@ -135,6 +136,129 @@ export const MOCK_FLATS: Flat[] = [
     viewFromWindowTypology: null,
     sectionNumber: "3",
     layoutUrl: "/images/apartment/plans/31.png",
+    floorPlan: "",
+  },
+  // ----- Ниже — синтетические позиции для более полного превью (список длиннее,
+  // все фильтры «живее»). Значения правдоподобны (amount = area × price), но
+  // планы/PDF переиспуют реальные, чтобы превью не ловило битые ссылки.
+  {
+    name: "KLM-1-1-К-2-3-2-7",
+    number: "7",
+    floor: 3,
+    area: 64.8,
+    amount: 146448000,
+    price: 2260000,
+    amountDiscount: 146448000,
+    areaProject: 64.8,
+    type: "Flat",
+    status: "Free",
+    numberOfBedrooms: 1,
+    numberOfBathrooms: "",
+    pdf: "https://www.klimashkina711.ru/assets/img//pdf/KLM-1-1-К-3-2-2-28-floor-2-number-28.pdf",
+    ceilingHeightM: 3.4,
+    viewFromWindowTypology: null,
+    sectionNumber: "2",
+    layoutUrl: "/images/apartment/plans/28.png",
+    floorPlan: "",
+  },
+  {
+    name: "KLM-1-1-К-1-2-2-22",
+    number: "22",
+    floor: 2,
+    area: 72.1,
+    amount: 143479000,
+    price: 1990000,
+    amountDiscount: 143479000,
+    areaProject: 72.1,
+    type: "Flat",
+    status: "Free",
+    numberOfBedrooms: 1,
+    numberOfBathrooms: "",
+    pdf: "https://www.klimashkina711.ru/assets/img//pdf/KLM-1-1-К-2-2-2-13-floor-2-number-13.pdf",
+    ceilingHeightM: 3.4,
+    viewFromWindowTypology: null,
+    sectionNumber: "1",
+    layoutUrl: "/images/apartment/plans/13.png",
+    floorPlan: "",
+  },
+  {
+    name: "KLM-1-1-К-1-4-2-11",
+    number: "11",
+    floor: 4,
+    area: 88.3,
+    amount: 192494000,
+    price: 2180000,
+    amountDiscount: 192494000,
+    areaProject: 88.3,
+    type: "Flat",
+    status: "Free",
+    numberOfBedrooms: 2,
+    numberOfBathrooms: "",
+    pdf: "https://www.klimashkina711.ru/assets/img//pdf/KLM-1-1-К-1-3-2-4-floor-3-number-4.pdf",
+    ceilingHeightM: 3.4,
+    viewFromWindowTypology: null,
+    sectionNumber: "1",
+    layoutUrl: "/images/apartment/plans/4.png",
+    floorPlan: "",
+  },
+  {
+    name: "KLM-1-1-К-1-5-1-15",
+    number: "15",
+    floor: 5,
+    area: 95.7,
+    amount: 230637000,
+    price: 2410000,
+    amountDiscount: 230637000,
+    areaProject: 95.7,
+    type: "Flat",
+    status: "Free",
+    numberOfBedrooms: 2,
+    numberOfBathrooms: "",
+    pdf: "https://www.klimashkina711.ru/assets/img//pdf/KLM-1-1-К-1-4-1-5-floor-4-number-5.pdf",
+    ceilingHeightM: 3.4,
+    viewFromWindowTypology: null,
+    sectionNumber: "1",
+    layoutUrl: "/images/apartment/plans/5.png",
+    floorPlan: "",
+  },
+  {
+    name: "KLM-1-1-К-3-4-1-34",
+    number: "34",
+    floor: 4,
+    area: 128.6,
+    amount: 263630000,
+    price: 2050000,
+    amountDiscount: 263630000,
+    areaProject: 128.6,
+    type: "Flat",
+    status: "Free",
+    numberOfBedrooms: 3,
+    numberOfBathrooms: "",
+    pdf: "https://www.klimashkina711.ru/assets/img//pdf/KLM-1-1-К-3-3-1-31-floor-3-number-31.pdf",
+    ceilingHeightM: 3.4,
+    viewFromWindowTypology: null,
+    sectionNumber: "3",
+    layoutUrl: "/images/apartment/plans/31.png",
+    floorPlan: "",
+  },
+  {
+    name: "KLM-1-1-К-3-5-3-40",
+    number: "40",
+    floor: 5,
+    area: 162.4,
+    amount: 370272000,
+    price: 2280000,
+    amountDiscount: 370272000,
+    areaProject: 162.4,
+    type: "Flat",
+    status: "Free",
+    numberOfBedrooms: 3,
+    numberOfBathrooms: "",
+    pdf: "https://www.klimashkina711.ru/assets/img//pdf/KLM-1-1-К-3-2-3-29-floor-2-number-29.pdf",
+    ceilingHeightM: 3.4,
+    viewFromWindowTypology: null,
+    sectionNumber: "3",
+    layoutUrl: "/images/apartment/plans/29.png",
     floorPlan: "",
   },
 ];
