@@ -186,12 +186,56 @@ function HeartIcon() {
   );
 }
 
+// ----- Бейджи активных фильтров: «Название: значение ✕», клик снимает фильтр.
+// Один компонент на два места — в колонке фильтров (десктоп) и над таблицей
+// (мобайл); цвет чипа задаёт контейнер (см. .panelBadges / .badges в SCSS).
+function FilterBadges({
+  keys,
+  filters,
+  onRemove,
+  className,
+}: {
+  keys: FilterKey[];
+  filters: Filters;
+  onRemove: (k: FilterKey) => void;
+  className: string;
+}) {
+  if (!keys.length) return null;
+  return (
+    <div className={className}>
+      {keys.map((k) => {
+        // Подпись — из ПРИМЕНЁННОГО: бейдж описывает то, что сейчас в таблице.
+        const text = describe(k, filters);
+        return (
+          <button
+            key={k}
+            type="button"
+            className={styles.badge}
+            onClick={() => onRemove(k)}
+            aria-label={`Убрать фильтр: ${text}`}
+          >
+            <span className={styles.badgeLabel}>{text}</span>
+            <span className={styles.badgeX} aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none">
+                <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" strokeWidth="1.5" />
+              </svg>
+            </span>
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
 // ----- Панель фильтров (общая: десктоп-сайдбар и мобильный оверлей) -----
 // Панель правит ТОЛЬКО черновик; в таблицу он уходит по кнопке «Показать».
 function FilterPanel({
   draft,
   ranges,
   bedOptions,
+  badges,
+  applied,
+  onRemoveBadge,
   count,
   dirty,
   canReset,
@@ -205,6 +249,10 @@ function FilterPanel({
   /** Полные границы каталога — ползунки всегда показывают их целиком. */
   ranges: Ranges;
   bedOptions: number[];
+  /** Активные бейджи и применённые значения — рисуем их вверху колонки (десктоп). */
+  badges: FilterKey[];
+  applied: Filters;
+  onRemoveBadge: (k: FilterKey) => void;
   /** Сколько лотов подходит под ЧЕРНОВИК (предпросмотр для кнопки «Показать N»). */
   count: number;
   /** Черновик разошёлся с применённым — подсвечиваем кнопку применения. */
@@ -251,6 +299,16 @@ function FilterPanel({
       )}
 
       <div className={styles.filtersInner}>
+        {/* Бейджи — вверху колонки фильтров (макет 649-16295). На мобайле панель
+            это оверлей, поэтому там бейджи живут над таблицей — см. .panelBadges
+            @mobile display:none и второй FilterBadges в списке. */}
+        <FilterBadges
+          keys={badges}
+          filters={applied}
+          onRemove={onRemoveBadge}
+          className={styles.panelBadges}
+        />
+
         <div className={styles.bedGroup}>
           <p className={styles.bedLabel}>Количество спален</p>
           <div className={styles.tabs}>
@@ -520,6 +578,9 @@ export function ApartmentCatalog({ apartments }: { apartments: Apartment[] }) {
           draft={draft}
           ranges={ranges}
           bedOptions={bedOptions}
+          badges={badges}
+          applied={applied}
+          onRemoveBadge={removeFilter}
           count={previewCount}
           dirty={dirty}
           canReset={canReset}
@@ -531,35 +592,17 @@ export function ApartmentCatalog({ apartments }: { apartments: Apartment[] }) {
       </aside>
 
       <div className={styles.list}>
-        {/* Бейджи и шапка залипают ОДНИМ блоком: по отдельности top шапки
-            пришлось бы держать равным высоте бейджей, а она переменная —
-            бейджи переносятся на вторую строку. */}
+        {/* Бейджи и шапка залипают ОДНИМ блоком. На мобайле бейджи живут здесь,
+            над таблицей (панель — оверлей); на десктопе .badges скрыт, а бейджи
+            рисуются в колонке фильтров (см. .panelBadges). Высота бейджей
+            переменная — потому и залипают вместе с шапкой одним контейнером. */}
         <div className={styles.listHead}>
-          {badges.length > 0 && (
-            <div className={styles.badges}>
-              {badges.map((k) => {
-                // Подпись — из ПРИМЕНЁННОГО: бейдж описывает то, что сейчас в
-                // таблице. Правка в панели меняет его только после «Показать».
-                const text = describe(k, applied);
-                return (
-                  <button
-                    key={k}
-                    type="button"
-                    className={styles.badge}
-                    onClick={() => removeFilter(k)}
-                    aria-label={`Убрать фильтр: ${text}`}
-                  >
-                    <span className={styles.badgeLabel}>{text}</span>
-                    <span className={styles.badgeX} aria-hidden="true">
-                      <svg viewBox="0 0 24 24" fill="none">
-                        <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" strokeWidth="1.5" />
-                      </svg>
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
-          )}
+          <FilterBadges
+            keys={badges}
+            filters={applied}
+            onRemove={removeFilter}
+            className={styles.badges}
+          />
 
           <div className={styles.thead}>
             <span>Этаж</span>
@@ -616,6 +659,9 @@ export function ApartmentCatalog({ apartments }: { apartments: Apartment[] }) {
             draft={draft}
             ranges={ranges}
             bedOptions={bedOptions}
+            badges={badges}
+            applied={applied}
+            onRemoveBadge={removeFilter}
             count={previewCount}
             dirty={dirty}
             canReset={canReset}

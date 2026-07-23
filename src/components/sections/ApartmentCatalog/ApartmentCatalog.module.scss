@@ -110,8 +110,12 @@
   padding-block: fluid(8);
   color: var(--color-badge-light);
   font-family: var(--font-body);
-  font-size: fluid(20);
+  font-size: fluid(14); // вариант 649-16295 — уменьшенные шрифты колонки (было 20)
   line-height: normal;
+
+  @include mobile {
+    font-size: fluid(20); // мобайл-оверлей не входит в вариант — как было
+  }
 }
 
 .tabs {
@@ -164,32 +168,47 @@
   }
 }
 
+// «Сбросить фильтры» — подчёркнутая текст-ссылка под «Показать» (вариант
+// 649-16295), а не аутлайн-кнопка. Мобайл-оверлей не входит в вариант — там
+// оставляем прежнюю кнопку во всю ширину.
 .reset {
-  align-self: stretch; // full-width — стыкуется с «Показать N» выше
-  margin-top: fluid(12); // зазор от «Показать», под которой она теперь стоит
+  align-self: center;
+  margin-top: fluid(16); // зазор от «Показать» (макет: 12 между кнопкой и ссылкой)
   flex-shrink: 0;
-  height: fluid(48);
-  padding-inline: fluid(20);
+  padding: fluid(4) fluid(8);
   -webkit-text-stroke-width: fluid(0.3);
-  border: fluid(1) solid var(--color-badge-light);
-  background: transparent;
+  border: 0;
+  background: none;
   color: var(--color-badge-light);
   font-family: var(--font-display);
   font-size: fluid(16);
   line-height: 1;
   letter-spacing: 0.05em;
+  text-decoration: underline;
+  text-underline-offset: fluid(4);
   cursor: pointer;
-  transition:
-    background-color 0.45s ease,
-    color 0.45s ease;
+  transition: color 0.3s ease;
 
   &:hover {
-    background: var(--color-badge-light);
-    color: var(--color-brown-dark-2);
+    color: var(--color-brown-light);
   }
 
   @include mobile {
+    align-self: stretch;
+    margin-top: fluid(12);
+    height: fluid(48);
+    padding: 0 fluid(20);
+    border: fluid(1) solid var(--color-badge-light);
     font-size: fluid(14);
+    text-decoration: none;
+    transition:
+      background-color 0.45s ease,
+      color 0.45s ease;
+
+    &:hover {
+      background: var(--color-badge-light);
+      color: var(--color-brown-dark-2);
+    }
   }
 }
 
@@ -264,24 +283,38 @@
   background: var(--color-bg); // непрозрачный фон — строки уходят ПОД блок
 }
 
-// ----- Бейджи активных фильтров над списком (Figma 373-9580) -----
-// По бейджу на каждый применённый фильтр: «Название: значение ✕», клик = снять
-// именно его. Блок рендерится условно — ниже на нём висит соседский селектор.
+// ----- Бейджи активных фильтров -----
+// Вариант 649-16295: на десктопе бейджи переехали в колонку фильтров (.panelBadges),
+// поэтому блок над таблицей скрыт. На мобайле панель — оверлей, там бейджи живут
+// над таблицей (здесь).
 .badges {
-  display: flex;
-  flex-wrap: wrap;
-  gap: fluid(8);
-  padding-top: fluid(40); // на уровень с верхом панели фильтров
+  display: none;
 
   @include mobile {
-    padding: fluid(20) fluid(6) 0;
+    display: flex;
+    flex-wrap: wrap;
     gap: fluid(12); // пять бейджей подряд — при gap 8 палец промахивается
+    padding: fluid(20) fluid(6) 0;
   }
 }
 
-// Когда бейдж есть — шапка таблицы идёт сразу под ним (без своего верхнего 40).
-.badges + .thead {
-  padding-top: fluid(20);
+// Шапка идёт сразу под бейджами — только на мобайле, где блок виден.
+@include mobile {
+  .badges + .thead {
+    padding-top: fluid(20);
+  }
+}
+
+// Бейджи в колонке фильтров (десктоп, вариант 649-16295): чипы с переносом вверху
+// панели, над «Количество спален».
+.panelBadges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: fluid(8);
+
+  @include mobile {
+    display: none; // мобайл — бейджи над таблицей (.badges)
+  }
 }
 
 .badge {
@@ -313,6 +346,21 @@
     height: fluid(36);
     font-size: fluid(12);
     padding: 0 fluid(8) 0 fluid(12);
+  }
+}
+
+// Бейдж в тёмной колонке фильтров — светлый текст/рамка (вместо коричневого для
+// светлого фона над таблицей) и компактнее по высоте (макет: чип 24-28px).
+.panelBadges .badge {
+  height: fluid(28);
+  gap: fluid(6);
+  padding: 0 fluid(8) 0 fluid(12);
+  border-color: var(--color-brown-medium);
+  color: var(--color-badge-light);
+
+  &:hover {
+    color: var(--color-brown-light);
+    border-color: var(--color-brown-light);
   }
 }
 

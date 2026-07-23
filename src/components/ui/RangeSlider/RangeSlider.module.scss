@@ -11,7 +11,7 @@
   padding-block: fluid(8);
   color: var(--color-badge-light);
   font-family: var(--font-body);
-  font-size: fluid(20);
+  font-size: fluid(14); // вариант 649-16295 — уменьшенные подписи колонки (было 20)
   line-height: normal;
 
   sup {
@@ -20,7 +20,7 @@
   }
 
   @include mobile {
-    font-size: fluid(16);
+    font-size: fluid(16); // мобайл не входит в вариант — как было
   }
 }
 
