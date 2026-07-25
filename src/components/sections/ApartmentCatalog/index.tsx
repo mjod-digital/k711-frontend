@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { memo, useEffect, useMemo, useState } from "react";
+import { memo, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import { RangeSlider } from "@/components/ui/RangeSlider";
 import {
@@ -14,6 +14,10 @@ import {
 import { useFavorites, useHydrated } from "@/store/favorites";
 import { cn } from "@/lib/utils";
 import styles from "./ApartmentCatalog.module.scss";
+
+// useLayoutEffect на клиенте (FLIP-замер до отрисовки), useEffect на сервере —
+// иначе Next ругается на useLayoutEffect в SSR.
+const useIsoLayoutEffect = typeof window !== "undefined" ? useLayoutEffect : useEffect;
 
 // ----- URL ↔ фильтры: shareable-ссылка на отфильтрованный каталог -----
 // Пары [ключ фильтра, имя query-параметра]. Диапазон пишем в URL только если он
@@ -187,8 +191,36 @@ function HeartIcon() {
 }
 
 // ----- Бейджи активных фильтров: «Название: значение ✕», клик снимает фильтр.
-// Один компонент на два места — в колонке фильтров (десктоп) и над таблицей
-// (мобайл); цвет чипа задаёт контейнер (см. .panelBadges / .badges в SCSS).
+// Один чип. Подпись — из ПРИМЕНЁННОГО: бейдж описывает то, что сейчас в таблице.
+function BadgeChip({
+  filterKey,
+  filters,
+  onRemove,
+}: {
+  filterKey: FilterKey;
+  filters: Filters;
+  onRemove: (k: FilterKey) => void;
+}) {
+  const text = describe(filterKey, filters);
+  return (
+    <button
+      type="button"
+      className={styles.badge}
+      onClick={() => onRemove(filterKey)}
+      aria-label={`Убрать фильтр: ${text}`}
+    >
+      <span className={styles.badgeLabel}>{text}</span>
+      <span className={styles.badgeX} aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none">
+          <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" strokeWidth="1.5" />
+        </svg>
+      </span>
+    </button>
+  );
+}
+
+// Список бейджей над таблицей (мобайл). В колонке фильтров (десктоп) бейджи
+// рендерятся отдельно, в анимированной обёртке (см. FilterPanel / .panelBadges).
 function FilterBadges({
   keys,
   filters,
@@ -203,26 +235,9 @@ function FilterBadges({
   if (!keys.length) return null;
   return (
     <div className={className}>
-      {keys.map((k) => {
-        // Подпись — из ПРИМЕНЁННОГО: бейдж описывает то, что сейчас в таблице.
-        const text = describe(k, filters);
-        return (
-          <button
-            key={k}
-            type="button"
-            className={styles.badge}
-            onClick={() => onRemove(k)}
-            aria-label={`Убрать фильтр: ${text}`}
-          >
-            <span className={styles.badgeLabel}>{text}</span>
-            <span className={styles.badgeX} aria-hidden="true">
-              <svg viewBox="0 0 24 24" fill="none">
-                <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" strokeWidth="1.5" />
-              </svg>
-            </span>
-          </button>
-        );
-      })}
+      {keys.map((k) => (
+        <BadgeChip key={k} filterKey={k} filters={filters} onRemove={onRemove} />
+      ))}
     </div>
   );
 }
@@ -272,6 +287,34 @@ function FilterPanel({
   // и различаем, не заводя отдельного пропа.
   const idle = !dirty && !onClose;
 
+  // Плавная высота блока бейджей при ЛЮБОМ изменении (появление, снятие крестиком,
+  // смена количества). FLIP: замеряем новую высоту, мгновенно ставим прежнюю, затем
+  // плавно едем к новой — иначе снятие бейджа (особенно со схлопыванием ряда) резко
+  // сдвигает ползунки под ним. Скрытые экземпляры панели (мобайл/закрытый оверлей)
+  // имеют scrollHeight 0 — там эффект вхолостую.
+  const panelBadgesRef = useRef<HTMLDivElement>(null);
+  const prevBadgesH = useRef(0);
+  const badgesMounted = useRef(false);
+  useIsoLayoutEffect(() => {
+    const el = panelBadgesRef.current;
+    if (!el) return;
+    const next = el.scrollHeight;
+    const prev = prevBadgesH.current;
+    prevBadgesH.current = next;
+    if (!badgesMounted.current) {
+      badgesMounted.current = true; // на маунте не анимируем — бейджи просто есть
+      return;
+    }
+    // Анимируем ТОЛЬКО уменьшение (снятие бейджа) — там был резкий сдвиг ползунков.
+    // Появление бейджа — мгновенно, без плавности.
+    if (next >= prev) return;
+    el.style.transition = "none";
+    el.style.height = `${prev}px`;
+    void el.offsetHeight; // применить старт без анимации
+    el.style.transition = "height 0.3s ease";
+    el.style.height = `${next}px`;
+  }, [badges]);
+
   // Незаданный фильтр показываем как полный диапазон — ползунки «во всю ширину».
   const slider = (key: RangeKey, label: ReactNode) => (
     <RangeSlider
@@ -299,15 +342,25 @@ function FilterPanel({
       )}
 
       <div className={styles.filtersInner}>
-        {/* Бейджи — вверху колонки фильтров (макет 649-16295). На мобайле панель
-            это оверлей, поэтому там бейджи живут над таблицей — см. .panelBadges
-            @mobile display:none и второй FilterBadges в списке. */}
-        <FilterBadges
-          keys={badges}
-          filters={applied}
-          onRemove={onRemoveBadge}
-          className={styles.panelBadges}
-        />
+        {/* Бейджи — вверху колонки фильтров (макет 649-16295). Высоту блока плавно
+            анимирует FLIP-эффект выше (при появлении/снятии/смене количества), чтобы
+            ползунки под ним не прыгали. На мобайле панель — оверлей, поэтому там
+            бейджи живут над таблицей (.panelBadges @mobile display:none, второй
+            FilterBadges в списке). */}
+        <div
+          ref={panelBadgesRef}
+          className={cn(styles.panelBadges, badges.length > 0 && styles.panelBadgesOpen)}
+          onTransitionEnd={(e) => {
+            if (e.propertyName !== "height") return;
+            // Назад к auto — чтобы перенос строк оставался отзывчивым при ресайзе.
+            e.currentTarget.style.transition = "";
+            e.currentTarget.style.height = "";
+          }}
+        >
+          {badges.map((k) => (
+            <BadgeChip key={k} filterKey={k} filters={applied} onRemove={onRemoveBadge} />
+          ))}
+        </div>
 
         <div className={styles.bedGroup}>
           <p className={styles.bedLabel}>Количество спален</p>
@@ -459,12 +512,16 @@ export function ApartmentCatalog({ apartments }: { apartments: Apartment[] }) {
       ),
     );
 
+  // Вариант 2: вьюпорт НЕ двигаем. При смене фильтра результаты обновляются НА МЕСТЕ,
+  // под липкой панелью и шапкой. Якорь-скролл убран: он двигал экран поверх
+  // переверстки и выходил суетливо. Панель остаётся зафиксированной (min-height у
+  // .list), поэтому фильтры всегда на виду.
   const apply = () => setApplied(draft);
 
   // «Сбросить фильтры» — единственное исключение из «применяет только Показать»:
-  // чистит и черновик, и таблицу сразу. Это осознанный выбор: сброс — не подбор
-  // фильтра, а выход из него, и требовать после него ещё клик по «Показать» —
-  // лишний шаг. Та же функция обслуживает и аварийный сброс из пустого состояния.
+  // чистит и черновик, и таблицу сразу. Осознанно: сброс — не подбор фильтра, а
+  // выход из него, и требовать после него ещё клик по «Показать» — лишний шаг.
+  // Обслуживает и аварийный сброс из пустого состояния.
   const resetAll = () => {
     setDraft(EMPTY_FILTERS);
     setApplied(EMPTY_FILTERS);
