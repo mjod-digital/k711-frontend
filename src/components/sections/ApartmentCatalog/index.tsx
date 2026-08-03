@@ -292,6 +292,43 @@ function FilterPanel({
     />
   );
 
+  // «Резина по высоте» (десктоп-сайдбар): --fvw масштабирует контент по ШИРИНЕ, а колонка
+  // фильтров — по высоте вьюпорта; на широких, но низких окнах контент бывает ВЫШЕ колонки →
+  // теги/кнопки наезжали друг на друга и на ползунки. Масштабируем контент через zoom, чтобы
+  // всё всегда влезало. Только когда реально не влезает; оверлей (onClose) — своя прокрутка,
+  // не трогаем. Пересчёт: число тегов (deps), ресайз, смена брейкпоинта.
+  const scaleRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (onClose) return;
+    const content = scaleRef.current;
+    const box = content?.parentElement;
+    if (!content || !box) return;
+    const mq = window.matchMedia("(min-width: 768px)");
+    const fit = () => {
+      content.style.zoom = "1";
+      content.style.height = "auto";
+      if (mq.matches) {
+        const cs = getComputedStyle(box);
+        const avail = box.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom);
+        const natural = content.offsetHeight;
+        if (natural > avail && natural > 0) {
+          content.style.zoom = String(avail / natural); // высота остаётся natural, zoom ужимает до avail
+          return;
+        }
+      }
+      // влезает (или мобайл) — без масштаба: CSS height:100% + гибкий зазор (.actions margin-top:auto)
+      content.style.removeProperty("zoom");
+      content.style.removeProperty("height");
+    };
+    fit();
+    window.addEventListener("resize", fit);
+    mq.addEventListener("change", fit);
+    return () => {
+      window.removeEventListener("resize", fit);
+      mq.removeEventListener("change", fit);
+    };
+  }, [onClose, badges.length]);
+
   return (
     <div className={styles.filters}>
       {onClose && (
@@ -307,6 +344,7 @@ function FilterPanel({
         </button>
       )}
 
+      <div className={styles.filtersScale} ref={scaleRef}>
       <div className={styles.filtersInner}>
         <div className={styles.bedGroup}>
           <p className={styles.bedLabel}>Количество спален</p>
@@ -385,6 +423,7 @@ function FilterPanel({
             сбросить фильтры
           </button>
         )}
+      </div>
       </div>
     </div>
   );
