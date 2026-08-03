@@ -29,7 +29,7 @@ export async function generateMetadata(): Promise<Metadata> {
 // Слайдер ландшафтный (~1.62:1, ≥2200px). Все «свои» кадры архитектуры
 // (facade, residences, arch-facade, arch-choban) — портретные, не годятся.
 const FALLBACK_SLIDES: Slide[] = [
-  { src: "/images/slider-2.png", caption: "Медный фасад в свете заката" },
+  { src: "/images/slider-2.webp", caption: "Медный фасад в свете заката" },
 ];
 
 // Дефолтные абзацы intro (fallback-first: если CMS пусто — этот текст).
@@ -46,7 +46,7 @@ export default async function ArchitecturePage() {
   return (
     <>
       <PageHero
-        image={img(content, "hero_image", "/images/arch-hero.png")}
+        image={img(content, "hero_image", "/images/arch-hero.webp")}
         imageMobile={content.images.hero_image_mobile || undefined}
         imageAlt={txt(
           content,
@@ -115,7 +115,7 @@ export default async function ArchitecturePage() {
       <PhotoCards
         items={[
           {
-            src: "/images/arch-choban.png",
+            src: "/images/arch-choban.webp",
             alt: "Здание по проекту Сергея Чобана",
             position: "top",
             lines: [
@@ -124,7 +124,7 @@ export default async function ArchitecturePage() {
             ],
           },
           {
-            src: "/images/arch-facade.png",
+            src: "/images/arch-facade.webp",
             alt: "Исторический фасад 1905 года",
             position: "bottom",
             lines: [
@@ -136,7 +136,7 @@ export default async function ArchitecturePage() {
       />
 
       <Author
-        image={img(content, "author_image", "/images/arch-author.png")}
+        image={img(content, "author_image", "/images/arch-author.webp")}
         imageAlt={txt(content, "author_alt", "Архитектор Сергей Чобан")}
         paragraphs={
           authorP1

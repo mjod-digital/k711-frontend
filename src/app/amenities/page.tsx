@@ -28,8 +28,8 @@ export async function generateMetadata(): Promise<Metadata> {
 
 // amenities-slider-3 — портрет 1440×1804, в ландшафтный слайдер не годится.
 const FALLBACK_SLIDES: Slide[] = [
-  { src: "/images/amenities-slider-1.png", caption: "Красный салон с винной коллекцией" },
-  { src: "/images/amenities-slider-2.png", caption: "Панорамный фитнес в тёплых тонах" },
+  { src: "/images/amenities-slider-1.webp", caption: "Красный салон с винной коллекцией" },
+  { src: "/images/amenities-slider-2.webp", caption: "Панорамный фитнес в тёплых тонах" },
 ];
 
 const FALLBACK_INTRO: [string, string?] = [
@@ -53,7 +53,7 @@ export default async function AmenitiesPage() {
   return (
     <>
       <PageHero
-        image={img(content, "hero_image", "/images/amenities-hero.png")}
+        image={img(content, "hero_image", "/images/amenities-hero.webp")}
         imageMobile={content.images.hero_image_mobile || undefined}
         imageAlt={txt(
           content,
@@ -89,7 +89,7 @@ export default async function AmenitiesPage() {
       <Slider slides={slides} />
 
       <Terraces
-        image={img(content, "terraces_image", "/images/amenities-lobby.png")}
+        image={img(content, "terraces_image", "/images/amenities-lobby.webp")}
         imageAlt={txt(
           content,
           "terraces_alt",
@@ -118,7 +118,7 @@ export default async function AmenitiesPage() {
         scrim
         items={[
           {
-            src: "/images/amenities-spa.png",
+            src: "/images/amenities-spa.webp",
             alt: "SPA-кабинет клубного дома k 7/11",
             position: "top",
             lines: [
@@ -127,7 +127,7 @@ export default async function AmenitiesPage() {
             ],
           },
           {
-            src: "/images/amenities-fitness.png",
+            src: "/images/amenities-fitness.webp",
             alt: "Фитнес-зал для резидентов k 7/11",
             position: "bottom",
             lines: [

@@ -20,7 +20,7 @@ export default async function FavoritesPage() {
   return (
     <>
       <PageHero
-        image="/images/favorites-hero.png"
+        image="/images/favorites-hero.webp"
         imageAlt="Резиденции клубного дома k 7/11"
         breadcrumb={[
           { label: "…", href: "/", ariaLabel: "Главная" },

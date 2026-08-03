@@ -11,7 +11,7 @@ export function ScenarioImage() {
     <section className={styles.section}>
       <div className={styles.media}>
         <Image loading="eager"
-          src="/images/residences-scenario.png"
+          src="/images/residences-scenario.webp"
           alt="Интерьер резиденции — квартиры с вашим сценарием жизни"
           fill
           sizes="100vw"

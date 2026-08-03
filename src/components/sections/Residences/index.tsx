@@ -10,7 +10,7 @@ export function Residences() {
     <section className={styles.residences}>
       <div className={styles.media}>
         <Image
-          src="/images/residences.png"
+          src="/images/residences.webp"
           alt="Клубный дом k711 — 46 резиденций"
           fill
           sizes="(min-width: 768px) 49vw, 100vw"

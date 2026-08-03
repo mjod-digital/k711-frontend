@@ -47,40 +47,40 @@ const multiline = (s: string) =>
 // «Сервисы и забота». Красный салон переехал в «Жизнь внутри» (по макету),
 // amenities-hero убран — это hero-кадр своей страницы.
 const slidesSpa: Slide[] = [
-  { src: "/images/amenities-slider-2.png", caption: "Панорамный фитнес в тёплых тонах" },
+  { src: "/images/amenities-slider-2.webp", caption: "Панорамный фитнес в тёплых тонах" },
 ];
 
 // «Сад и благоустройство» — второй слайдер, сразу после блока
 // «Камерный скандинавский сад». Годных ландшафтов по саду всего два,
 // пока один слайд.
 const slidesGarden: Slide[] = [
-  { src: "/images/improvement-slider-courtyard.png", caption: "Приватный двор для семейных прогулок" },
-  { src: "/images/garden-courtyard.png", caption: "Прогулка с питомцем среди клёнов" },
+  { src: "/images/improvement-slider-courtyard.webp", caption: "Приватный двор для семейных прогулок" },
+  { src: "/images/garden-courtyard.webp", caption: "Прогулка с питомцем среди клёнов" },
 ];
 
 // «Жизнь внутри». Все интерьерные рендеры (gallery-*, residences-stat-*,
 // residences-space/hero) — портретные, в слайдер не годятся. Ландшафт один.
 const slidesInterior: Slide[] = [
-  { src: "/images/residences-scenario.png", caption: "Сценарий неспешного дня дома" },
-  { src: "/images/amenities-slider-1.png", caption: "Красный салон с винной коллекцией" },
-  { src: "/images/lounge-red.png", caption: "Красная гостиная с баром" },
+  { src: "/images/residences-scenario.webp", caption: "Сценарий неспешного дня дома" },
+  { src: "/images/amenities-slider-1.webp", caption: "Красный салон с винной коллекцией" },
+  { src: "/images/lounge-red.webp", caption: "Красная гостиная с баром" },
 ];
 
 // Лента-галерея перед Terraces (макет 373-10064): чередование широких/узких кадров.
 const galleryInteriors: GalleryItem[] = [
-  { src: "/images/gallery-living-1.png", caption: "Гостиная", variant: "wide" },
-  { src: "/images/gallery-living-2.png", caption: "Гостиная", variant: "narrow" },
-  { src: "/images/gallery-bedroom.png", caption: "Спальня", variant: "wide" },
-  { src: "/images/gallery-bath.png", caption: "Ванная", variant: "narrow" },
+  { src: "/images/gallery-living-1.webp", caption: "Гостиная", variant: "wide" },
+  { src: "/images/gallery-living-2.webp", caption: "Гостиная", variant: "narrow" },
+  { src: "/images/gallery-bedroom.webp", caption: "Спальня", variant: "wide" },
+  { src: "/images/gallery-bath.webp", caption: "Ванная", variant: "narrow" },
 ];
 
 // «Дом и окружение» — кадры из Figma (105:13636 / 13648 / 13635).
 // arch-hero.png и slider-1.png не берём: это те же два рендера (шире кроп /
 // без человека), рядом смотрелись бы дублями.
 const slidesViews: Slide[] = [
-  { src: "/images/facade-front.png", caption: "Историческая база и медный верх" },
-  { src: "/images/facade-corner.png", caption: "Медный объём над историческим карнизом" },
-  { src: "/images/terrace-lounge.png", caption: "Приватная терраса над историческим центром" },
+  { src: "/images/facade-front.webp", caption: "Историческая база и медный верх" },
+  { src: "/images/facade-corner.webp", caption: "Медный объём над историческим карнизом" },
+  { src: "/images/terrace-lounge.webp", caption: "Приватная терраса над историческим центром" },
 ];
 
 const spaceParagraphs: [string, string] = [
@@ -92,7 +92,7 @@ const spaceParagraphs: [string, string] = [
 // Каскадные заголовки шагов 2–3 остаются в коде (не выносятся в CMS).
 const showcaseSteps: ShowcaseStep[] = [
   {
-    image: "/images/residences.png",
+    image: "/images/residences.webp",
     imageAlt: "Клубный дом k711 — 46 резиденций",
     count: 46,
     word: "резиденций",
@@ -107,7 +107,7 @@ const showcaseSteps: ShowcaseStep[] = [
     ctaHref: "/apartments",
   },
   {
-    image: "/images/facade.png",
+    image: "/images/facade.webp",
     imageAlt: "Фрагмент фасада 1905 года",
     lines: [
       { parts: [{ text: "фрагмент" }] },
@@ -125,7 +125,7 @@ const showcaseSteps: ShowcaseStep[] = [
     ctaHref: "/apartments",
   },
   {
-    image: "/images/architect.png",
+    image: "/images/architect.webp",
     imageAlt: "Архитектор Сергей Чобан",
     lines: [
       { parts: [{ text: "проект" }] },
@@ -232,7 +232,7 @@ export default async function HomePage() {
         }
       />
 
-      <ImageHeading image="/images/garden.png" imageAlt="Камерный скандинавский сад k711">
+      <ImageHeading image="/images/garden.webp" imageAlt="Камерный скандинавский сад k711">
         <GardenHeading />
       </ImageHeading>
 
@@ -241,7 +241,7 @@ export default async function HomePage() {
       <CreamHeading />
 
       <ImageHeading
-        image="/images/lobby.png"
+        image="/images/lobby.webp"
         imageAlt="Лобби k711 с пятиметровыми потолками"
         overlay={0.2}
       >

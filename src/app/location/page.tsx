@@ -28,7 +28,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
 // location-slide-1 и -3 — всего 1016px по ширине (нужно ≥2200), мылят на retina.
 const FALLBACK_SLIDES: Slide[] = [
-  { src: "/images/location-slide-2.png", caption: "Музей русского импрессионизма" },
+  { src: "/images/location-slide-2.webp", caption: "Музей русского импрессионизма" },
 ];
 
 const FALLBACK_INTRO: [string, string] = [
@@ -43,7 +43,7 @@ export default async function LocationPage() {
   return (
     <>
       <PageHero
-        image={img(content, "hero_image", "/images/location-hero.png")}
+        image={img(content, "hero_image", "/images/location-hero.webp")}
         imageMobile={content.images.hero_image_mobile || undefined}
         imageAlt={txt(content, "hero_alt", "Клубный дом k 7/11 — локация в тихом центре Москвы")}
         breadcrumb={[
@@ -83,7 +83,7 @@ export default async function LocationPage() {
         className={styles.photoCards}
         items={[
           {
-            src: "/images/location-kremlin.png",
+            src: "/images/location-kremlin.webp",
             alt: "Вид на Кремль — в 10 минутах от k 7/11",
             position: "top",
             lines: [
@@ -98,7 +98,7 @@ export default async function LocationPage() {
             ],
           },
           {
-            src: "/images/location-patriarshie.png",
+            src: "/images/location-patriarshie.webp",
             alt: "Патриаршие пруды — в 5 минутах от k 7/11",
             position: "bottom",
             lines: [

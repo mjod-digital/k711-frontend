@@ -42,7 +42,7 @@ export function Scenario() {
       <div className={styles.media} ref={mediaRef}>
         <div className={styles.parallax} ref={parallaxRef}>
           <Image
-            src="/images/scenario.png"
+            src="/images/scenario.webp"
             alt="Интерьер клубного дома k711"
             fill
             sizes="100vw"

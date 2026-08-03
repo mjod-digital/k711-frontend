@@ -29,7 +29,7 @@ export async function generateMetadata(): Promise<Metadata> {
 // Кадры из Figma (105:13684 / 13686). Прежние slider-spa и photo-left —
 // портреты, в ландшафтный слайдер не годятся.
 const FALLBACK_SLIDES: Slide[] = [
-  { src: "/images/technologies/parking-hall.png", caption: "Свет и порядок под землёй" },
+  { src: "/images/technologies/parking-hall.webp", caption: "Свет и порядок под землёй" },
   { src: "/images/technologies/parking-bays.png", caption: "Место для каждого автомобиля" },
 ];
 
@@ -45,7 +45,7 @@ export default async function TechnologiesPage() {
   return (
     <>
       <PageHero
-        image={img(content, "hero_image", "/images/technologies/hero.png")}
+        image={img(content, "hero_image", "/images/technologies/hero.webp")}
         imageMobile={content.images.hero_image_mobile || undefined}
         imageAlt={txt(content, "hero_alt", "Передовые технологии клубного дома k 7/11")}
         breadcrumb={[
@@ -91,7 +91,7 @@ export default async function TechnologiesPage() {
         className={styles.stats}
         items={[
           {
-            src: "/images/technologies/parking.png",
+            src: "/images/technologies/parking.webp",
             objectPosition: "0% 50%",
             alt: "Паркинг с зарядками для электрокаров",
             place: "left",
@@ -105,7 +105,7 @@ export default async function TechnologiesPage() {
             ),
           },
           {
-            src: "/images/technologies/parking.png",
+            src: "/images/technologies/parking.webp",
             objectPosition: "50% 50%",
             alt: "Подземный паркинг на 55 машиномест",
             place: "right",
@@ -113,7 +113,7 @@ export default async function TechnologiesPage() {
             caption: "машиномест",
           },
           {
-            src: "/images/technologies/parking.png",
+            src: "/images/technologies/parking.webp",
             objectPosition: "100% 50%",
             alt: "Двухуровневый паркинг",
             place: "center",
@@ -128,8 +128,8 @@ export default async function TechnologiesPage() {
       <PhotoCards
         className={styles.photoCards}
         items={[
-          { src: "/images/technologies/photo-left.png", alt: "Инженерия дома", position: "top", lines: [] },
-          { src: "/images/technologies/photo-right.png", alt: "Комфорт резиденций", position: "bottom", lines: [] },
+          { src: "/images/technologies/photo-left.webp", alt: "Инженерия дома", position: "top", lines: [] },
+          { src: "/images/technologies/photo-right.webp", alt: "Комфорт резиденций", position: "bottom", lines: [] },
         ]}
       />
 

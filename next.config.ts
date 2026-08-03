@@ -48,8 +48,10 @@ const nextConfig: NextConfig = {
     loadPaths: [path.join(process.cwd(), "src/styles")],
   },
   images: {
-    // AVIF предпочтительнее WebP (~20-30% меньше для фото); WebP как фолбэк (PERF-008).
-    formats: ["image/avif", "image/webp"],
+    // Только WebP. AVIF даёт ~20-30% меньше, НО его кодирование на проде (2-CPU VM,
+    // on-demand оптимизация) отваливается по таймауту (>40с) на крупных слайдерных
+    // кадрах → картинки в слайдерах не грузились. WebP кодируется за 0.2-0.8с. (PERF-008)
+    formats: ["image/webp"],
     // Self-hosted origin: без длинного TTL оптимизатор пере-кодирует тяжёлые
     // исходники PNG слишком часто. 31 день.
     minimumCacheTTL: 2678400,

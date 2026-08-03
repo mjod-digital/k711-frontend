@@ -20,7 +20,7 @@ export default async function ApartmentsPage() {
   return (
     <>
       <PageHero
-        image="/images/apartments-hero.png"
+        image="/images/apartments-hero.webp"
         imageAlt="Каталог резиденций клубного дома k 7/11"
         breadcrumb={[
           { label: "…", href: "/", ariaLabel: "Главная" },

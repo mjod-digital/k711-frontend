@@ -146,7 +146,7 @@ export const CONTACT_FALLBACK: ContactContent = {
   address: "ул. Климашкина, 7/11",
   email: "private@mr-group.ru",
   office: {
-    image: "/images/contact-office.jpg",
+    image: "/images/contact-office.webp",
     alt: "Офис продаж клубного дома k 7/11",
   },
   meta: {
@@ -174,7 +174,7 @@ const EMPTY_PAGE: PageContent = {
 };
 
 // CMS/MODX иногда отдаёт локальный путь с задвоенным ведущим слэшем
-// («//images/hero.jpg») — next/image трактует «//» как protocol-relative URL и
+// («//images/hero.webp») — next/image трактует «//» как protocol-relative URL и
 // падает с «must be changed to an absolute URL». Схлопываем ведущие слэши в один;
 // абсолютные (http/https/data) и явно protocol-relative внешние URL не трогаем.
 function normalizeImagePath(v: string): string {

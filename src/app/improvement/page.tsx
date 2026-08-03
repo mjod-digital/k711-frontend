@@ -28,8 +28,8 @@ export async function generateMetadata(): Promise<Metadata> {
 
 // improvement-slider-greenery — портрет 1380×1440, в ландшафтный слайдер не годится.
 const FALLBACK_SLIDES: Slide[] = [
-  { src: "/images/improvement-slider-courtyard.png", caption: "Приватный двор для семейных прогулок" },
-  { src: "/images/improvement-slider-terrace.png", caption: "Терраса с видом на московские шпили" },
+  { src: "/images/improvement-slider-courtyard.webp", caption: "Приватный двор для семейных прогулок" },
+  { src: "/images/improvement-slider-terrace.webp", caption: "Терраса с видом на московские шпили" },
 ];
 
 export default async function ImprovementPage() {
@@ -43,7 +43,7 @@ export default async function ImprovementPage() {
   return (
     <>
       <PageHero
-        image={img(content, "hero_image", "/images/improvement-hero.png")}
+        image={img(content, "hero_image", "/images/improvement-hero.webp")}
         imageMobile={content.images.hero_image_mobile || undefined}
         imageAlt={txt(
           content,
@@ -80,7 +80,7 @@ export default async function ImprovementPage() {
         scrim="soft"
         items={[
           {
-            src: "/images/improvement-card-greenery.png",
+            src: "/images/improvement-card-greenery.webp",
             alt: "Озеленение двора, цветущее всесезонно",
             position: "bottom",
             lines: [
@@ -90,7 +90,7 @@ export default async function ImprovementPage() {
             ],
           },
           {
-            src: "/images/improvement-card-courtyard.png",
+            src: "/images/improvement-card-courtyard.webp",
             alt: "Приватный двор для резидентов клубного дома",
             position: "top",
             lines: [
@@ -102,12 +102,12 @@ export default async function ImprovementPage() {
       />
 
       <DesignBureau
-        image={img(content, "bureau_image", "/images/improvement-bureau.png")}
+        image={img(content, "bureau_image", "/images/improvement-bureau.webp")}
         imageAlt={txt(content, "bureau_alt", "Основатели дизайн-бюро L.BURO")}
         paragraph={bureauP1 || undefined}
       />
 
-      <ConnectBlock image="/images/improvement-connect.png" />
+      <ConnectBlock image="/images/improvement-connect.webp" />
     </>
   );
 }

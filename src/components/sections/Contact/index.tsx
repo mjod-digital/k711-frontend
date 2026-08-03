@@ -38,7 +38,7 @@ export function Contact() {
       <div className={styles.inner}>
         <div className={styles.media}>
           <Image
-            src="/images/contact.png"
+            src="/images/contact.webp"
             alt="Клубный дом k711"
             fill
             sizes="(min-width: 768px) 57vw, 100vw"

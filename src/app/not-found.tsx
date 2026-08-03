@@ -27,7 +27,7 @@ export default function NotFound() {
       <div className={styles.body}>
         <div className={styles.media}>
           <Image
-            src="/images/not-found-building.png"
+            src="/images/not-found-building.webp"
             alt="Фасад клубного дома k 7/11"
             fill
             sizes="(max-width: 767.98px) 100vw, 48vw"

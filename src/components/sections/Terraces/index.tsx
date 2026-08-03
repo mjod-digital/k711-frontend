@@ -37,7 +37,7 @@ type TerracesProps = {
 export function Terraces({
   desktopLines = DEFAULT_DESKTOP_LINES,
   mobileLines = DEFAULT_MOBILE_LINES,
-  image = "/images/terraces.png",
+  image = "/images/terraces.webp",
   imageAlt = "Фасад k711 — сохранённая историческая стена",
   paragraphs,
   rowPadTop,

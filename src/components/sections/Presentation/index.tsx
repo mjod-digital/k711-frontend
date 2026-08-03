@@ -25,7 +25,7 @@ export function Presentation({
     </>
   ),
   description = "Получите презентацию проекта и узнайте все детали о клубном доме: от уникальной концепции и локации до планировочных решений и премиальных сервисов.",
-  image = "/images/slider-2.png",
+  image = "/images/slider-2.webp",
   imageAlt = "Клубный дом k711",
   ctaLabel = "Скачать презентацию",
   ctaHref = "/pdf/klimashkina711.pdf",

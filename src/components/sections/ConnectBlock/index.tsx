@@ -17,7 +17,7 @@ type ConnectBlockProps = {
 // Переиспользуемый кросс-страничный блок; вся плашка — ссылка.
 export function ConnectBlock({
   href = "/apartments",
-  image = "/images/arch-connect.png",
+  image = "/images/arch-connect.webp",
   imageAlt = "",
   className,
 }: ConnectBlockProps) {

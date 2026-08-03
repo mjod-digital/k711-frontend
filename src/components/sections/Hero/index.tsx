@@ -12,7 +12,7 @@ import styles from "./Hero.module.scss";
 type HeroProps = { image?: string; imageMobile?: string; imageAlt?: string };
 
 export function Hero({
-  image = "/images/hero.jpg",
+  image = "/images/hero.webp",
   imageMobile,
   imageAlt = "Клубный дом k711 на тихой Пресне",
 }: HeroProps = {}) {
