@@ -3,10 +3,11 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useRef } from "react";
-import type { CSSProperties, ReactNode } from "react";
-import { Reveal } from "@/components/ui/Reveal";
+import type { ReactNode } from "react";
 import { useIsomorphicLayoutEffect } from "@/lib/useIsomorphicLayoutEffect";
 import styles from "./Author.module.scss";
+
+const clamp01 = (v: number) => Math.min(1, Math.max(0, v));
 
 type AuthorProps = {
   image: string;
@@ -71,33 +72,71 @@ export function Author({
     };
   }, []);
 
+  // Фото «разворачивается» сверху вниз — та же анимация, что у картинки Terraces
+  // (скролл-скраб --pu, окно у верхней кромки растёт вниз). Финал (--pu=1, default в
+  // SCSS) — фото показано целиком в текущей раскладке/по макету. Демпфирование (lerp)
+  // → плавно; reduced-motion → сразу финал. Старт разворота позже (puStart), как в Terraces.
+  useIsomorphicLayoutEffect(() => {
+    const el = sectionRef.current;
+    if (!el) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      el.style.setProperty("--pu", "1");
+      return;
+    }
+    const mqMobile = window.matchMedia("(max-width: 767.98px)");
+    let v = 0;
+    let raf = 0;
+    let ticking = false;
+    const tick = () => {
+      const rect = el.getBoundingClientRect();
+      const vh = window.innerHeight || 1;
+      const target = clamp01((vh - rect.top) / (vh * 0.9));
+      v += (target - v) * 0.085;
+      const settled = Math.abs(target - v) < 0.0004;
+      if (settled) v = target;
+      const puStart = mqMobile.matches ? 0.2 : 0.4;
+      el.style.setProperty("--pu", String(clamp01((v - puStart) / (1 - puStart))));
+      if (!settled) raf = requestAnimationFrame(tick);
+      else ticking = false;
+    };
+    const wake = () => {
+      if (!ticking) {
+        ticking = true;
+        raf = requestAnimationFrame(tick);
+      }
+    };
+    wake();
+    window.addEventListener("scroll", wake, { passive: true });
+    window.addEventListener("resize", wake);
+    return () => {
+      window.removeEventListener("scroll", wake);
+      window.removeEventListener("resize", wake);
+      cancelAnimationFrame(raf);
+      ticking = false;
+    };
+  }, []);
+
   return (
     <section ref={sectionRef} className={styles.section}>
       <div className={styles.stage}>
         <div className={styles.photo}>
-          <Image
-            src={image}
-            alt={imageAlt}
-            fill
-            sizes="(min-width: 768px) 40vw, 59vw"
-            className={styles.image}
-          />
+          <div className={styles.unfold}>
+            <Image
+              src={image}
+              alt={imageAlt}
+              fill
+              sizes="(min-width: 768px) 40vw, 59vw"
+              className={styles.image}
+            />
+          </div>
         </div>
 
-        <Reveal variant="lines" as="h2" className={styles.heading}>
-          <span className={`${styles.avtor} reveal-line`} style={{ "--i": 0 } as CSSProperties}>
-            Автор
-          </span>
-          <span className={`${styles.proekta} reveal-line`} style={{ "--i": 1 } as CSSProperties}>
-            проекта
-          </span>
-          <span className={`${styles.sergey} reveal-line`} style={{ "--i": 2 } as CSSProperties}>
-            Сергей
-          </span>
-          <span className={`${styles.choban} reveal-line`} style={{ "--i": 3 } as CSSProperties}>
-            Чобан
-          </span>
-        </Reveal>
+        <h2 className={styles.heading}>
+          <span className={styles.avtor}>Автор</span>
+          <span className={styles.proekta}>проекта</span>
+          <span className={styles.sergey}>Сергей</span>
+          <span className={styles.choban}>Чобан</span>
+        </h2>
       </div>
 
       <p ref={triggerRef} className={styles.col1}>{paragraphs[0]}</p>

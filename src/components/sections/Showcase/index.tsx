@@ -37,6 +37,10 @@ export function Showcase({ steps }: { steps: ShowcaseStep[] }) {
   const [mobile, setMobile] = useState(false);
   const [active, setActive] = useState(-1);
   const activeRef = useRef(-1);
+  // Счётчик первого шага стартует по РЕАЛЬНОЙ видимости числа (IO ниже), а не по
+  // scrub-прогрессу — иначе он либо крутится за кадром, либо ждёт лишнего доскролла.
+  const countRef = useRef<HTMLDivElement>(null);
+  const [countInView, setCountInView] = useState(false);
 
   // 1) Режим: пин (десктоп без reduced-motion) / стопка; + флаг мобайла.
   useIsomorphicLayoutEffect(() => {
@@ -53,6 +57,25 @@ export function Showcase({ steps }: { steps: ShowcaseStep[] }) {
       mqlDesktop.removeEventListener("change", decide);
       mqlReduce.removeEventListener("change", decide);
     };
+  }, []);
+
+  // Старт счётчика по видимости самого числа (.count). Порог −15% снизу: заводим, когда
+  // число вошло в кадр примерно на 15% высоты вьюпорта (уже видно), а не при первом
+  // пикселе у кромки и не заранее за кадром. Срабатывает один раз.
+  useIsomorphicLayoutEffect(() => {
+    const el = countRef.current;
+    if (!el) return;
+    const io = new IntersectionObserver(
+      ([entry], obs) => {
+        if (entry.isIntersecting) {
+          setCountInView(true);
+          obs.disconnect();
+        }
+      },
+      { root: null, rootMargin: "0px 0px -15% 0px", threshold: 0 },
+    );
+    io.observe(el);
+    return () => io.disconnect();
   }, []);
 
   // 2) Десктоп — scrubbed-прогресс по шагам. Мобайл — параллакс каждой картинки.
@@ -100,9 +123,9 @@ export function Showcase({ steps }: { steps: ShowcaseStep[] }) {
       // кнопкой — стабильное окно для клика (раньше cta появлялась лишь в 0.9..1.0
       // и тут же сменялась следующим шагом → «периодически не кликается»).
       const stage = (sub: number) => ({
-        title: clamp01((sub - 0.42) / 0.2), // заголовок — на середине картинки
-        desc: clamp01((sub - 0.54) / 0.16), // описание — после заголовка
-        cta: clamp01((sub - 0.62) / 0.12), // кнопка — когда картинка почти встала, и ДЕРЖИТСЯ до конца шага
+        title: clamp01((sub - 0.53) / 0.2), // заголовок — позже середины картинки
+        desc: clamp01((sub - 0.65) / 0.16), // описание — после заголовка
+        cta: clamp01((sub - 0.73) / 0.12), // кнопка — последней; держится до конца шага (окно 0.85..1.0)
       });
       const render = () => {
         let idx: number;
@@ -128,12 +151,12 @@ export function Showcase({ steps }: { steps: ShowcaseStep[] }) {
           let rCta: number;
           let ph = 0;
           if (idx === 0 && i === 0) {
-            // вход счётчика: счётчик → desc → cta, последовательно снизу-вверх;
-            // завершаем раньше (cta к e0≈0.83) → кнопка держится видимой до конца HOLD.
-            const e0 = clamp01(p / HOLD);
-            rTitle = clamp01(e0 / 0.5);
-            rDesc = clamp01((e0 - 0.4) / 0.25);
-            rCta = clamp01((e0 - 0.58) / 0.25);
+            // Первый шаг — текст виден СРАЗУ, как только секция появляется в кадре (без
+            // доскролла в пин). Раньше он проявлялся по e0=p/HOLD, а до пина (p=0) была
+            // видна только картинка. Счётчик всё равно крутится 0→N по active (CountUp).
+            rTitle = 1;
+            rDesc = 1;
+            rCta = 1;
           } else if (i === idx) {
             // активный шаг — постадийное появление
             const s = stage(sub);
@@ -321,11 +344,13 @@ export function Showcase({ steps }: { steps: ShowcaseStep[] }) {
             <div className={styles.content}>
               <div className={styles.textClip}>
                 {step.count != null ? (
-                  <div className={styles.count}>
+                  <div className={styles.count} ref={countRef}>
                     <CountUp
                       end={step.count}
                       className={styles.num}
-                      play={pinned ? i === active : undefined}
+                      // Пин: заводим, когда число реально попало в кадр (IO выше).
+                      // Не пин (мобайл): CountUp сам стартует по своему IO.
+                      play={pinned ? countInView : undefined}
                       // На мобайле счётчик 0→N не крутим — сразу конечное число.
                       animate={!mobile}
                     />

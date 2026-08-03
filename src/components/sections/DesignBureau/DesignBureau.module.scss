@@ -13,11 +13,13 @@
   @include contentMax;
   position: relative;
   aspect-ratio: 1440 / 901;
+  margin-top: fluid(120); // отступ от предыдущего блока (был вплотную)
 
   @include mobile {
     aspect-ratio: auto;
     display: flex;
     flex-direction: column;
+    margin-top: fluid(64);
   }
 }
 
@@ -56,9 +58,25 @@
   }
 }
 
+// Разворот фото СВЕРХУ ВНИЗ по --pu (та же анимация, что у картинки Terraces/Author):
+// окно у верхней кромки растёт вниз. Старт — виден верх ~21%, финал (--pu=1) — целиком.
+// default 1 → без JS/SSR и при reduced-motion фото показано полностью (текущий финал).
+.unfold {
+  position: absolute;
+  inset: 0;
+  clip-path: inset(0 0 calc((1 - var(--pu, 1)) * 79%) 0);
+  will-change: clip-path;
+}
+
 .image {
   object-fit: cover;
   object-position: center;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .unfold {
+    clip-path: none;
+  }
 }
 
 // ----- Скаттер-заголовок «Авторы концепции благоустройства L.BURO» -----
@@ -70,6 +88,12 @@
   font-size: var(--fs-h2); // 68 / 36
   line-height: 1;
   text-transform: uppercase;
+  // Заголовок «съезжает» вниз по --pu — как .headingWrap в Terraces / .heading в Author:
+  // старт приподнят, финал (--pu=1, default) на месте (текущая раскладка/макет; при
+  // reduced-motion/SSR --pu=1 → без сдвига). Клип-ревил строк (.reveal-line — дочерние
+  // span) идёт ПОВЕРХ трансформа контейнера и не конфликтует.
+  transform: translate3d(0, calc((var(--pu, 1) - 1) * fluid(82)), 0);
+  will-change: transform;
 
   span {
     position: absolute;
@@ -78,6 +102,7 @@
 
   @include mobile {
     font-size: fluid(28);
+    transform: translate3d(0, calc((var(--pu, 1) - 1) * fluid(40)), 0);
   }
 }
 

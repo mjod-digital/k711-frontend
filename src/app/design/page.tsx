@@ -29,8 +29,8 @@ export async function generateMetadata(): Promise<Metadata> {
 
 // design/pair-* — портреты 3277×4096, в ландшафтный слайдер не годятся.
 const FALLBACK_SLIDES: Slide[] = [
-  { src: "/images/design/slider-lobby.png", caption: "Утопленный лаунж, залитый солнцем" },
-  { src: "/images/design/lobby.png", caption: "Красный лаунж с характером" },
+  { src: "/images/design/slider-lobby.webp", caption: "Утопленный лаунж, залитый солнцем" },
+  { src: "/images/design/lobby.webp", caption: "Красный лаунж с характером" },
 ];
 
 const FALLBACK_INTRO: [string, string] = [
@@ -50,7 +50,7 @@ export default async function DesignPage() {
   return (
     <>
       <PageHero
-        image={img(content, "hero_image", "/images/design/hero.png")}
+        image={img(content, "hero_image", "/images/design/hero.webp")}
         imageMobile={content.images.hero_image_mobile || undefined}
         imageAlt={txt(content, "hero_alt", "Дизайнерское лобби клубного дома k 7/11")}
         breadcrumb={[
@@ -93,13 +93,13 @@ export default async function DesignPage() {
       <PhotoPair
         items={[
           {
-            src: "/images/design/pair-lobby.png",
+            src: "/images/design/pair-lobby.webp",
             alt: "Лобби клубного дома",
             position: "top",
             caption: "Лобби",
           },
           {
-            src: "/images/design/pair-soft-zone.png",
+            src: "/images/design/pair-soft-zone.webp",
             alt: "Мягкая зона лобби",
             position: "bottom",
             caption: "Мягкая зона",
@@ -109,7 +109,8 @@ export default async function DesignPage() {
 
       <SpaceSplit
         className={styles.spaceSplit}
-        image={img(content, "space_image", "/images/design/garden.png")}
+        animated
+        image={img(content, "space_image", "/images/design/garden.webp")}
         imageAlt={txt(content, "space_alt", "Концепция благоустройства от L.BURO")}
         headingLines={["концепция", "благо­устройства", "от EDXXKAT"]}
         paragraphs={[

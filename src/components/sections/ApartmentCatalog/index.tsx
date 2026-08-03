@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { memo, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { memo, useEffect, useMemo, useRef, useState } from "react";
+import type Lenis from "lenis";
 import type { ReactNode } from "react";
 import { RangeSlider } from "@/components/ui/RangeSlider";
 import {
@@ -14,10 +15,6 @@ import {
 import { useFavorites, useHydrated } from "@/store/favorites";
 import { cn } from "@/lib/utils";
 import styles from "./ApartmentCatalog.module.scss";
-
-// useLayoutEffect на клиенте (FLIP-замер до отрисовки), useEffect на сервере —
-// иначе Next ругается на useLayoutEffect в SSR.
-const useIsoLayoutEffect = typeof window !== "undefined" ? useLayoutEffect : useEffect;
 
 // ----- URL ↔ фильтры: shareable-ссылка на отфильтрованный каталог -----
 // Пары [ключ фильтра, имя query-параметра]. Диапазон пишем в URL только если он
@@ -74,6 +71,8 @@ const eqBeds = (a: number[], b: number[]) =>
   a.length === b.length && a.every((v, i) => v === b[i]);
 
 const hasAny = (f: Filters) => f.bedrooms.length > 0 || RANGE_KEYS.some((k) => f[k]);
+
+const clamp01 = (v: number) => Math.min(1, Math.max(0, v));
 
 const filtersEqual = (a: Filters, b: Filters) =>
   eqBeds(a.bedrooms, b.bedrooms) && RANGE_KEYS.every((k) => eqRange(a[k], b[k]));
@@ -152,19 +151,14 @@ function parseFiltersFromQuery(search: string, r: Ranges, beds: number[]): Filte
 }
 
 // ----- Бейджи активных фильтров -----
+// Подпись тега = подпись ползунка, с единицей В СКОБКАХ (макет 665-16449):
+// «Площадь (м²): 112–350», «Стоимость (млн руб.): 116–253». Так тег читается теми
+// же словами и цифрами, что и слайдер; диапазон — без хвоста-единицы.
 const RANGE_LABELS: Record<RangeKey, string> = {
   floor: "Этаж",
-  area: "Площадь",
-  pricePerM2: "Цена за м²",
-  cost: "Стоимость",
-};
-// Единицы — доменные (тыс/млн), как на подписях ползунков, а не как в ячейках
-// таблицы (×1000 / ×1e6): бейдж должен читаться теми же цифрами, что и слайдер.
-const RANGE_UNITS: Record<RangeKey, string> = {
-  floor: "",
-  area: " м²",
-  pricePerM2: " тыс ₽",
-  cost: " млн ₽",
+  area: "Площадь (м²)",
+  pricePerM2: "Цена за 1 м² (тыс руб.)",
+  cost: "Стоимость (млн руб.)",
 };
 
 // Один источник текста и для подписи, и для aria-label — чтобы доступное имя
@@ -175,7 +169,7 @@ const describe = (k: FilterKey, f: Filters): string => {
   if (!r) return RANGE_LABELS[k];
   const [lo, hi] = r;
   const v = lo === hi ? ru(lo) : `${ru(lo)}–${ru(hi)}`; // en dash
-  return `${RANGE_LABELS[k]}: ${v}${RANGE_UNITS[k]}`;
+  return `${RANGE_LABELS[k]}: ${v}`;
 };
 
 function HeartIcon() {
@@ -287,34 +281,6 @@ function FilterPanel({
   // и различаем, не заводя отдельного пропа.
   const idle = !dirty && !onClose;
 
-  // Плавная высота блока бейджей при ЛЮБОМ изменении (появление, снятие крестиком,
-  // смена количества). FLIP: замеряем новую высоту, мгновенно ставим прежнюю, затем
-  // плавно едем к новой — иначе снятие бейджа (особенно со схлопыванием ряда) резко
-  // сдвигает ползунки под ним. Скрытые экземпляры панели (мобайл/закрытый оверлей)
-  // имеют scrollHeight 0 — там эффект вхолостую.
-  const panelBadgesRef = useRef<HTMLDivElement>(null);
-  const prevBadgesH = useRef(0);
-  const badgesMounted = useRef(false);
-  useIsoLayoutEffect(() => {
-    const el = panelBadgesRef.current;
-    if (!el) return;
-    const next = el.scrollHeight;
-    const prev = prevBadgesH.current;
-    prevBadgesH.current = next;
-    if (!badgesMounted.current) {
-      badgesMounted.current = true; // на маунте не анимируем — бейджи просто есть
-      return;
-    }
-    // Анимируем ТОЛЬКО уменьшение (снятие бейджа) — там был резкий сдвиг ползунков.
-    // Появление бейджа — мгновенно, без плавности.
-    if (next >= prev) return;
-    el.style.transition = "none";
-    el.style.height = `${prev}px`;
-    void el.offsetHeight; // применить старт без анимации
-    el.style.transition = "height 0.3s ease";
-    el.style.height = `${next}px`;
-  }, [badges]);
-
   // Незаданный фильтр показываем как полный диапазон — ползунки «во всю ширину».
   const slider = (key: RangeKey, label: ReactNode) => (
     <RangeSlider
@@ -342,26 +308,6 @@ function FilterPanel({
       )}
 
       <div className={styles.filtersInner}>
-        {/* Бейджи — вверху колонки фильтров (макет 649-16295). Высоту блока плавно
-            анимирует FLIP-эффект выше (при появлении/снятии/смене количества), чтобы
-            ползунки под ним не прыгали. На мобайле панель — оверлей, поэтому там
-            бейджи живут над таблицей (.panelBadges @mobile display:none, второй
-            FilterBadges в списке). */}
-        <div
-          ref={panelBadgesRef}
-          className={cn(styles.panelBadges, badges.length > 0 && styles.panelBadgesOpen)}
-          onTransitionEnd={(e) => {
-            if (e.propertyName !== "height") return;
-            // Назад к auto — чтобы перенос строк оставался отзывчивым при ресайзе.
-            e.currentTarget.style.transition = "";
-            e.currentTarget.style.height = "";
-          }}
-        >
-          {badges.map((k) => (
-            <BadgeChip key={k} filterKey={k} filters={applied} onRemove={onRemoveBadge} />
-          ))}
-        </div>
-
         <div className={styles.bedGroup}>
           <p className={styles.bedLabel}>Количество спален</p>
           <div className={styles.tabs}>
@@ -398,9 +344,21 @@ function FilterPanel({
         {slider("cost", "Стоимость (млн руб.)")}
       </div>
 
-      {/* Блок кнопок — footer ВНЕ прокручиваемого .filtersInner. Так «Показать»
-          всегда виден, а на низком экране прокручиваются ползунки, а не кнопки,
-          и ничто не наезжает на значения последнего ползунка. */}
+      {/* Теги — в гибком зазоре между фильтрами и кнопками (макет 665-16449).
+          .panelBadges { margin-top: auto } прижимает теги вместе с кнопками к низу
+          панели, а воздушный зазор над тегами поглощает их появление/снятие —
+          ползунки сверху и кнопки снизу не двигаются, поэтому FLIP-анимация высоты
+          больше не нужна. На мобайле панель — оверлей: .panelBadges display:none,
+          теги живут над таблицей (второй FilterBadges в списке). */}
+      <div className={styles.panelBadges}>
+        {badges.map((k) => (
+          <BadgeChip key={k} filterKey={k} filters={applied} onRemove={onRemoveBadge} />
+        ))}
+      </div>
+
+      {/* Блок кнопок прибит к низу панели (footer ВНЕ прокручиваемого .filtersInner):
+          «Показать» всегда виден, а на низком окне прокручиваются ползунки, а не
+          кнопки. */}
       <div className={styles.actions}>
         {/* Три состояния. Нулевое — комбинация невозможна, гасим (иначе кнопка
             предлагала бы «Показать 0 резиденций» и опустошила бы таблицу).
@@ -512,11 +470,145 @@ export function ApartmentCatalog({ apartments }: { apartments: Apartment[] }) {
       ),
     );
 
-  // Вариант 2: вьюпорт НЕ двигаем. При смене фильтра результаты обновляются НА МЕСТЕ,
-  // под липкой панелью и шапкой. Якорь-скролл убран: он двигал экран поверх
-  // переверстки и выходил суетливо. Панель остаётся зафиксированной (min-height у
-  // .list), поэтому фильтры всегда на виду.
-  const apply = () => setApplied(draft);
+  const sectionRef = useRef<HTMLElement>(null);
+  const listScrollRef = useRef<HTMLDivElement>(null);
+  const tbodyRef = useRef<HTMLDivElement>(null);
+  const thumbRef = useRef<HTMLDivElement>(null);
+
+  // «Показать» применяет черновик. Список ведётся прокруткой страницы (пин, см. эффект
+  // ниже), поэтому «в начало» = вернуть страницу к старту пина (p=0): новую выборку видно
+  // сверху, секция остаётся зафиксированной. Мобайл/reduced-motion (нет пина) — no-op.
+  const apply = () => {
+    setApplied(draft);
+    const sec = sectionRef.current;
+    if (!sec || !window.matchMedia("(min-width: 768px)").matches) return;
+    const header = document.querySelector("header")?.getBoundingClientRect().height ?? 0;
+    const pinStartY = Math.max(0, sec.getBoundingClientRect().top + window.scrollY - header);
+    const g = (window as Window & { __lenis?: Lenis }).__lenis;
+    if (g) g.scrollTo(pinStartY, { immediate: true });
+    else window.scrollTo(0, pinStartY);
+  };
+
+  // Пин секции + скролл списка от прокрутки страницы (десктоп) — как в галерее/Showcase.
+  // .catalog — высокая обёртка (высоту ставит JS = экран−хедер + overflow списка), внутри
+  // .catalogSticky липнет вверху (класс .pinned). Прогресс пина p (0→1) по rect.top ведёт
+  // .list.scrollTop; дочитал список (p=1) — пин отпускает, страница идёт к футеру. Инерцию
+  // даёт глобальный Lenis (страница). Кастомный скроллбар отражает p и тянется мышью
+  // (двигает страницу). Мобайл/reduced-motion — без пина: список скроллится сам (см. SCSS).
+  useEffect(() => {
+    const section = sectionRef.current;
+    const list = listScrollRef.current;
+    const thumb = thumbRef.current;
+    const track = thumb?.parentElement ?? null;
+    if (!section || !list) return;
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const mqDesktop = window.matchMedia("(min-width: 768px)");
+    const active = () => mqDesktop.matches && !reduce.matches;
+
+    let header = 0;
+    let overflow = 0;
+    let headH = 0;
+    let trackH = 0;
+    const measure = () => {
+      if (!active()) {
+        section.style.height = "";
+        section.classList.remove(styles.pinned);
+        overflow = 0;
+        if (track) track.style.opacity = "0";
+        return;
+      }
+      section.classList.add(styles.pinned);
+      // Высота хедера = резолвнутое значение var(--header-h) (то же, что CSS-пин top).
+      // getPropertyValue вернул бы fluid()-calc (не число), поэтому меряем сам <header>.
+      header = document.querySelector("header")?.getBoundingClientRect().height ?? 0;
+      overflow = Math.max(0, list.scrollHeight - list.clientHeight);
+      // высокая обёртка: экран (минус хедер) + ход пина = overflow списка
+      section.style.height = `${window.innerHeight - header + overflow}px`;
+      const head = list.querySelector<HTMLElement>(`.${styles.listHead}`);
+      headH = head ? head.offsetHeight : 0;
+      if (track) {
+        track.style.top = `${headH}px`; // трек под шапкой — скроллбар только у строк
+        trackH = track.clientHeight;
+      }
+    };
+    const tick = () => {
+      if (!active()) return;
+      if (overflow <= 0) {
+        list.scrollTop = 0;
+        if (track) track.style.opacity = "0";
+        return;
+      }
+      // p: rect.top идёт от header (p=0, пин начался) до header−overflow (p=1, дочитан)
+      const p = clamp01((header - section.getBoundingClientRect().top) / overflow);
+      list.scrollTop = p * overflow;
+      if (track && thumb) {
+        track.style.opacity = "1";
+        const thumbH = Math.max(24, ((list.clientHeight - headH) / (list.scrollHeight - headH)) * trackH);
+        thumb.style.height = `${thumbH}px`;
+        thumb.style.transform = `translateY(${p * (trackH - thumbH)}px)`;
+      }
+    };
+    const refresh = () => {
+      measure();
+      tick();
+    };
+
+    refresh();
+    window.addEventListener("scroll", tick, { passive: true });
+    window.addEventListener("resize", refresh);
+    mqDesktop.addEventListener("change", refresh);
+    reduce.addEventListener("change", refresh);
+    const ro = new ResizeObserver(refresh);
+    ro.observe(list);
+    if (tbodyRef.current) ro.observe(tbodyRef.current);
+
+    // Перетаскивание thumb: позиция курсора в треке → доля пина → скролл СТРАНИЦЫ (список
+    // ведётся страницей). Через глобальный Lenis (immediate).
+    let dragging = false;
+    const applyDrag = (clientY: number) => {
+      if (!track || !thumb || overflow <= 0) return;
+      const r = track.getBoundingClientRect();
+      const thumbH = thumb.offsetHeight;
+      const frac = clamp01((clientY - r.top - thumbH / 2) / Math.max(1, r.height - thumbH));
+      const pinStartY = section.getBoundingClientRect().top + window.scrollY - header;
+      const targetY = Math.max(0, pinStartY + frac * overflow);
+      const g = (window as Window & { __lenis?: Lenis }).__lenis;
+      if (g) g.scrollTo(targetY, { immediate: true });
+      else window.scrollTo(0, targetY);
+    };
+    const onMove = (e: PointerEvent) => {
+      if (dragging) applyDrag(e.clientY);
+    };
+    const onUp = (e: PointerEvent) => {
+      dragging = false;
+      try {
+        thumb?.releasePointerCapture(e.pointerId);
+      } catch {}
+      window.removeEventListener("pointermove", onMove);
+      window.removeEventListener("pointerup", onUp);
+    };
+    const onDown = (e: PointerEvent) => {
+      dragging = true;
+      thumb?.setPointerCapture(e.pointerId);
+      window.addEventListener("pointermove", onMove);
+      window.addEventListener("pointerup", onUp);
+      applyDrag(e.clientY);
+      e.preventDefault();
+    };
+    thumb?.addEventListener("pointerdown", onDown);
+
+    return () => {
+      window.removeEventListener("scroll", tick);
+      window.removeEventListener("resize", refresh);
+      mqDesktop.removeEventListener("change", refresh);
+      reduce.removeEventListener("change", refresh);
+      ro.disconnect();
+      thumb?.removeEventListener("pointerdown", onDown);
+      window.removeEventListener("pointermove", onMove);
+      window.removeEventListener("pointerup", onUp);
+      section.style.height = "";
+    };
+  }, []);
 
   // «Сбросить фильтры» — единственное исключение из «применяет только Показать»:
   // чистит и черновик, и таблицу сразу. Осознанно: сброс — не подбор фильтра, а
@@ -601,10 +693,12 @@ export function ApartmentCatalog({ apartments }: { apartments: Apartment[] }) {
     [apartments, draft],
   );
   const dirty = !filtersEqual(draft, applied);
-  // Сброс правит только черновик — значит и показываем его ровно тогда, когда в
-  // черновике что-то есть. Сняли все бейджи крестиками → черновик пуст → сбрасывать
-  // нечего, кнопки нет. Таблицу при этом вернёт «Показать», как и всё остальное.
-  const canReset = hasAny(draft);
+  // «Сбросить фильтры» чистит И черновик, И применённое (resetAll), поэтому показываем
+  // кнопку, когда есть что сбрасывать в ЛЮБОМ из них. Иначе баг: применили фильтр (кнопка
+  // появилась) → ведём ползунок обратно к границам → черновик становится пуст → кнопка
+  // исчезала, хотя таблица ещё отфильтрована по applied. Сняли все бейджи крестиками (✕
+  // чистит оба) → оба пусты → сбрасывать нечего, кнопки нет.
+  const canReset = hasAny(draft) || hasAny(applied);
 
   // Мемоизируем сами элементы строк: applied не меняется, пока тянут ползунок,
   // а родитель при этом перерисовывается на каждый кадр.
@@ -616,20 +710,21 @@ export function ApartmentCatalog({ apartments }: { apartments: Apartment[] }) {
     [rows, favSet, hydrated, toggleFav],
   );
 
-  // Бейдж живёт на ПЕРЕСЕЧЕНИИ применённого и черновика, и это не перестраховка:
-  // по одному applied он не исчезал бы по крестику (тот правит только черновик) и
-  // клик выглядел бы промахом; по одному draft — появлялся бы сразу при выборе в
-  // панели, до всякого применения. Пересечение даёт и то, и другое: появляется
-  // только после «Показать», исчезает сразу по крестику, а таблица ждёт кнопку.
+  // Бейдж описывает ПРИМЕНЁННЫЙ фильтр → показываем строго по applied[k]. Появляется
+  // только после «Показать» (applied меняется лишь там), а крестик (removeFilter чистит
+  // и черновик, и applied) сразу его убирает. На draft НЕ завязываемся: иначе (а) бейдж
+  // всплывал бы до применения при выборе в панели и (б) исчезал бы при возврате ползунка
+  // к границам (draft[k] обнулился), хотя фильтр в таблице ещё активен — как с кнопкой сброса.
   const badges = useMemo<FilterKey[]>(() => {
     const out: FilterKey[] = [];
-    if (applied.bedrooms.length && draft.bedrooms.length) out.push("bedrooms");
-    for (const k of RANGE_KEYS) if (applied[k] && draft[k]) out.push(k);
+    if (applied.bedrooms.length) out.push("bedrooms");
+    for (const k of RANGE_KEYS) if (applied[k]) out.push(k);
     return out;
-  }, [applied, draft]);
+  }, [applied]);
 
   return (
-    <section className={styles.catalog}>
+    <section ref={sectionRef} className={styles.catalog}>
+      <div className={styles.catalogSticky}>
       <aside className={styles.sidebar}>
         <FilterPanel
           draft={draft}
@@ -648,7 +743,8 @@ export function ApartmentCatalog({ apartments }: { apartments: Apartment[] }) {
         />
       </aside>
 
-      <div className={styles.list}>
+      <div className={styles.listPane}>
+        <div className={styles.list} ref={listScrollRef}>
         {/* Бейджи и шапка залипают ОДНИМ блоком. На мобайле бейджи живут здесь,
             над таблицей (панель — оверлей); на десктопе .badges скрыт, а бейджи
             рисуются в колонке фильтров (см. .panelBadges). Высота бейджей
@@ -671,7 +767,7 @@ export function ApartmentCatalog({ apartments }: { apartments: Apartment[] }) {
           </div>
         </div>
 
-        <div className={styles.tbody}>
+        <div className={styles.tbody} ref={tbodyRef}>
           {body}
           {rows.length === 0 && (
             <p className={styles.empty}>
@@ -695,6 +791,13 @@ export function ApartmentCatalog({ apartments }: { apartments: Apartment[] }) {
             </button>
           </div>
         )}
+        </div>
+
+        {/* Кастомный скроллбар списка (десктоп) — трек у правого края, под шапкой; thumb двигает JS. */}
+        <div className={styles.scrollTrack} aria-hidden="true">
+          <div className={styles.scrollThumb} ref={thumbRef} />
+        </div>
+      </div>
       </div>
 
       <div

@@ -3,11 +3,12 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useRef } from "react";
-import type { CSSProperties, ReactNode } from "react";
-import { Reveal } from "@/components/ui/Reveal";
+import type { ReactNode } from "react";
 import { useIsomorphicLayoutEffect } from "@/lib/useIsomorphicLayoutEffect";
 import { cn } from "@/lib/utils";
 import styles from "./SpaceSplit.module.scss";
+
+const clamp01 = (v: number) => Math.min(1, Math.max(0, v));
 
 type SpaceSplitProps = {
   image: string;
@@ -19,6 +20,9 @@ type SpaceSplitProps = {
   /** Подпись CTA-кнопки под вторым абзацем. */
   ctaLabel?: string;
   ctaHref?: string;
+  /** Скролл-анимация как в Terraces/Author (разворот фото + съезд заголовка).
+   *  Включается точечно (только /design), иначе секция статична, как раньше. */
+  animated?: boolean;
   /** Постраничные переопределения (напр. --ss-mt / --ss-heading-top на design). */
   className?: string;
 };
@@ -32,6 +36,7 @@ export function SpaceSplit({
   paragraphs,
   ctaLabel = "выбрать резиденцию",
   ctaHref = "/apartments",
+  animated = false,
   className,
 }: SpaceSplitProps) {
   const sectionRef = useRef<HTMLElement>(null);
@@ -69,31 +74,74 @@ export function SpaceSplit({
     };
   }, []);
 
+  // Разворот фото сверху вниз + съезд заголовка по --pu — как в Terraces/Author. Только
+  // когда animated (на /design); иначе секция статична (residences не трогаем). Скролл-скраб
+  // ставит --pu (0→1) на секцию с lerp-демпфированием; финал (--pu=1, default в SCSS) =
+  // текущая раскладка. reduced-motion → сразу финал. Старт разворота позже (puStart).
+  useIsomorphicLayoutEffect(() => {
+    if (!animated) return;
+    const el = sectionRef.current;
+    if (!el) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      el.style.setProperty("--pu", "1");
+      return;
+    }
+    const mqMobile = window.matchMedia("(max-width: 767.98px)");
+    let v = 0;
+    let raf = 0;
+    let ticking = false;
+    const tick = () => {
+      const rect = el.getBoundingClientRect();
+      const vh = window.innerHeight || 1;
+      const target = clamp01((vh - rect.top) / (vh * 0.9));
+      v += (target - v) * 0.085;
+      const settled = Math.abs(target - v) < 0.0004;
+      if (settled) v = target;
+      const puStart = mqMobile.matches ? 0.2 : 0.4;
+      el.style.setProperty("--pu", String(clamp01((v - puStart) / (1 - puStart))));
+      if (!settled) raf = requestAnimationFrame(tick);
+      else ticking = false;
+    };
+    const wake = () => {
+      if (!ticking) {
+        ticking = true;
+        raf = requestAnimationFrame(tick);
+      }
+    };
+    wake();
+    window.addEventListener("scroll", wake, { passive: true });
+    window.addEventListener("resize", wake);
+    return () => {
+      window.removeEventListener("scroll", wake);
+      window.removeEventListener("resize", wake);
+      cancelAnimationFrame(raf);
+      ticking = false;
+    };
+  }, [animated]);
+
   return (
-    <section ref={sectionRef} className={cn(styles.section, className)}>
-      <Reveal variant="lines" className={styles.headingWrap}>
+    <section ref={sectionRef} className={cn(styles.section, animated && styles.animated, className)}>
+      <div className={styles.headingWrap}>
         <h2 className={styles.heading}>
           {headingLines.map((line, i) => (
-            <span
-              key={i}
-              className={`${styles.hLine} reveal-line`}
-              style={{ "--i": i } as CSSProperties}
-            >
+            <span key={i} className={styles.hLine}>
               {line}
             </span>
           ))}
         </h2>
-      </Reveal>
+      </div>
 
       <div className={styles.content}>
         <div className={styles.media}>
-          <Image
-            src={image}
-            alt={imageAlt}
-            fill
-            sizes="(min-width: 768px) 36vw, 90vw"
-            className={styles.image}
-          />
+          <div className={styles.unfold}>
+            <Image
+              src={image}
+              alt={imageAlt}
+              fill
+              sizes="(min-width: 768px) 36vw, 90vw"
+              className={styles.image}
+            />
+          </div>
         </div>
 
         <div className={styles.body}>

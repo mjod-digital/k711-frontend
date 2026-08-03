@@ -92,9 +92,44 @@
   }
 }
 
+// Обёртка картинки. Без .animated — простой контейнер (фото статично, как на
+// residences). С .animated (только /design) — разворот СВЕРХУ ВНИЗ по --pu, как в
+// Terraces/Author: окно у верхней кромки растёт вниз, финал (--pu=1) — целиком.
+.unfold {
+  position: absolute;
+  inset: 0;
+}
+
 .image {
   object-fit: cover;
   object-position: center;
+}
+
+// Скролл-анимация (включается пропом animated → класс .animated; только /design).
+.animated {
+  .unfold {
+    clip-path: inset(0 0 calc((1 - var(--pu, 1)) * 79%) 0);
+    will-change: clip-path;
+  }
+
+  // Заголовок «съезжает» вниз по --pu (как .headingWrap в Terraces): старт приподнят,
+  // финал (--pu=1, default) — на месте (текущая раскладка/макет). .reveal-line клип строк
+  // идёт поверх и не конфликтует (он на дочерних span).
+  .headingWrap {
+    transform: translate3d(0, calc((var(--pu, 1) - 1) * fluid(82)), 0);
+    will-change: transform;
+
+    @include mobile {
+      transform: translate3d(0, calc((var(--pu, 1) - 1) * fluid(40)), 0);
+    }
+  }
+}
+
+// reduced-motion: JS и так ставит --pu=1 (финал), но на всякий случай снимаем клип.
+@media (prefers-reduced-motion: reduce) {
+  .animated .unfold {
+    clip-path: none;
+  }
 }
 
 // Правая колонка: два абзаца в ряд (p1 + p2/CTA), сдвинута вниз и вправо.

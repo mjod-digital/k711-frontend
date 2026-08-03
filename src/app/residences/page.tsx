@@ -31,7 +31,7 @@ export async function generateMetadata(): Promise<Metadata> {
 // портретные ~0.79. Годного ландшафтного кадра под слайдер на странице нет.
 // Временно ставим один ландшафт; нужны нормальные слайдер-рендеры от клиента.
 const FALLBACK_SLIDES: Slide[] = [
-  { src: "/images/apartments-hero.png", caption: "Дубовый холл с почтовыми ячейками" },
+  { src: "/images/apartments-hero.webp", caption: "Дубовый холл с почтовыми ячейками" },
 ];
 
 const FALLBACK_SPACE: [string, string] = [
@@ -47,7 +47,7 @@ export default async function ResidencesPage() {
   return (
     <>
       <PageHero
-        image={img(content, "hero_image", "/images/residences-hero.png")}
+        image={img(content, "hero_image", "/images/residences-hero.webp")}
         imageMobile={content.images.hero_image_mobile || undefined}
         imageAlt={txt(content, "hero_alt", "Резиденции клубного дома k 7/11 — редкость клубного формата")}
         breadcrumb={[
@@ -86,7 +86,7 @@ export default async function ResidencesPage() {
       <ResidenceStats
         items={[
           {
-            src: "/images/residences-stat-1.png",
+            src: "/images/residences-stat-1.webp",
             alt: "Кабинет резиденции",
             place: "left",
             number: "2-4",
@@ -95,14 +95,14 @@ export default async function ResidencesPage() {
             caption: "на этаже",
           },
           {
-            src: "/images/residences-stat-2.png",
+            src: "/images/residences-stat-2.webp",
             alt: "Гостиная резиденции",
             place: "right",
             number: "49",
             caption: "резиденций",
           },
           {
-            src: "/images/residences-stat-3.png",
+            src: "/images/residences-stat-3.webp",
             alt: "Спальня резиденции",
             place: "center",
             prefix: "до",
@@ -118,7 +118,8 @@ export default async function ResidencesPage() {
       />
 
       <SpaceSplit
-        image={img(content, "space_image", "/images/residences-space.png")}
+        animated
+        image={img(content, "space_image", "/images/residences-space.webp")}
         imageAlt={txt(content, "space_alt", "Пентхаус с личным патио на крыше")}
         headingLines={["Пространство", "по вашим", "правилам"]}
         paragraphs={[
