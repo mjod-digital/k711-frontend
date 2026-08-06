@@ -27,7 +27,6 @@ const RANGE_PARAMS = [
 ] as const;
 
 type RangeKey = (typeof RANGE_PARAMS)[number][0];
-type FilterKey = "bedrooms" | RangeKey;
 
 const RANGE_KEYS: readonly RangeKey[] = RANGE_PARAMS.map(([k]) => k);
 
@@ -76,10 +75,6 @@ const clamp01 = (v: number) => Math.min(1, Math.max(0, v));
 
 const filtersEqual = (a: Filters, b: Filters) =>
   eqBeds(a.bedrooms, b.bedrooms) && RANGE_KEYS.every((k) => eqRange(a[k], b[k]));
-
-// Сброс одного фильтра к «не задан»: у спален это пустой массив, у диапазонов null.
-const clearKey = (f: Filters, k: FilterKey): Filters =>
-  k === "bedrooms" ? setKey(f, "bedrooms", []) : setKey(f, k, null);
 
 // Единственный предикат отбора: им фильтруется и таблица (applied), и счётчик на
 // кнопке (draft). Две отдельные реализации — это способ разъехаться цифрам.
@@ -150,28 +145,6 @@ function parseFiltersFromQuery(search: string, r: Ranges, beds: number[]): Filte
   return f;
 }
 
-// ----- Бейджи активных фильтров -----
-// Подпись тега = подпись ползунка, с единицей В СКОБКАХ (макет 665-16449):
-// «Площадь (м²): 112–350», «Стоимость (млн руб.): 116–253». Так тег читается теми
-// же словами и цифрами, что и слайдер; диапазон — без хвоста-единицы.
-const RANGE_LABELS: Record<RangeKey, string> = {
-  floor: "Этаж",
-  area: "Площадь (м²)",
-  pricePerM2: "Цена за 1 м² (тыс руб.)",
-  cost: "Стоимость (млн руб.)",
-};
-
-// Один источник текста и для подписи, и для aria-label — чтобы доступное имя
-// кнопки не разошлось с видимым.
-const describe = (k: FilterKey, f: Filters): string => {
-  if (k === "bedrooms") return `Спальни: ${f.bedrooms.join(", ")}`;
-  const r = f[k];
-  if (!r) return RANGE_LABELS[k];
-  const [lo, hi] = r;
-  const v = lo === hi ? ru(lo) : `${ru(lo)}–${ru(hi)}`; // en dash
-  return `${RANGE_LABELS[k]}: ${v}`;
-};
-
 function HeartIcon() {
   return (
     <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -184,67 +157,12 @@ function HeartIcon() {
   );
 }
 
-// ----- Бейджи активных фильтров: «Название: значение ✕», клик снимает фильтр.
-// Один чип. Подпись — из ПРИМЕНЁННОГО: бейдж описывает то, что сейчас в таблице.
-function BadgeChip({
-  filterKey,
-  filters,
-  onRemove,
-}: {
-  filterKey: FilterKey;
-  filters: Filters;
-  onRemove: (k: FilterKey) => void;
-}) {
-  const text = describe(filterKey, filters);
-  return (
-    <button
-      type="button"
-      className={styles.badge}
-      onClick={() => onRemove(filterKey)}
-      aria-label={`Убрать фильтр: ${text}`}
-    >
-      <span className={styles.badgeLabel}>{text}</span>
-      <span className={styles.badgeX} aria-hidden="true">
-        <svg viewBox="0 0 24 24" fill="none">
-          <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" strokeWidth="1.5" />
-        </svg>
-      </span>
-    </button>
-  );
-}
-
-// Список бейджей над таблицей (мобайл). В колонке фильтров (десктоп) бейджи
-// рендерятся отдельно, в анимированной обёртке (см. FilterPanel / .panelBadges).
-function FilterBadges({
-  keys,
-  filters,
-  onRemove,
-  className,
-}: {
-  keys: FilterKey[];
-  filters: Filters;
-  onRemove: (k: FilterKey) => void;
-  className: string;
-}) {
-  if (!keys.length) return null;
-  return (
-    <div className={className}>
-      {keys.map((k) => (
-        <BadgeChip key={k} filterKey={k} filters={filters} onRemove={onRemove} />
-      ))}
-    </div>
-  );
-}
-
 // ----- Панель фильтров (общая: десктоп-сайдбар и мобильный оверлей) -----
 // Панель правит ТОЛЬКО черновик; в таблицу он уходит по кнопке «Показать».
 function FilterPanel({
   draft,
   ranges,
   bedOptions,
-  badges,
-  applied,
-  onRemoveBadge,
   count,
   dirty,
   canReset,
@@ -258,10 +176,6 @@ function FilterPanel({
   /** Полные границы каталога — ползунки всегда показывают их целиком. */
   ranges: Ranges;
   bedOptions: number[];
-  /** Активные бейджи и применённые значения — рисуем их вверху колонки (десктоп). */
-  badges: FilterKey[];
-  applied: Filters;
-  onRemoveBadge: (k: FilterKey) => void;
   /** Сколько лотов подходит под ЧЕРНОВИК (предпросмотр для кнопки «Показать N»). */
   count: number;
   /** Черновик разошёлся с применённым — подсвечиваем кнопку применения. */
@@ -296,7 +210,7 @@ function FilterPanel({
   // фильтров — по высоте вьюпорта; на широких, но низких окнах контент бывает ВЫШЕ колонки →
   // теги/кнопки наезжали друг на друга и на ползунки. Масштабируем контент через zoom, чтобы
   // всё всегда влезало. Только когда реально не влезает; оверлей (onClose) — своя прокрутка,
-  // не трогаем. Пересчёт: число тегов (deps), ресайз, смена брейкпоинта.
+  // не трогаем. Пересчёт: ресайз, смена брейкпоинта.
   const scaleRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     if (onClose) return;
@@ -327,7 +241,7 @@ function FilterPanel({
       window.removeEventListener("resize", fit);
       mq.removeEventListener("change", fit);
     };
-  }, [onClose, badges.length]);
+  }, [onClose]);
 
   return (
     <div className={styles.filters}>
@@ -382,18 +296,6 @@ function FilterPanel({
         {slider("cost", "Стоимость (млн руб.)")}
       </div>
 
-      {/* Теги — в гибком зазоре между фильтрами и кнопками (макет 665-16449).
-          .panelBadges { margin-top: auto } прижимает теги вместе с кнопками к низу
-          панели, а воздушный зазор над тегами поглощает их появление/снятие —
-          ползунки сверху и кнопки снизу не двигаются, поэтому FLIP-анимация высоты
-          больше не нужна. На мобайле панель — оверлей: .panelBadges display:none,
-          теги живут над таблицей (второй FilterBadges в списке). */}
-      <div className={styles.panelBadges}>
-        {badges.map((k) => (
-          <BadgeChip key={k} filterKey={k} filters={applied} onRemove={onRemoveBadge} />
-        ))}
-      </div>
-
       {/* Блок кнопок прибит к низу панели (footer ВНЕ прокручиваемого .filtersInner):
           «Показать» всегда виден, а на низком окне прокручиваются ползунки, а не
           кнопки. */}
@@ -409,11 +311,11 @@ function FilterPanel({
           onClick={onShow}
         >
           {empty
-            ? "Нет вариантов"
+            ? "Нет подходящих резиденций"
             : idle
               ? // Согласование глагола: показанА 1, показанЫ 2, показанО 6.
-                `${plural(count, "Показана", "Показаны", "Показано")} ${count}`
-              : `Показать ${count}`}
+                `${plural(count, "Показана", "Показаны", "Показано")} ${count} ${plural(count, "резиденция", "резиденции", "резиденций")}`
+              : `Показать ${count} ${plural(count, "резиденцию", "резиденции", "резиденций")}`}
         </button>
 
         {/* Сбрасывать нечего — кнопки нет. В отличие от «Показать», ей нечего
@@ -658,17 +560,6 @@ export function ApartmentCatalog({ apartments }: { apartments: Apartment[] }) {
     setApplied(EMPTY_FILTERS);
   };
 
-  // Крестик снимает СВОЙ фильтр сразу — и из черновика, и из таблицы: бейдж
-  // описывает применённый фильтр, поэтому его отмена его же и убирает. При этом
-  // незакоммиченные правки в панели (покрученные слайдеры) остаются в черновике
-  // неприменёнными — они и держат кнопку активной. Так после ✕ кнопка гаснет до
-  // «Показано N», если больше применять нечего, и остаётся «Показать N», если в
-  // панели уже что-то набрано.
-  const removeFilter = (k: FilterKey) => {
-    setDraft((d) => clearKey(d, k));
-    setApplied((a) => clearKey(a, k));
-  };
-
   // Синхронизация черновика с применённым — на обеих границах оверлея и только в
   // обработчиках: эффект по filtersOpen сработал бы и на закрытии. Без синхронизации
   // при отмене брошенный мобильный черновик пережил бы поворот экрана и всплыл
@@ -749,18 +640,6 @@ export function ApartmentCatalog({ apartments }: { apartments: Apartment[] }) {
     [rows, favSet, hydrated, toggleFav],
   );
 
-  // Бейдж описывает ПРИМЕНЁННЫЙ фильтр → показываем строго по applied[k]. Появляется
-  // только после «Показать» (applied меняется лишь там), а крестик (removeFilter чистит
-  // и черновик, и applied) сразу его убирает. На draft НЕ завязываемся: иначе (а) бейдж
-  // всплывал бы до применения при выборе в панели и (б) исчезал бы при возврате ползунка
-  // к границам (draft[k] обнулился), хотя фильтр в таблице ещё активен — как с кнопкой сброса.
-  const badges = useMemo<FilterKey[]>(() => {
-    const out: FilterKey[] = [];
-    if (applied.bedrooms.length) out.push("bedrooms");
-    for (const k of RANGE_KEYS) if (applied[k]) out.push(k);
-    return out;
-  }, [applied]);
-
   return (
     <section ref={sectionRef} className={styles.catalog}>
       <div className={styles.catalogSticky}>
@@ -769,9 +648,6 @@ export function ApartmentCatalog({ apartments }: { apartments: Apartment[] }) {
           draft={draft}
           ranges={ranges}
           bedOptions={bedOptions}
-          badges={badges}
-          applied={applied}
-          onRemoveBadge={removeFilter}
           count={previewCount}
           dirty={dirty}
           canReset={canReset}
@@ -784,18 +660,8 @@ export function ApartmentCatalog({ apartments }: { apartments: Apartment[] }) {
 
       <div className={styles.listPane}>
         <div className={styles.list} ref={listScrollRef}>
-        {/* Бейджи и шапка залипают ОДНИМ блоком. На мобайле бейджи живут здесь,
-            над таблицей (панель — оверлей); на десктопе .badges скрыт, а бейджи
-            рисуются в колонке фильтров (см. .panelBadges). Высота бейджей
-            переменная — потому и залипают вместе с шапкой одним контейнером. */}
+        {/* Шапка таблицы залипает под фикс-хедером — видна при любой прокрутке списка. */}
         <div className={styles.listHead}>
-          <FilterBadges
-            keys={badges}
-            filters={applied}
-            onRemove={removeFilter}
-            className={styles.badges}
-          />
-
           <div className={styles.thead}>
             <span>Этаж</span>
             <span>Спальни</span>
@@ -858,9 +724,6 @@ export function ApartmentCatalog({ apartments }: { apartments: Apartment[] }) {
             draft={draft}
             ranges={ranges}
             bedOptions={bedOptions}
-            badges={badges}
-            applied={applied}
-            onRemoveBadge={removeFilter}
             count={previewCount}
             dirty={dirty}
             canReset={canReset}
