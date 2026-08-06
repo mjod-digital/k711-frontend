@@ -181,18 +181,23 @@
 .actions {
   flex-shrink: 0; // footer flex-колонки .filters — не сжимается, всегда виден
   display: flex;
-  flex-direction: column;
+  // Десктоп: в ОДИН РЯД — «Сбросить» слева, «Показать N» справа (макет 649-16295+),
+  // ОБЕ по 50% (flex:1 1 0 на кнопках) → «Показать» не прыгает по ширине от числа.
+  // row-reverse: в DOM порядок [Показать, Сбросить] сохраняем (для мобайл-колонки:
+  // Показать сверху), а визуально переворачиваем → Сбросить слева, Показать справа.
+  flex-direction: row-reverse;
+  align-items: center;
+  gap: fluid(16);
   // Прижимаем кнопки к низу панели: margin-top:auto забирает всё свободное место над
   // блоком → воздушный ГИБКИЙ зазор между тегами и кнопками, он и поглощает смену тегов.
   margin-top: auto;
 
-  // Десктоп: footer вне прокручиваемого .filtersInner — кнопки всегда видны, а
-  // ползунки уезжают под них при нехватке высоты. Раньше блок был sticky ВНУТРИ
-  // прокрутки и наезжал на значения последнего ползунка (баг).
-  //
-  // Мобайл: оверлей во весь экран — держим кнопку применения у нижнего края,
-  // чтобы не уезжала под список ползунков.
+  // Мобайл: оверлей во весь экран — кнопки колонкой, применение прибито к нижнему краю.
   @include mobile {
+    flex-direction: column;
+    justify-content: normal;
+    align-items: stretch;
+    gap: 0;
     margin-top: fluid(20); // мобайл-оверлей не flex → auto даёт 0; фикс-зазор от ползунков
     position: sticky;
     bottom: 0;
@@ -207,10 +212,12 @@
 // 649-16295), а не аутлайн-кнопка. Мобайл-оверлей не входит в вариант — там
 // оставляем прежнюю кнопку во всю ширину.
 .reset {
-  align-self: center;
-  margin-top: fluid(16); // зазор от «Показать» (макет: 12 между кнопкой и ссылкой)
-  flex-shrink: 0;
-  padding: fluid(4) fluid(8);
+  // Десктоп: текст-ссылка в ряду слева, по контенту (padding-inline:0). «Показать» справа
+  // забирает ОСТАТОК ряда (flex:1) → его ширина стабильна, не прыгает от числа. Текст
+  // «сбросить фильтры» ≈ половина ряда, поэтому визуально выходит ~поровну. Мобайл — ниже.
+  flex: 0 0 auto;
+  white-space: nowrap;
+  padding: fluid(4) 0;
   -webkit-text-stroke-width: fluid(0.3);
   border: 0;
   background: none;
@@ -230,6 +237,7 @@
 
   @include mobile {
     align-self: stretch;
+    text-align: center; // мобайл: кнопка во всю ширину → текст по центру (десктоп-left не нужен)
     margin-top: fluid(12);
     height: fluid(48);
     padding: 0 fluid(20);
@@ -249,11 +257,12 @@
 
 // «Показать N резиденций» — залитая светлая кнопка, первая в блоке действий.
 .showResults {
-  align-self: stretch;
+  flex: 1 1 0; // десктоп: половина ряда (как «Сбросить») → ширина стабильна, не прыгает от числа
+  min-width: 0;
   margin-top: 0; // верхний зазор держит .actions
-  flex-shrink: 0;
   height: fluid(48);
   padding-inline: fluid(20);
+  white-space: nowrap;
   -webkit-text-stroke-width: fluid(0.3);
   background: var(--color-badge-light);
   color: var(--color-brown-dark-2);
@@ -290,6 +299,7 @@
   }
 
   @include mobile {
+    flex: none; // мобайл: колонка → обычная кнопка во всю ширину (align-items:stretch у .actions)
     font-size: fluid(14);
   }
 }
