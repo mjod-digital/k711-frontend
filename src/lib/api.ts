@@ -11,6 +11,8 @@ import { safeUrl } from "./url";
 const API_BASE_URL =
   process.env.API_BASE_URL ?? "https://www.klimashkina711.ru/api";
 const REVALIDATE_TIME = 60;
+// Таймаут внешних запросов: подвисший MODX/CRM не должен блокировать SSR/ISR-рендер.
+const FETCH_TIMEOUT_MS = 8000;
 
 // Источник каталога квартир: "api" — живой CRM, "mock" — снимок в коде
 // (src/lib/flats.mock.ts). На превью-деплое CRM не нужен: каталог собирается из
@@ -44,13 +46,86 @@ export type Flat = {
   floorPlan: string; // мини-план этажа (внешний S3)
 };
 
+// ----- Валидация внешних данных (ARCH-004/DATA-003) -----
+// CRM-ответ приходит нетипизированным JSON. Раньше он кастился в Flat[] «на веру»:
+// одно кривое/пустое числовое поле (цена, площадь) давало NaN, который тихо протекал
+// в карточки и ломал фильтры каталога. Валидируем на границе: поля, на которых стоит
+// арифметика и фильтры, обязаны быть конечными числами — иначе строка отбрасывается
+// (fallback-first: пустой каталог лучше каталога с NaN-ценами).
+function isFiniteNumber(v: unknown): v is number {
+  return typeof v === "number" && Number.isFinite(v);
+}
+
+function toFlat(x: unknown): Flat | null {
+  if (!x || typeof x !== "object") return null;
+  const f = x as Record<string, unknown>;
+  // number — идентификатор квартиры (роутинг + ключи): непустая строка.
+  const number =
+    typeof f.number === "string" ? f.number.trim() : String(f.number ?? "").trim();
+  if (!number) return null;
+  // Числовые поля, на которых держатся арифметика и фильтры.
+  if (
+    !isFiniteNumber(f.floor) ||
+    !isFiniteNumber(f.area) ||
+    !isFiniteNumber(f.amount) ||
+    !isFiniteNumber(f.price) ||
+    !isFiniteNumber(f.numberOfBedrooms)
+  ) {
+    return null;
+  }
+  // Необязательные поля добиваем безопасными дефолтами.
+  return {
+    name: typeof f.name === "string" ? f.name : "",
+    number,
+    floor: f.floor,
+    area: f.area,
+    amount: f.amount,
+    price: f.price,
+    amountDiscount: isFiniteNumber(f.amountDiscount) ? f.amountDiscount : 0,
+    areaProject: isFiniteNumber(f.areaProject) ? f.areaProject : f.area,
+    type: typeof f.type === "string" ? f.type : "",
+    status: typeof f.status === "string" ? f.status : "",
+    numberOfBedrooms: f.numberOfBedrooms,
+    numberOfBathrooms:
+      isFiniteNumber(f.numberOfBathrooms) || typeof f.numberOfBathrooms === "string"
+        ? (f.numberOfBathrooms as number | string)
+        : "",
+    pdf: typeof f.pdf === "string" ? f.pdf : "",
+    ceilingHeightM: isFiniteNumber(f.ceilingHeightM) ? f.ceilingHeightM : 0,
+    viewFromWindowTypology:
+      typeof f.viewFromWindowTypology === "string" ? f.viewFromWindowTypology : null,
+    sectionNumber:
+      typeof f.sectionNumber === "string"
+        ? f.sectionNumber
+        : String(f.sectionNumber ?? ""),
+    layoutUrl: typeof f.layoutUrl === "string" ? f.layoutUrl : "",
+    floorPlan: typeof f.floorPlan === "string" ? f.floorPlan : "",
+  };
+}
+
+// Массив из CRM → валидные Flat; битые строки отбрасываются с предупреждением в лог.
+function parseFlats(raw: unknown): Flat[] {
+  if (!Array.isArray(raw)) return [];
+  const flats: Flat[] = [];
+  for (const item of raw) {
+    const flat = toFlat(item);
+    if (flat) flats.push(flat);
+  }
+  const dropped = raw.length - flats.length;
+  if (dropped > 0) {
+    console.warn(`[api] отброшено ${dropped} из ${raw.length} квартир: невалидная форма`);
+  }
+  return flats;
+}
+
 export async function fetchApartments(): Promise<Flat[]> {
   if (USE_MOCK_FLATS) return MOCK_FLATS;
   const res = await fetch(`${API_BASE_URL}/flats`, {
     next: { revalidate: REVALIDATE_TIME },
+    signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
   });
   if (!res.ok) throw new Error("Failed to fetch apartments");
-  return res.json();
+  return parseFlats(await res.json());
 }
 
 export async function fetchApartmentById(
@@ -65,9 +140,14 @@ export async function fetchApartmentById(
   }
   const res = await fetch(`${API_BASE_URL}/flat?id=${encodeURIComponent(id)}`, {
     next: { revalidate: REVALIDATE_TIME },
+    signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
   });
   if (!res.ok) throw new Error("Failed to fetch apartment data");
-  return res.json();
+  const d = (await res.json()) as { flat?: unknown; relatedFlats?: unknown };
+  const flat = toFlat(d.flat);
+  // Форма пришла битой — ведём себя как при 404 (вызывающая страница ловит → notFound()).
+  if (!flat) throw new Error("Failed to fetch apartment data");
+  return { flat, relatedFlats: parseFlats(d.relatedFlats ?? []) };
 }
 
 export async function fetchFloorData(id: string) {
@@ -75,6 +155,7 @@ export async function fetchFloorData(id: string) {
   try {
     const res = await fetch(`${API_BASE_URL}/floor?id=${encodeURIComponent(id)}`, {
       next: { revalidate: REVALIDATE_TIME },
+      signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
     });
     if (!res.ok) return null;
     return res.json();
@@ -201,7 +282,10 @@ function cacheOpts(
 
 export async function fetchPage(alias: string): Promise<PageContent> {
   try {
-    const res = await fetch(`${API_BASE_URL}/${alias}`, cacheOpts(`page:${alias}`));
+    const res = await fetch(`${API_BASE_URL}/${alias}`, {
+      ...cacheOpts(`page:${alias}`),
+      signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
+    });
     if (!res.ok) return EMPTY_PAGE;
     const d = (await res.json()) as Partial<PageContent>;
     return {
@@ -261,7 +345,10 @@ export function cmsGallery(
 
 export async function fetchContact(): Promise<ContactContent> {
   try {
-    const res = await fetch(`${API_BASE_URL}/contact`, cacheOpts("contact"));
+    const res = await fetch(`${API_BASE_URL}/contact`, {
+      ...cacheOpts("contact"),
+      signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
+    });
     if (!res.ok) return CONTACT_FALLBACK;
     const d = (await res.json()) as Partial<ContactContent>;
     const f = CONTACT_FALLBACK;
