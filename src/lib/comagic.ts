@@ -15,10 +15,10 @@ type ComagicOfflineRequest = {
   email?: string;
   phone?: string;
   message?: string;
-  // Кастомные поля заявки идут в CoMagic ТОЛЬКО через user_fields — виджет
-  // форвардит именно это свойство, произвольные ключи верхнего уровня (sopd,
-  // mailing) он выбрасывает. ext_id — из метода get.offline_message_user_fields.
-  user_fields?: { ext_id: string; value: string }[];
+  // Кастомные поля заявки идут в CoMagic ТОЛЬКО через user_fields. Формат JS API —
+  // ОБЪЕКТ { ext_id: value } (НЕ массив [{ext_id,value}] — это формат Data API,
+  // сервер его принимает, но в поля не пишет). ext_id — из get.offline_message_user_fields.
+  user_fields?: Record<string, string>;
 };
 
 type ComagicApi = {
@@ -103,14 +103,12 @@ export function sendLead(lead: Lead): void {
     email: lead.email?.trim() || "",
     message: buildMessage(lead),
   };
-  // Согласия — в user_fields по ext_id (sopd / mailing). Виджет CoMagic берёт
-  // доп-поля только отсюда; ключи верхнего уровня (req.sopd) он отбрасывает.
-  const userFields: { ext_id: string; value: string }[] = [];
-  if (lead.consent !== undefined)
-    userFields.push({ ext_id: "sopd", value: lead.consent ? "Да" : "Нет" });
-  if (lead.marketing !== undefined)
-    userFields.push({ ext_id: "mailing", value: lead.marketing ? "Да" : "Нет" });
-  if (userFields.length) req.user_fields = userFields;
+  // Согласия — в user_fields (объект { ext_id: value }, формат JS API CoMagic).
+  // Ключи = ext_id полей: sopd (согласие на ПД) / mailing (согласие на рассылку).
+  const userFields: Record<string, string> = {};
+  if (lead.consent !== undefined) userFields.sopd = lead.consent ? "Да" : "Нет";
+  if (lead.marketing !== undefined) userFields.mailing = lead.marketing ? "Да" : "Нет";
+  if (Object.keys(userFields).length) req.user_fields = userFields;
 
   withComagic((api) => {
     try {
