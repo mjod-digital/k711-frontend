@@ -1,0 +1,13 @@
+@use "breakpoints" as *;
+
+.genplan {
+  min-height: calc(100dvh - var(--header-h));
+  padding-inline: fluid(20);
+  padding-bottom: fluid(20);
+  background: var(--color-badge-light);
+  color: var(--color-brown-dark);
+
+  @include mobile {
+    display: none;
+  }
+}

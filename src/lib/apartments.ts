@@ -1,6 +1,19 @@
 // Доменные типы каталога квартир. Данные приходят из API (src/lib/api.ts);
 // здесь — формы и утилиты подсчёта диапазонов/опций фильтров.
 
+export const GENPLAN_VIEW_IDS = ["street", "corner", "courtyard"] as const;
+
+export type GenplanViewId = (typeof GENPLAN_VIEW_IDS)[number];
+
+export type ApartmentPolygon = {
+  viewId: GenplanViewId;
+  points: string;
+  label: {
+    x: number;
+    y: number;
+  };
+};
+
 export type Apartment = {
   id: string; // = number из API (уникальный)
   floor: number;
@@ -8,6 +21,12 @@ export type Apartment = {
   area: number; // м²
   pricePerM2: number; // тыс руб/м²
   cost: number; // млн руб
+};
+
+export type GenplanApartment = Apartment & {
+  section: string;
+  status: string;
+  polygon: ApartmentPolygon[];
 };
 
 export type ApartmentDetail = Apartment & {

@@ -1,0 +1,93 @@
+@use "breakpoints" as *;
+
+.genplanStage {
+  display: grid;
+  gap: fluid(20);
+
+  &__toolbar {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: fluid(32);
+    min-height: fluid(96);
+    padding: fluid(12) fluid(20) fluid(20);
+  }
+
+  &__viewport {
+    position: relative;
+    width: 100%;
+    margin-inline: auto;
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
+    max-height: 875px;
+    background:
+      linear-gradient(rgb(29 29 29 / 12%), rgb(29 29 29 / 12%)),
+      url("/images/genplan/frame_0001.webp") center / cover no-repeat,
+      var(--color-black);
+    isolation: isolate;
+  }
+
+  &__canvas {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
+  &__initialLoader {
+    position: absolute;
+    inset: 0;
+    z-index: 5;
+    display: grid;
+    place-items: center;
+    background: rgb(38 23 24 / 78%);
+    color: var(--color-white);
+  }
+
+  &__loaderContent {
+    display: grid;
+    justify-items: center;
+    gap: fluid(10);
+  }
+
+  &__loaderLine {
+    width: fluid(280);
+    height: 1px;
+    overflow: hidden;
+    background: rgb(255 255 255 / 34%);
+
+    span {
+      display: block;
+      width: 100%;
+      height: 100%;
+      background: var(--color-badge-light);
+      transform-origin: left;
+      transition: transform 160ms linear;
+    }
+  }
+
+  &__loaderPercent {
+    font-family: var(--font-display);
+    font-size: fluid(18);
+    line-height: 1;
+  }
+
+  &__error {
+    position: absolute;
+    inset: auto fluid(22) fluid(22);
+    z-index: 5;
+    margin: 0;
+    padding: fluid(12) fluid(16);
+    background: rgb(192 86 60 / 92%);
+    color: var(--color-white);
+    font-size: var(--fs-caption);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    &__loaderLine span {
+      transition: none;
+    }
+  }
+}

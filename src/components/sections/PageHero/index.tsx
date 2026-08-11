@@ -1,8 +1,8 @@
 "use client";
 
-import Link from "next/link";
 import { useRef, useState } from "react";
 import type { CSSProperties, ReactNode } from "react";
+import { Breadcrumb } from "@/components/ui/Breadcrumb";
 import { HeroImage } from "@/components/ui/HeroImage";
 import { Reveal } from "@/components/ui/Reveal";
 import { useIsomorphicLayoutEffect } from "@/lib/useIsomorphicLayoutEffect";
@@ -102,26 +102,7 @@ export function PageHero({
 
   return (
     <section className={styles.hero}>
-      <nav className={styles.breadcrumb} aria-label="Хлебные крошки">
-        <ol className={styles.crumbs}>
-          {breadcrumb.map((crumb, i) => (
-            <li key={i} className={styles.crumb}>
-              {i > 0 && (
-                <span className={styles.sep} aria-hidden="true">
-                  /
-                </span>
-              )}
-              {crumb.href ? (
-                <Link href={crumb.href} aria-label={crumb.ariaLabel}>
-                  {crumb.label}
-                </Link>
-              ) : (
-                <span aria-current="page">{crumb.label}</span>
-              )}
-            </li>
-          ))}
-        </ol>
-      </nav>
+      <Breadcrumb items={breadcrumb} />
 
       <div
         className={styles.media}
