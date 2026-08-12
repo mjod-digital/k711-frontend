@@ -9,7 +9,7 @@
   height: 100%;
   opacity: 0;
   pointer-events: none;
-  transition: opacity 350ms ease;
+  transition: opacity 0.4s;
 
   &[data-visible="true"] {
     opacity: 1;
@@ -31,46 +31,65 @@
     pointer-events: none;
   }
 
+  &__shadePolygon {
+    fill: var(--color-purple-light);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.5s;
+
+    &[data-muted="true"] {
+      opacity: 1;
+    }
+  }
+
   &__polygon {
     fill: transparent;
+    opacity: 1;
     stroke: var(--color-badge-light);
     stroke-width: 2;
     vector-effect: non-scaling-stroke;
     cursor: pointer;
-    transition: opacity 0.3s;
+    transition: opacity 0.5s;
 
     &[data-muted="true"] {
       opacity: 0;
     }
   }
 
-  &__hint {
-    position: absolute;
-    z-index: 4;
-    display: grid;
-    min-width: fluid(138);
-    padding: fluid(12) fluid(14);
-    border: 1px solid rgb(255 255 255 / 52%);
-    background: rgb(244 242 234 / 94%);
-    color: var(--color-brown-dark);
-    font-size: var(--fs-caption);
-    line-height: 1.35;
-    pointer-events: none;
-    transform: translate(-50%, calc(-100% - #{fluid(12)}));
-    box-shadow: 0 fluid(12) fluid(30) rgb(29 29 29 / 18%);
-
-    strong {
-      margin-bottom: fluid(4);
-      font-family: var(--font-display);
-      font-size: fluid(18);
-      font-weight: 400;
+  @media (prefers-reduced-motion: reduce) {
+    &,
+    &__polygon,
+    &__shadePolygon {
+      transition: none;
     }
   }
 
-  @media (prefers-reduced-motion: reduce) {
-    &,
-    &__polygon {
-      transition: none;
-    }
+  &__card {
+    min-width: fluid(334);
+    padding: fluid(12);
+    border: 1px solid var(--color-badge-light-2);
+    background: var(--color-badge-light);
+    box-shadow: 0 fluid(12) fluid(30) rgb(29 29 29 / 18%);
+  }
+
+  &__cardHeading {
+    display: flex;
+    justify-content: space-between;
+    gap: fluid(20);
+    margin-bottom: fluid(9);
+    color: var(--color-black);
+    font-family: var(--font-body), serif;
+    font-weight: 400;
+    font-size: fluid(20);
+    line-height: 100%;
+  }
+
+  &__cardFloor {
+    font-family: var(--font-body), serif;
+    font-weight: 400;
+    font-size: fluid(12);
+    line-height: fluid(16);
+    letter-spacing: 0.01em;
+    color: var(--color-brown-medium);
   }
 }

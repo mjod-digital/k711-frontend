@@ -75,24 +75,17 @@ function parseApartmentPolygons(value: unknown): ApartmentPolygon[] {
     if (!item || typeof item !== "object") return [];
 
     const polygon = item as Record<string, unknown>;
-    const label = polygon.label;
     if (
       !isGenplanViewId(polygon.viewId) ||
-      typeof polygon.points !== "string" ||
-      !label ||
-      typeof label !== "object"
+      typeof polygon.points !== "string"
     ) {
       return [];
     }
-
-    const position = label as Record<string, unknown>;
-    if (!isFiniteNumber(position.x) || !isFiniteNumber(position.y)) return [];
 
     return [
       {
         viewId: polygon.viewId,
         points: polygon.points,
-        label: { x: position.x, y: position.y },
       },
     ];
   });

@@ -3,14 +3,14 @@
 .genplanStage {
   display: grid;
   gap: fluid(20);
+  position: relative;
 
-  &__toolbar {
-    display: flex;
-    align-items: flex-end;
-    justify-content: space-between;
-    gap: fluid(32);
-    min-height: fluid(96);
-    padding: fluid(12) fluid(20) fluid(20);
+  &__navigation {
+    position: absolute;
+    top: fluid(24);
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 2;
   }
 
   &__viewport {
@@ -25,6 +25,10 @@
       url("/images/genplan/frame_0001.webp") center / cover no-repeat,
       var(--color-black);
     isolation: isolate;
+
+    @media (min-width: 1920px) {
+      max-height: 1100px;
+    }
   }
 
   &__canvas {

@@ -1,7 +1,9 @@
 import Link from "next/link";
 import { FC, useId, useMemo, useState } from "react";
-import type { GenplanApartment } from "@/lib/apartments";
+import { ru, type GenplanApartment } from "@/lib/apartments";
 import { GENPLAN_FRAME_HEIGHT, GENPLAN_FRAME_WIDTH } from "../../model/config";
+import { GenplanCard } from "../card/genplan-card";
+import cardStyles from "../card/genplan-card.module.scss";
 import styles from "./apartment-overlay.module.scss";
 
 type TApartmentOverlay = {
@@ -10,12 +12,19 @@ type TApartmentOverlay = {
   isInteractive: boolean;
 };
 
+type PresentedCard = {
+  apartment: GenplanApartment;
+  polygon: GenplanApartment["polygon"][number];
+  isOpen: boolean;
+};
+
 export const ApartmentOverlay:FC<TApartmentOverlay> =({
   apartments,
   viewId,
   isInteractive,
 }) => {
   const [activeApartmentId, setActiveApartmentId] = useState<string | null>(null);
+  const [presentedCard, setPresentedCard] = useState<PresentedCard | null>(null);
 
   const overlayMaskId = `apartment-overlay-mask-${useId().replace(/:/g, "")}`;
   const visibleApartments = useMemo(
@@ -27,9 +36,19 @@ export const ApartmentOverlay:FC<TApartmentOverlay> =({
     [apartments, viewId],
   );
 
-  const active = visibleApartments.find(
-    ({ apartment }) => apartment.id === activeApartmentId,
-  );
+  const showCard = ({ apartment, polygon }: Omit<PresentedCard, "isOpen">) => {
+    setActiveApartmentId(apartment.id);
+    setPresentedCard({ apartment, polygon, isOpen: true });
+  };
+
+  const hideCard = (apartmentId: string) => {
+    setActiveApartmentId((currentId) => currentId === apartmentId ? null : currentId);
+    setPresentedCard((currentCard) =>
+      currentCard?.apartment.id === apartmentId
+        ? { ...currentCard, isOpen: false }
+        : currentCard,
+    );
+  };
 
   return (
     <>
@@ -51,7 +70,7 @@ export const ApartmentOverlay:FC<TApartmentOverlay> =({
               <polygon
                 key={`${apartment.id}-${viewId}-mask`}
                 points={polygon.points}
-                fill={activeApartmentId === null || activeApartmentId === apartment.id ? "black" : "white"}
+                fill="black"
               />
             ))}
           </mask>
@@ -65,15 +84,24 @@ export const ApartmentOverlay:FC<TApartmentOverlay> =({
         />
 
         {visibleApartments.map(({ apartment, polygon }) => (
+          <polygon
+            key={`${apartment.id}-${viewId}-shade`}
+            className={styles.genplanApartmentOverlay__shadePolygon}
+            data-muted={activeApartmentId !== null && activeApartmentId !== apartment.id}
+            points={polygon.points}
+          />
+        ))}
+
+        {visibleApartments.map(({ apartment, polygon }) => (
           <Link
             href={`/apartments/${apartment.id}`}
             key={`${apartment.id}-${viewId}`}
             className={styles.genplanApartmentOverlay__link}
             aria-label={`Квартира ${apartment.id}, ${apartment.floor} этаж, ${apartment.area} м²`}
-            onMouseEnter={() => setActiveApartmentId(apartment.id)}
-            onMouseLeave={() => setActiveApartmentId(null)}
-            onFocus={() => setActiveApartmentId(apartment.id)}
-            onBlur={() => setActiveApartmentId(null)}
+            onMouseEnter={() => showCard({ apartment, polygon })}
+            onMouseLeave={() => hideCard(apartment.id)}
+            onFocus={() => showCard({ apartment, polygon })}
+            onBlur={() => hideCard(apartment.id)}
           >
             <polygon
               className={styles.genplanApartmentOverlay__polygon}
@@ -85,18 +113,36 @@ export const ApartmentOverlay:FC<TApartmentOverlay> =({
         ))}
       </svg>
 
-      {active && (
-        <div
-          className={styles.genplanApartmentOverlay__hint}
-          style={{
-            left: `${(active.polygon.label.x / GENPLAN_FRAME_WIDTH) * 100}%`,
-            top: `${(active.polygon.label.y / GENPLAN_FRAME_HEIGHT) * 100}%`,
+      {presentedCard && (
+        <GenplanCard
+          key={`${presentedCard.apartment.id}-${presentedCard.polygon.viewId}`}
+          polygonPoints={presentedCard.polygon.points}
+          frameWidth={GENPLAN_FRAME_WIDTH}
+          frameHeight={GENPLAN_FRAME_HEIGHT}
+          isOpen={presentedCard.isOpen}
+          onExitComplete={() => {
+            setPresentedCard((currentCard) =>
+              currentCard?.apartment.id === presentedCard.apartment.id && !currentCard.isOpen
+                ? null
+                : currentCard,
+            );
           }}
         >
-          <strong>№ {active.apartment.id}</strong>
-          <span>{active.apartment.floor} этаж</span>
-          <span>{active.apartment.area} м²</span>
-        </div>
+          <div className={styles.genplanApartmentOverlay__card}>
+            <div className={styles.genplanApartmentOverlay__cardHeading}>
+              <div>
+                № {presentedCard.apartment.id}
+              </div>
+              <div>
+                {ru(presentedCard.apartment.cost * 1_000_000)} ₽
+              </div>
+            </div>
+
+            <div className={styles.genplanApartmentOverlay__cardFloor}>
+              {presentedCard.apartment.floor} этаж
+            </div>
+          </div>
+        </GenplanCard>
       )}
     </>
   );

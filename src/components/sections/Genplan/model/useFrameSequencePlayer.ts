@@ -68,8 +68,8 @@ export function useFrameSequencePlayer(enabled: boolean) {
       .then(async (image) => {
         try {
           await image.decode();
-        } catch {
-          // onload уже подтвердил, что браузер может использовать изображение.
+        } catch (err) {
+          console.error(err)
         }
 
         frameCacheRef.current.set(frameIndex, image);

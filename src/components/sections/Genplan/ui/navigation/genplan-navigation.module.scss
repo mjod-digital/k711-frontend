@@ -1,65 +1,33 @@
 @use "breakpoints" as *;
 
 .genplanNavigation {
-  display: flex;
-  align-items: stretch;
-  border: 1px solid rgb(62 32 34 / 24%);
-  border-radius: 999px;
   overflow: hidden;
+  display: flex;
+  gap: fluid(52);
 
-  &__button {
-    display: inline-flex;
-    align-items: center;
-    gap: fluid(10);
-    min-width: fluid(132);
-    min-height: fluid(46);
-    padding: fluid(12) fluid(20);
+  &__control {
+    display: grid;
+    place-items: center;
+    width: fluid(40);
+    height: fluid(40);
+    padding: 0;
     border: 0;
-    border-right: 1px solid rgb(62 32 34 / 24%);
     background: transparent;
-    color: var(--color-brown-dark);
-    font: inherit;
-    font-size: var(--fs-p2);
     cursor: pointer;
-    transition:
-      background-color 300ms ease,
-      color 300ms ease,
-      opacity 300ms ease;
+    transition: opacity 0.5s;
 
-    &:last-child {
-      border-right: 0;
-    }
-
-    &[data-active="true"] {
-      background: var(--color-brown-dark);
-      color: var(--color-badge-light);
-    }
-
-    &:not(:disabled, [data-active="true"]):hover {
-      background: var(--color-badge-light-2);
+    &_next {
+      transform: rotate(180deg);
     }
 
     &:disabled {
-      cursor: wait;
-      opacity: 0.62;
+      pointer-events: none;
+      opacity: 0.6;
     }
 
     &:focus-visible {
-      position: relative;
-      z-index: 1;
       outline: 2px solid var(--color-brown-light);
-      outline-offset: -3px;
-    }
-  }
-
-  &__number {
-    color: var(--color-brown-light);
-    font-size: var(--fs-caption);
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    &__button {
-      transition: none;
+      outline-offset: 3px;
     }
   }
 }

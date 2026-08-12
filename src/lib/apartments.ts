@@ -8,10 +8,6 @@ export type GenplanViewId = (typeof GENPLAN_VIEW_IDS)[number];
 export type ApartmentPolygon = {
   viewId: GenplanViewId;
   points: string;
-  label: {
-    x: number;
-    y: number;
-  };
 };
 
 export type Apartment = {
