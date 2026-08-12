@@ -32,12 +32,12 @@
     position: relative;
     width: 100%;
     margin-inline: auto;
-    aspect-ratio: 16 / 9;
+    aspect-ratio: 1298 / 730;
     overflow: hidden;
     max-height: 875px;
     background:
       linear-gradient(rgb(29 29 29 / 12%), rgb(29 29 29 / 12%)),
-      url("/images/genplan/frame_0001.webp") center / cover no-repeat,
+      url("/images/genplan/01.jpg") center / cover no-repeat,
       var(--color-black);
     isolation: isolate;
 
