@@ -1,20 +1,20 @@
 @use "breakpoints" as *;
 
 .button {
-  padding: fluid(17) fluid(26);
+  padding: fluid(13) fluid(20);
   backdrop-filter: blur(24px);
   color: var(--color-white);
-  background: var(--color-black-100-60);
+  background: var(--color-black-100-20);
   font-family: var(--font-display), serif;
   font-size: var(--fs-button);
   letter-spacing: 0.05em;
   cursor: pointer;
+  transition: background-color 0.5s, scale 0.3s;
 
-  &_black20 {
-    background: var(--color-black-100-20);
-  }
-
-  &_small {
-    padding: fluid(13) fluid(20);
+  @media (hover: hover) {
+    &:hover {
+      background: var(--color-black-100-60);
+      scale: 1.1;
+    }
   }
 }

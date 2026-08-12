@@ -5,12 +5,10 @@ import styles from "./button.module.scss";
 
 export const BUTTON_COLORS = {
   def: "",
-  black20: "button_black20",
 } as const;
 
 export const BUTTON_VARIANTS = {
   def: '',
-  small: 'button_small',
 }
 
 type ButtonColor = (typeof BUTTON_COLORS)[keyof typeof BUTTON_COLORS];
@@ -29,7 +27,7 @@ export const Button: FC<TButton> = ({
   children,
   url,
   color = BUTTON_COLORS.def,
-  variant = BUTTON_VARIANTS.small
+  variant = BUTTON_VARIANTS.def
 }) => {
   const buttonClassName = cn(styles.button, className, styles[color], styles[variant]);
 

@@ -6,6 +6,7 @@
   background: var(--color-black-100-20);
 
   &__button {
+    position: relative;
     min-width: fluid(66);
     padding: fluid(12) fluid(14) fluid(14) fluid(12);
     color: var(--color-white);
@@ -28,7 +29,8 @@
 
     @media (hover: hover) {
       &:hover {
-        scale: 1.1;
+        z-index: 2;
+        scale: 1.06;
         background: var(--color-black-100-60);
       }
     }

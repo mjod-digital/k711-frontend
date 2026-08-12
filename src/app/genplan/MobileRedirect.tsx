@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { ROUTES_PATH } from "@/config/site";
 
-const MOBILE_QUERY = "(max-width: 1279px)";
+const MOBILE_QUERY = "(max-width: 1200px)";
 
 export const MobileRedirect = () => {
   const router = useRouter();
