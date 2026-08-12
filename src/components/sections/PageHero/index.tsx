@@ -7,6 +7,8 @@ import { HeroImage } from "@/components/ui/HeroImage";
 import { Reveal } from "@/components/ui/Reveal";
 import { useIsomorphicLayoutEffect } from "@/lib/useIsomorphicLayoutEffect";
 import styles from "./PageHero.module.scss";
+import { Button, BUTTON_COLORS, BUTTON_VARIANTS } from '@/components/ui/Button/button';
+import { ROUTES_PATH } from '@/config/site';
 
 export type Crumb = {
   label: string;
@@ -116,6 +118,15 @@ export function PageHero({
           } as CSSProperties
         }
       >
+        <Button
+          color={BUTTON_COLORS.black20}
+          variant={BUTTON_VARIANTS.small}
+          className={styles.btnGenplan}
+          url={ROUTES_PATH.genplan}
+        >
+          Визуальный выбор
+        </Button>
+
         <div className={styles.parallax} ref={parallaxRef}>
           <HeroImage
             image={image}

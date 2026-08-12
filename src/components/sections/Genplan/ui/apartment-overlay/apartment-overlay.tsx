@@ -3,11 +3,12 @@ import { FC, useId, useMemo, useState } from "react";
 import { ru, type GenplanApartment } from "@/lib/apartments";
 import { GENPLAN_FRAME_HEIGHT, GENPLAN_FRAME_WIDTH } from "../../model/config";
 import { GenplanCard } from "../card/genplan-card";
-import cardStyles from "../card/genplan-card.module.scss";
 import styles from "./apartment-overlay.module.scss";
+import { ROUTES_PATH } from '@/config/site';
 
 type TApartmentOverlay = {
   apartments: GenplanApartment[];
+  selectedBedrooms: number[];
   viewId: GenplanApartment["polygon"][number]["viewId"];
   isInteractive: boolean;
 };
@@ -20,6 +21,7 @@ type PresentedCard = {
 
 export const ApartmentOverlay:FC<TApartmentOverlay> =({
   apartments,
+  selectedBedrooms,
   viewId,
   isInteractive,
 }) => {
@@ -30,11 +32,19 @@ export const ApartmentOverlay:FC<TApartmentOverlay> =({
   const visibleApartments = useMemo(
     () =>
       apartments.flatMap((apartment) => {
+        if (selectedBedrooms.length > 0 && !selectedBedrooms.includes(apartment.bedrooms)) {
+          return [];
+        }
+
         const polygon = apartment.polygon.find((item) => item.viewId === viewId);
         return polygon ? [{ apartment, polygon }] : [];
       }),
-    [apartments, viewId],
+    [apartments, selectedBedrooms, viewId],
   );
+
+  const isPresentedCardVisible = presentedCard
+    ? visibleApartments.some(({ apartment }) => apartment.id === presentedCard.apartment.id)
+    : false;
 
   const showCard = ({ apartment, polygon }: Omit<PresentedCard, "isOpen">) => {
     setActiveApartmentId(apartment.id);
@@ -94,7 +104,7 @@ export const ApartmentOverlay:FC<TApartmentOverlay> =({
 
         {visibleApartments.map(({ apartment, polygon }) => (
           <Link
-            href={`/apartments/${apartment.id}`}
+            href={`${ROUTES_PATH.apartments}/${apartment.id}`}
             key={`${apartment.id}-${viewId}`}
             className={styles.genplanApartmentOverlay__link}
             aria-label={`Квартира ${apartment.id}, ${apartment.floor} этаж, ${apartment.area} м²`}
@@ -119,10 +129,11 @@ export const ApartmentOverlay:FC<TApartmentOverlay> =({
           polygonPoints={presentedCard.polygon.points}
           frameWidth={GENPLAN_FRAME_WIDTH}
           frameHeight={GENPLAN_FRAME_HEIGHT}
-          isOpen={presentedCard.isOpen}
+          isOpen={presentedCard.isOpen && isPresentedCardVisible}
           onExitComplete={() => {
             setPresentedCard((currentCard) =>
-              currentCard?.apartment.id === presentedCard.apartment.id && !currentCard.isOpen
+              currentCard?.apartment.id === presentedCard.apartment.id &&
+              (!currentCard.isOpen || !isPresentedCardVisible)
                 ? null
                 : currentCard,
             );

@@ -13,6 +13,21 @@
     z-index: 2;
   }
 
+  &__filter  {
+    position: absolute;
+    top: 50%;
+    left: fluid(40);
+    transform: translateY(-50%);
+    z-index: 2;
+  }
+
+  &__btn {
+    position: absolute;
+    top: fluid(16);
+    right: fluid(20);
+    z-index: 2;
+  }
+
   &__viewport {
     position: relative;
     width: 100%;

@@ -1,0 +1,42 @@
+@use "breakpoints" as *;
+
+.genplanFilter {
+  display: flex;
+  flex-direction: column;
+  background: var(--color-black-100-20);
+
+  &__button {
+    min-width: fluid(66);
+    padding: fluid(12) fluid(14) fluid(14) fluid(12);
+    color: var(--color-white);
+    font-family: var(--font-display), serif;
+    font-size: var(--fs-button);
+    cursor: pointer;
+    backdrop-filter: blur(20px);
+    letter-spacing: 0.05em;
+    transition: background-color 0.5s, backdrop-filter 0.5s, scale 0.3s;
+
+    &[data-active="true"] {
+      background: var(--color-black-100-60);
+      backdrop-filter: blur(24px);
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--color-black-100-60);
+      outline-offset: 2px;
+    }
+
+    @media (hover: hover) {
+      &:hover {
+        scale: 1.1;
+        background: var(--color-black-100-60);
+      }
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    &__button {
+      transition: none;
+    }
+  }
+}

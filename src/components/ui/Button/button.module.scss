@@ -1,0 +1,20 @@
+@use "breakpoints" as *;
+
+.button {
+  padding: fluid(17) fluid(26);
+  backdrop-filter: blur(24px);
+  color: var(--color-white);
+  background: var(--color-black-100-60);
+  font-family: var(--font-display), serif;
+  font-size: var(--fs-button);
+  letter-spacing: 0.05em;
+  cursor: pointer;
+
+  &_black20 {
+    background: var(--color-black-100-20);
+  }
+
+  &_small {
+    padding: fluid(13) fluid(20);
+  }
+}

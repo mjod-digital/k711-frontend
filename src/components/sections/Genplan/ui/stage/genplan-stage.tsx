@@ -7,7 +7,10 @@ import { useFrameSequencePlayer } from "../../model/useFrameSequencePlayer";
 import { ApartmentOverlay } from "../apartment-overlay/apartment-overlay";
 import { GenplanNavigation } from "../navigation/genplan-navigation";
 import styles from "./genplan-stage.module.scss";
-import { FC } from 'react';
+import { FC, useState } from "react";
+import { GenplanFilter } from "../filter/genplan-filter";
+import { Button } from '@/components/ui/Button/button';
+import { ROUTES_PATH } from '@/config/site';
 
 type TGenplanStage = {
   apartments: GenplanApartment[];
@@ -16,6 +19,9 @@ type TGenplanStage = {
 export const GenplanStage:FC<TGenplanStage> = ({ apartments }) => {
   const isDesktop = useDesktopViewport();
   const { canvasRef, state, goToView } = useFrameSequencePlayer(isDesktop);
+
+  const [selectedBedrooms, setSelectedBedrooms] = useState<number[]>([]);
+
   const currentView = GENPLAN_VIEWS[state.currentViewIndex];
   const isBusy = state.status === "loading" || state.status === "playing";
 
@@ -29,6 +35,21 @@ export const GenplanStage:FC<TGenplanStage> = ({ apartments }) => {
         onSelect={goToView}
         className={styles.genplanStage__navigation}
       />
+
+      <GenplanFilter
+        apartments={apartments}
+        selectedBedrooms={selectedBedrooms}
+        onChange={setSelectedBedrooms}
+        className={styles.genplanStage__filter}
+      />
+
+      <Button
+        className={styles.genplanStage__btn}
+        url={ROUTES_PATH.apartments}
+      >
+        Выбор по параметрам
+      </Button>
+
       <div className={styles.genplanStage__viewport} aria-busy={isBusy}>
         <canvas
           ref={canvasRef}
@@ -40,6 +61,7 @@ export const GenplanStage:FC<TGenplanStage> = ({ apartments }) => {
 
         <ApartmentOverlay
           apartments={apartments}
+          selectedBedrooms={selectedBedrooms}
           viewId={currentView.id}
           isInteractive={state.status === "ready"}
         />

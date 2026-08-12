@@ -14,6 +14,17 @@
   }
 }
 
+.btnGenplan {
+  position: absolute;
+  top: fluid(20);
+  right: fluid(20);
+  z-index: 3;
+
+  @media (max-width: $bp-max-desktop-d) {
+    display: none;
+  }
+}
+
 // ----- Фото-сцена -----
 .media {
   position: relative;
