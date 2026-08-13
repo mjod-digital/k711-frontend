@@ -1,10 +1,11 @@
 import Link from "next/link";
-import { FC, useId, useMemo, useState } from "react";
-import { ru, type GenplanApartment } from "@/lib/apartments";
+import { FC, useEffect, useId, useMemo, useRef, useState } from "react";
+import type { GenplanApartment } from "@/lib/apartments";
 import { GENPLAN_FRAME_HEIGHT, GENPLAN_FRAME_WIDTH } from "../../model/config";
 import { GenplanCard } from "../card/genplan-card";
 import styles from "./apartment-overlay.module.scss";
 import { ROUTES_PATH } from '@/config/site';
+import { GenplanFlat } from '@/components/sections/Genplan/ui/flat/genplan-flat';
 
 type TApartmentOverlay = {
   apartments: GenplanApartment[];
@@ -13,11 +14,13 @@ type TApartmentOverlay = {
   isInteractive: boolean;
 };
 
-type PresentedCard = {
+type TPresentedCard = {
   apartment: GenplanApartment;
   polygon: GenplanApartment["polygon"][number];
   isOpen: boolean;
 };
+
+const CARD_CLOSE_DELAY_MS = 250;
 
 export const ApartmentOverlay:FC<TApartmentOverlay> =({
   apartments,
@@ -26,7 +29,23 @@ export const ApartmentOverlay:FC<TApartmentOverlay> =({
   isInteractive,
 }) => {
   const [activeApartmentId, setActiveApartmentId] = useState<string | null>(null);
-  const [presentedCard, setPresentedCard] = useState<PresentedCard | null>(null);
+  const [presentedCard, setPresentedCard] = useState<TPresentedCard | null>(null);
+  const closeTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const cancelScheduledClose = () => {
+    if (closeTimeoutRef.current === null) return;
+    clearTimeout(closeTimeoutRef.current);
+    closeTimeoutRef.current = null;
+  };
+
+  useEffect(
+    () => () => {
+      if (closeTimeoutRef.current !== null) {
+        clearTimeout(closeTimeoutRef.current);
+      }
+    },
+    [],
+  );
 
   const overlayMaskId = `apartment-overlay-mask-${useId().replace(/:/g, "")}`;
   const visibleApartments = useMemo(
@@ -46,7 +65,8 @@ export const ApartmentOverlay:FC<TApartmentOverlay> =({
     ? visibleApartments.some(({ apartment }) => apartment.id === presentedCard.apartment.id)
     : false;
 
-  const showCard = ({ apartment, polygon }: Omit<PresentedCard, "isOpen">) => {
+  const showCard = ({ apartment, polygon }: Omit<TPresentedCard, "isOpen">) => {
+    cancelScheduledClose();
     setActiveApartmentId(apartment.id);
     setPresentedCard({ apartment, polygon, isOpen: true });
   };
@@ -58,6 +78,14 @@ export const ApartmentOverlay:FC<TApartmentOverlay> =({
         ? { ...currentCard, isOpen: false }
         : currentCard,
     );
+  };
+
+  const scheduleCardClose = (apartmentId: string) => {
+    cancelScheduledClose();
+    closeTimeoutRef.current = setTimeout(() => {
+      hideCard(apartmentId);
+      closeTimeoutRef.current = null;
+    }, CARD_CLOSE_DELAY_MS);
   };
 
   return (
@@ -109,9 +137,9 @@ export const ApartmentOverlay:FC<TApartmentOverlay> =({
             className={styles.genplanApartmentOverlay__link}
             aria-label={`Квартира ${apartment.id}, ${apartment.floor} этаж, ${apartment.area} м²`}
             onMouseEnter={() => showCard({ apartment, polygon })}
-            onMouseLeave={() => hideCard(apartment.id)}
+            onMouseLeave={() => scheduleCardClose(apartment.id)}
             onFocus={() => showCard({ apartment, polygon })}
-            onBlur={() => hideCard(apartment.id)}
+            onBlur={() => scheduleCardClose(apartment.id)}
           >
             <polygon
               className={styles.genplanApartmentOverlay__polygon}
@@ -130,6 +158,16 @@ export const ApartmentOverlay:FC<TApartmentOverlay> =({
           frameWidth={GENPLAN_FRAME_WIDTH}
           frameHeight={GENPLAN_FRAME_HEIGHT}
           isOpen={presentedCard.isOpen && isPresentedCardVisible}
+          onPointerEnter={() => showCard({
+            apartment: presentedCard.apartment,
+            polygon: presentedCard.polygon,
+          })}
+          onPointerLeave={() => scheduleCardClose(presentedCard.apartment.id)}
+          onFocus={() => showCard({
+            apartment: presentedCard.apartment,
+            polygon: presentedCard.polygon,
+          })}
+          onBlur={() => scheduleCardClose(presentedCard.apartment.id)}
           onExitComplete={() => {
             setPresentedCard((currentCard) =>
               currentCard?.apartment.id === presentedCard.apartment.id &&
@@ -139,20 +177,7 @@ export const ApartmentOverlay:FC<TApartmentOverlay> =({
             );
           }}
         >
-          <div className={styles.genplanApartmentOverlay__card}>
-            <div className={styles.genplanApartmentOverlay__cardHeading}>
-              <div>
-                № {presentedCard.apartment.id}
-              </div>
-              <div>
-                {ru(presentedCard.apartment.cost * 1_000_000)} ₽
-              </div>
-            </div>
-
-            <div className={styles.genplanApartmentOverlay__cardFloor}>
-              {presentedCard.apartment.floor} этаж
-            </div>
-          </div>
+          <GenplanFlat {...presentedCard.apartment} />
         </GenplanCard>
       )}
     </>

@@ -49,6 +49,11 @@ export type Flat = {
   ceilingHeightM: number;
   viewFromWindowTypology: string | null;
   sectionNumber: string;
+  tags?: string[];
+  images?: Array<{
+    src: string;
+    alt: string;
+  }>;
   layoutUrl: string; // планировка (внешний S3)
   floorPlan: string; // мини-план этажа (внешний S3)
   polygon: ApartmentPolygon[]; // фасадные контуры на стоп-ракурсах генплана
@@ -88,6 +93,21 @@ function parseApartmentPolygons(value: unknown): ApartmentPolygon[] {
         points: polygon.points,
       },
     ];
+  });
+}
+
+function parseFlatImages(value: unknown): Flat["images"] {
+  if (!Array.isArray(value)) return undefined;
+
+  return value.flatMap((item) => {
+    if (!item || typeof item !== "object") return [];
+
+    const image = item as Record<string, unknown>;
+    if (typeof image.src !== "string" || typeof image.alt !== "string") {
+      return [];
+    }
+
+    return [{ src: image.src, alt: image.alt }];
   });
 }
 
@@ -133,6 +153,10 @@ function toFlat(x: unknown): Flat | null {
       typeof f.sectionNumber === "string"
         ? f.sectionNumber
         : String(f.sectionNumber ?? ""),
+    tags: Array.isArray(f.tags)
+      ? f.tags.filter((tag): tag is string => typeof tag === "string")
+      : undefined,
+    images: parseFlatImages(f.images),
     layoutUrl: typeof f.layoutUrl === "string" ? f.layoutUrl : "",
     floorPlan: typeof f.floorPlan === "string" ? f.floorPlan : "",
     polygon: parseApartmentPolygons(f.polygon),
@@ -221,6 +245,12 @@ export function flatToGenplanApartment(f: Flat): GenplanApartment {
     section: f.sectionNumber,
     status: f.status,
     polygon: f.polygon,
+    tags: f.tags,
+    images: f.images,
+    layoutUrl: f.layoutUrl,
+    price: f.price,
+    amount: f.amount,
+    amountDiscount: f.amountDiscount,
   };
 }
 

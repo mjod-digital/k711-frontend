@@ -29,13 +29,6 @@ export const GenplanStage:FC<TGenplanStage> = ({ apartments }) => {
 
   return (
     <div className={styles.genplanStage}>
-      <GenplanNavigation
-        currentViewIndex={state.currentViewIndex}
-        status={state.status}
-        onSelect={goToView}
-        className={styles.genplanStage__navigation}
-      />
-
       <GenplanFilter
         apartments={apartments}
         selectedBedrooms={selectedBedrooms}
@@ -51,6 +44,13 @@ export const GenplanStage:FC<TGenplanStage> = ({ apartments }) => {
       </Button>
 
       <div className={styles.genplanStage__viewport} aria-busy={isBusy}>
+        <GenplanNavigation
+          currentViewIndex={state.currentViewIndex}
+          status={state.status}
+          onSelect={goToView}
+          className={styles.genplanStage__navigation}
+        />
+
         <canvas
           ref={canvasRef}
           className={styles.genplanStage__canvas}

@@ -49,7 +49,7 @@ export const MOCK_FLATS: Flat[] = [
     area: 79.6,
     amount: 147260000,
     price: 1850000,
-    amountDiscount: 147260000,
+    amountDiscount: 127260000,
     areaProject: 79.6,
     type: "Flat",
     status: "Free",
@@ -73,7 +73,7 @@ export const MOCK_FLATS: Flat[] = [
     area: 106.8,
     amount: 223746000,
     price: 2095000,
-    amountDiscount: 223746000,
+    amountDiscount: 213526000,
     areaProject: 106.8,
     type: "Flat",
     status: "Free",
@@ -83,10 +83,21 @@ export const MOCK_FLATS: Flat[] = [
     ceilingHeightM: 3.4,
     viewFromWindowTypology: null,
     sectionNumber: "1",
+    images: [
+      {
+        src: "/images/apartment/plans/5.png",
+        alt: "plan"
+      },
+      {
+        src: "/images/apartment/plans/13.png",
+        alt: "plan"
+      }
+    ],
     layoutUrl: "/images/apartment/plans/4.png",
+    tags: ["Пентхаус", "Антресольный этаж", "Терраса", "Балкон", "Пентхаус"],
     floorPlan: "",
     polygon: [
-      { viewId: "street", points: "406,268,430,85,454,80,840,114,835,278,445,261" },
+      { viewId: "street", points: "288,195,275,199,290,94,299,88,435,88,429,190" },
       { viewId: "corner", points: "785,490 900,498 900,570 785,560" },
     ],
   },
@@ -134,7 +145,7 @@ export const MOCK_FLATS: Flat[] = [
     layoutUrl: "/images/apartment/plans/29.png",
     floorPlan: "",
     polygon: [
-      { viewId: "corner", points: "749,269,766,102,864,71,898,75,988,124,1005,281,915,249,849,246" },
+      { viewId: "corner", points: "556,272,552,256,593,246,607,241,612,227,625,221,635,223,646,227,648,236,658,238,658,250,678,257,679,273,706,277,697,193,643,168,595,168,558,175,527,178,519,273" },
       { viewId: "courtyard", points: "630,630 785,630 785,720 630,720" },
     ],
   },

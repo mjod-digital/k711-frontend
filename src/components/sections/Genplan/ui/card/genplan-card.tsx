@@ -10,6 +10,10 @@ type TGenplanCard = {
   frameHeight: number;
   isOpen: boolean;
   onExitComplete?: () => void;
+  onPointerEnter?: () => void;
+  onPointerLeave?: () => void;
+  onFocus?: () => void;
+  onBlur?: () => void;
 };
 
 type CardSide = "left" | "right";
@@ -47,6 +51,10 @@ export const GenplanCard: FC<TGenplanCard> = ({
   frameHeight,
   isOpen,
   onExitComplete,
+  onPointerEnter,
+  onPointerLeave,
+  onFocus,
+  onBlur,
 }) => {
   const cardRef = useRef<HTMLDivElement>(null);
   const [side, setSide] = useState<CardSide>("right");
@@ -91,6 +99,10 @@ export const GenplanCard: FC<TGenplanCard> = ({
     >
       <div
         className={styles.genplanCard__content}
+        onPointerEnter={onPointerEnter}
+        onPointerLeave={onPointerLeave}
+        onFocus={onFocus}
+        onBlur={onBlur}
         onAnimationEnd={(event) => {
           if (event.target === event.currentTarget && !isOpen) {
             onExitComplete?.();

@@ -18,6 +18,7 @@
   }
 
   &__content {
+    pointer-events: auto;
     will-change: opacity, transform;
   }
 
