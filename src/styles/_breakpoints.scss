@@ -2,6 +2,8 @@
 // Граница = min-ширина десктоп-артборда Figma (десктоп 1440, мобилка 360).
 $bp-desktop: 768px;
 
+$bp-max-desktop-d: 1200px;
+
 // Desktop-first: базовые стили = десктоп, миксин mobile включает мобильные
 // переопределения через max-width.
 @mixin mobile {

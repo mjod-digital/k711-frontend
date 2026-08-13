@@ -1,5 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
+import { Breadcrumb } from "@/components/ui/Breadcrumb";
 import styles from "./not-found.module.scss";
 
 // 404 / страница не найдена (Figma 540-21098 / 540-21356 / 541-21952).
@@ -8,21 +9,13 @@ import styles from "./not-found.module.scss";
 export default function NotFound() {
   return (
     <section className={styles.notFound}>
-      <nav className={styles.breadcrumb} aria-label="Хлебные крошки">
-        <ol className={styles.crumbs}>
-          <li className={styles.crumb}>
-            <Link href="/" aria-label="Главная">
-              …
-            </Link>
-          </li>
-          <li className={styles.crumb}>
-            <span className={styles.sep} aria-hidden="true">
-              /
-            </span>
-            <span aria-current="page">404</span>
-          </li>
-        </ol>
-      </nav>
+      <Breadcrumb
+        variant="notFound"
+        items={[
+          { label: "…", href: "/", ariaLabel: "Главная" },
+          { label: "404" },
+        ]}
+      />
 
       <div className={styles.body}>
         <div className={styles.media}>

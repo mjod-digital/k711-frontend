@@ -18,4 +18,9 @@ export const siteConfig = {
   ],
 } as const;
 
+export const ROUTES_PATH = {
+  apartments: '/apartments',
+  genplan: '/genplan',
+} as const;
+
 export type SiteConfig = typeof siteConfig;

@@ -1,0 +1,70 @@
+@use "breakpoints" as *;
+
+.genplanCard {
+  position: absolute;
+  top: var(--genplan-card-center-y);
+  z-index: 4;
+  width: max-content;
+  pointer-events: none;
+
+  &[data-side="right"] {
+    left: var(--genplan-card-right);
+    transform: translate(var(--genplan-card-gap), -50%);
+  }
+
+  &[data-side="left"] {
+    left: var(--genplan-card-left);
+    transform: translate(calc(-100% - var(--genplan-card-gap)), -50%);
+  }
+
+  &__content {
+    pointer-events: auto;
+    will-change: opacity, transform;
+  }
+
+  &[data-state="open"] &__content {
+    animation: genplan-card-scale-in 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  &[data-state="closed"] &__content {
+    animation: genplan-card-scale-out 0.4s cubic-bezier(0.64, 0, 0.78, 0) both;
+  }
+
+  &[data-side="right"] &__content {
+    transform-origin: left center;
+  }
+
+  &[data-side="left"] &__content {
+    transform-origin: right center;
+  }
+}
+
+@keyframes genplan-card-scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes genplan-card-scale-out {
+  from {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  to {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .genplanCard__content {
+    animation-duration: 1ms !important;
+  }
+}

@@ -1,0 +1,33 @@
+@use "breakpoints" as *;
+
+.genplanNavigation {
+  overflow: hidden;
+  display: flex;
+  gap: fluid(52);
+
+  &__control {
+    display: grid;
+    place-items: center;
+    width: fluid(40);
+    height: fluid(40);
+    padding: 0;
+    border: 0;
+    background: transparent;
+    cursor: pointer;
+    transition: opacity 0.5s;
+
+    &_next {
+      transform: rotate(180deg);
+    }
+
+    &:disabled {
+      pointer-events: none;
+      opacity: 0.6;
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--color-brown-light);
+      outline-offset: 3px;
+    }
+  }
+}

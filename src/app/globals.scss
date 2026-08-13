@@ -90,6 +90,8 @@ p {
   /* ----- Цвета ----- */
   --color-white: #ffffff;
   --color-black: #1d1d1d;
+  --color-black-100-20: #00000033;
+  --color-black-100-60: #00000099;
   --color-brown-light: #b0725f;
   --color-brown-medium: #753b29;
   --color-brown-dark: #3e2022;
@@ -99,7 +101,9 @@ p {
   --color-badge-light-2: #e6d6cb;
   --color-dom-brown-light: #a98f71;
   --color-apt-mob: #ECE7DE;
+  --color-purple-light: #19050466;
   --color-error: #c0563c; /* подсветка незаполненных обязательных полей */
+  --color-suvaGrey: #A08B85;
 
   --color-bg: var(--color-badge-light);
   --color-fg: var(--color-black);

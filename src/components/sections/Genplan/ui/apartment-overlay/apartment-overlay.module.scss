@@ -1,0 +1,66 @@
+@use "breakpoints" as *;
+
+.genplanApartmentOverlay {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: block;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.4s;
+
+  &[data-visible="true"] {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  &__link {
+    &:focus-visible {
+      outline: none;
+
+      .genplanApartmentOverlay__polygon {
+        stroke-width: 5;
+      }
+    }
+  }
+
+  &__shade {
+    fill: var(--color-purple-light);
+    pointer-events: none;
+  }
+
+  &__shadePolygon {
+    fill: var(--color-purple-light);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.5s;
+
+    &[data-muted="true"] {
+      opacity: 1;
+    }
+  }
+
+  &__polygon {
+    fill: transparent;
+    opacity: 1;
+    stroke: var(--color-badge-light);
+    stroke-width: 2;
+    vector-effect: non-scaling-stroke;
+    cursor: pointer;
+    transition: opacity 0.5s;
+
+    &[data-muted="true"] {
+      opacity: 0;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    &,
+    &__polygon,
+    &__shadePolygon {
+      transition: none;
+    }
+  }
+}
