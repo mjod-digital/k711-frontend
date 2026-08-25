@@ -1,11 +1,10 @@
 "use client";
 
-import Link from "next/link";
 import { HeroImage } from "@/components/ui/HeroImage";
 import { useRef, useState } from "react";
 import type { CSSProperties } from "react";
 import { Reveal } from "@/components/ui/Reveal";
-import { siteConfig } from "@/config/site";
+import { cn } from "@/lib/utils";
 import { useIsomorphicLayoutEffect } from "@/lib/useIsomorphicLayoutEffect";
 import styles from "./Hero.module.scss";
 
@@ -18,6 +17,8 @@ export function Hero({
 }: HeroProps = {}) {
   const mediaRef = useRef<HTMLDivElement>(null);
   const parallaxRef = useRef<HTMLDivElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [videoPlaying, setVideoPlaying] = useState(false);
   // Заголовок держим под шторкой, пока перекрывает прелоудер: свой IO сработал бы
   // сразу при монтировании и анимация отыграла бы «вслепую». Стартуем шторку по
   // сигналу прелоудера (событие preloader:done) — заголовок проявляется на его сходе.
@@ -63,16 +64,44 @@ export function Hero({
     };
   }, []);
 
+  // Автоплей hero-видео: muted+playsInline → политика автоплея пускает. НЕ играем при
+  // reduced-motion (виден статичный кадр = HeroImage под видео). Видео стартует
+  // прозрачным и проявляется по событию playing — до старта виден приоритетный
+  // HeroImage (верный кроп моб/десктоп, LCP, хук прелоудера), без чёрного мелькания.
+  useIsomorphicLayoutEffect(() => {
+    const v = videoRef.current;
+    if (!v) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    v.play().catch(() => {});
+  }, []);
+
   return (
     <section className={styles.hero}>
       <div className={styles.media} ref={mediaRef}>
         <div className={styles.parallax} ref={parallaxRef}>
+          {/* Под видео — приоритетная картинка (data-hero): её ждёт прелоудер, она же
+              LCP-кадр и фолбэк (виден до старта видео и при reduced-motion, с верным
+              кропом моб/десктоп). */}
           <HeroImage
             image={image}
             imageMobile={imageMobile}
             imageAlt={imageAlt}
             className={styles.image}
           />
+          {/* Видео-фон поверх. muted+loop+playsInline → автоплеится. Проявляется
+              (opacity) по playing — без чёрного мелькания и без poster-рассинхрона. */}
+          <video
+            ref={videoRef}
+            className={cn(styles.image, styles.video, videoPlaying && styles.videoPlaying)}
+            muted
+            loop
+            playsInline
+            preload="auto"
+            aria-hidden="true"
+            onPlaying={() => setVideoPlaying(true)}
+          >
+            <source src="/video/k711-hero.mp4" type="video/mp4" />
+          </video>
         </div>
 
         <div className={styles.overlay}>
@@ -109,14 +138,6 @@ export function Hero({
             >
               пресне
             </span>
-          </Reveal>
-
-          {/* Кнопка — как абзацы в Statement: мягкий fade+сдвиг снизу от ТОГО ЖЕ
-              триггера, что и заголовок, с задержкой → появляется вслед за ним. */}
-          <Reveal variant="fade" active={revealed} delay={1400} duration={900}>
-            <Link href={siteConfig.cta.href} className={styles.cta}>
-              {siteConfig.cta.label}
-            </Link>
           </Reveal>
         </div>
       </div>

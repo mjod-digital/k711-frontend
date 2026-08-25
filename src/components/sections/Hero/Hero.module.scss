@@ -41,6 +41,17 @@
   object-position: center;
 }
 
+// Видео-фон поверх .image: прозрачно до старта (виден HeroImage-фолбэк), плавно
+// проявляется по .videoPlaying (событие playing). cover/inset наследует от .image.
+.video {
+  opacity: 0;
+  transition: opacity 0.7s ease;
+  pointer-events: none;
+}
+.videoPlaying {
+  opacity: 1;
+}
+
 // Равномерное затемнение всего фото (Figma: #1b090b, multiply, 30%). multiply
 // приглушает, сохраняя фактуру; работает внутри .media (isolation:isolate),
 // с кремовым фоном не смешивается. Текст (.overlay z-index:2) рисуется поверх и
@@ -118,34 +129,3 @@
   text-transform: uppercase;
 }
 
-// ----- Кнопка «выбрать резиденцию» (светлый вариант поверх фото) -----
-.cta {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  height: fluid(48);
-  padding-inline: fluid(20);
-  border: fluid(1) solid var(--color-badge-light);
-  -webkit-text-stroke-width: fluid(0.3);
-  color: var(--color-badge-light);
-  font-family: var(--font-display);
-  font-size: var(--fs-button);
-  line-height: var(--lh-button);
-  letter-spacing: var(--ls-button);
-  white-space: nowrap;
-  transition:
-    background-color 0.45s ease,
-    color 0.45s ease;
-
-  // Появление ведёт Reveal (variant="fade") — как абзацы Statement, вслед за
-  // заголовком. Собственной CSS-анимации входа у кнопки больше нет.
-
-  &:hover {
-    background: var(--color-badge-light);
-    color: var(--color-brown-dark);
-  }
-
-  @include mobile {
-    height: fluid(44);
-  }
-}

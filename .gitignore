@@ -31,6 +31,8 @@
 *.pem
 # архивы ассетов не коммитим (напр. public/images_N.zip ~915MB — локальный мусор)
 *.zip
+# исходник hero-видео (228MB) — коммитим только сжатый public/video/k711-hero.mp4
+/public/video/k711_final_2k.mp4
 
 # debug
 npm-debug.log*
