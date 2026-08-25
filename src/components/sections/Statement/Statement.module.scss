@@ -15,12 +15,32 @@
   padding: fluid(40) fluid(20) fluid(40) 0;
 
   @include mobile {
-    // Мобайл: правая колонка ~71% ширины, прижата вправо.
+    // Мобайл: колонка — лид-заголовок (центр) сверху, правая колонка ~71% ниже, вправо.
     display: flex;
-    justify-content: flex-end;
+    flex-direction: column;
+    align-items: flex-end;
     padding: 0;
     padding-inline-end: fluid(8);
     margin-bottom: fluid(80); // отступ от следующей секции
+  }
+}
+
+// Доп. центрированный заголовок над блоком (дублирует hero-заголовок — запрос).
+// Контраст к правой колонке ниже: тянется на всю ширину и центрируется.
+.leadHeading {
+  width: 100%;
+  margin-bottom: fluid(40);
+  text-align: center;
+  color: var(--color-brown-medium);
+  font-family: var(--font-display);
+  // Размер как у hero-заголовка (запрос): --fs-h1 + его line-height/трекинг.
+  font-size: var(--fs-h1);
+  line-height: var(--lh-h1);
+  letter-spacing: var(--ls-h1);
+  text-transform: uppercase;
+
+  @include mobile {
+    margin-bottom: fluid(24);
   }
 }
 
