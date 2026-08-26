@@ -9,12 +9,18 @@
 
   &[data-side="right"] {
     left: var(--genplan-card-right);
-    transform: translate(var(--genplan-card-gap), -50%);
+    transform: translate(
+      calc(var(--genplan-card-gap) + var(--genplan-card-shift-x, 0px)),
+      calc(-50% + var(--genplan-card-shift-y, 0px))
+    );
   }
 
   &[data-side="left"] {
     left: var(--genplan-card-left);
-    transform: translate(calc(-100% - var(--genplan-card-gap)), -50%);
+    transform: translate(
+      calc(-100% - var(--genplan-card-gap) + var(--genplan-card-shift-x, 0px)),
+      calc(-50% + var(--genplan-card-shift-y, 0px))
+    );
   }
 
   &__content {
