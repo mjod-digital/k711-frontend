@@ -2,7 +2,7 @@ import type { GenplanViewId } from "@/lib/apartments";
 
 export const GENPLAN_FRAME_WIDTH = 5000;
 export const GENPLAN_FRAME_HEIGHT = 2812;
-export const GENPLAN_FPS = 35;
+export const GENPLAN_FPS = 60;
 
 export type GenplanView = {
   id: GenplanViewId;
