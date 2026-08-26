@@ -18,6 +18,12 @@ type TGenplanCard = {
 
 type CardSide = "left" | "right";
 
+type CardPosition = {
+  side: CardSide;
+  shiftX: number;
+  shiftY: number;
+};
+
 const CARD_GAP = 27;
 
 const getPolygonBounds = (points: string) => {
@@ -44,6 +50,11 @@ const getPolygonBounds = (points: string) => {
   };
 };
 
+const clamp = (value: number, min: number, max: number) => {
+  if (min > max) return (min + max) / 2;
+  return Math.min(Math.max(value, min), max);
+};
+
 export const GenplanCard: FC<TGenplanCard> = ({
   children,
   polygonPoints,
@@ -57,13 +68,19 @@ export const GenplanCard: FC<TGenplanCard> = ({
   onBlur,
 }) => {
   const cardRef = useRef<HTMLDivElement>(null);
-  const [side, setSide] = useState<CardSide>("right");
+  const [position, setPosition] = useState<CardPosition>({
+    side: "right",
+    shiftX: 0,
+    shiftY: 0,
+  });
   const bounds = useMemo(() => getPolygonBounds(polygonPoints), [polygonPoints]);
   const style = {
     "--genplan-card-left": `${(bounds.left / frameWidth) * 100}%`,
     "--genplan-card-right": `${(bounds.right / frameWidth) * 100}%`,
     "--genplan-card-center-y": `${(bounds.centerY / frameHeight) * 100}%`,
     "--genplan-card-gap": `${CARD_GAP}px`,
+    "--genplan-card-shift-x": `${position.shiftX}px`,
+    "--genplan-card-shift-y": `${position.shiftY}px`,
   } as CSSProperties;
 
   useIsomorphicLayoutEffect(() => {
@@ -72,28 +89,59 @@ export const GenplanCard: FC<TGenplanCard> = ({
 
     if (!(card && container instanceof HTMLElement)) return;
 
-    const updateSide = () => {
-      const polygonRight = (bounds.right / frameWidth) * container.clientWidth;
-      const availableSpace = container.clientWidth - polygonRight - CARD_GAP;
-      const nextSide: CardSide = availableSpace >= card.offsetWidth ? "right" : "left";
+    const updatePosition = () => {
+      const { clientWidth, clientHeight } = container;
+      const cardWidth = card.offsetWidth;
+      const cardHeight = card.offsetHeight;
 
-      setSide((currentSide) => currentSide === nextSide ? currentSide : nextSide);
+      const polygonLeft = (bounds.left / frameWidth) * clientWidth;
+      const polygonRight = (bounds.right / frameWidth) * clientWidth;
+      const centerY = (bounds.centerY / frameHeight) * clientHeight;
+
+      const spaceRight = clientWidth - polygonRight - CARD_GAP;
+      const spaceLeft = polygonLeft - CARD_GAP;
+      const nextSide: CardSide =
+        spaceRight >= cardWidth || spaceRight >= spaceLeft ? "right" : "left";
+
+      const cardLeft =
+        nextSide === "right"
+          ? polygonRight + CARD_GAP
+          : polygonLeft - CARD_GAP - cardWidth;
+      const cardRight = cardLeft + cardWidth;
+
+      let shiftX = 0;
+      if (cardRight > clientWidth) shiftX = clientWidth - cardRight;
+      if (cardLeft + shiftX < 0) shiftX = -cardLeft;
+
+      const shiftY = clamp(centerY, cardHeight / 2, clientHeight - cardHeight / 2) - centerY;
+
+      setPosition((current) => {
+        if (
+          current.side === nextSide &&
+          current.shiftX === shiftX &&
+          current.shiftY === shiftY
+        ) {
+          return current;
+        }
+
+        return { side: nextSide, shiftX, shiftY };
+      });
     };
 
-    updateSide();
+    updatePosition();
 
-    const resizeObserver = new ResizeObserver(updateSide);
+    const resizeObserver = new ResizeObserver(updatePosition);
     resizeObserver.observe(container);
     resizeObserver.observe(card);
 
     return () => resizeObserver.disconnect();
-  }, [bounds.right, frameWidth]);
+  }, [bounds.centerY, bounds.left, bounds.right, frameHeight, frameWidth]);
 
   return (
     <div
       ref={cardRef}
       className={styles.genplanCard}
-      data-side={side}
+      data-side={position.side}
       data-state={isOpen ? "open" : "closed"}
       style={style}
     >
