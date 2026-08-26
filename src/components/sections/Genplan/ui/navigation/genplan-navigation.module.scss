@@ -3,6 +3,7 @@
 .genplanNavigation {
   overflow: hidden;
   display: flex;
+  align-items: center;
   gap: fluid(52);
 
   &__control {
@@ -14,10 +15,18 @@
     border: 0;
     background: transparent;
     cursor: pointer;
-    transition: opacity 0.5s;
+    transition: opacity 0.5s, transform 0.5s;
+
+    &:hover {
+      transform: scale(1.2);
+    }
 
     &_next {
       transform: rotate(180deg);
+
+      &:hover {
+        transform: rotate(180deg) scale(1.2);
+      }
     }
 
     &:disabled {
