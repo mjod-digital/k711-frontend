@@ -12,7 +12,7 @@ export type GenplanView = {
 
 export const GENPLAN_FRAME_PATHS = Array.from(
   { length: 238 },
-  (_, index) => `/images/genplan/${String(index).padStart(4, "0")}.jpg`,
+  (_, index) => `/images/genplan/${String(index).padStart(4, "0")}.webp`,
 );
 
 export const GENPLAN_VIEWS = [
