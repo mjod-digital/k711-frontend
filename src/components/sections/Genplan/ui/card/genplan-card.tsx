@@ -25,6 +25,7 @@ type CardPosition = {
 };
 
 const CARD_GAP = 27;
+const CARD_EDGE_GAP = 16;
 
 const getPolygonBounds = (points: string) => {
   const coordinates = points.match(/-?\d*\.?\d+(?:e[-+]?\d+)?/gi)?.map(Number) ?? [];
@@ -113,7 +114,12 @@ export const GenplanCard: FC<TGenplanCard> = ({
       if (cardRight > clientWidth) shiftX = clientWidth - cardRight;
       if (cardLeft + shiftX < 0) shiftX = -cardLeft;
 
-      const shiftY = clamp(centerY, cardHeight / 2, clientHeight - cardHeight / 2) - centerY;
+      const shiftY =
+        clamp(
+          centerY,
+          cardHeight / 2 + CARD_EDGE_GAP,
+          clientHeight - cardHeight / 2 - CARD_EDGE_GAP,
+        ) - centerY;
 
       setPosition((current) => {
         if (
