@@ -19,6 +19,20 @@ const INITIAL_STATE: GenplanPlayerState = {
   error: null,
 };
 
+const READY_STATE: GenplanPlayerState = {
+  currentViewIndex: 0,
+  status: "ready",
+  progress: 1,
+  error: null,
+};
+
+const frameCache = new Map<number, HTMLImageElement>();
+const frameRequests = new Map<number, Promise<HTMLImageElement>>();
+
+function isFrameSequenceLoaded() {
+  return frameCache.size === GENPLAN_FRAME_PATHS.length;
+}
+
 function getFrameRange(from: number, to: number) {
   const direction = to >= from ? 1 : -1;
   const frames: number[] = [];
@@ -32,11 +46,11 @@ function getFrameRange(from: number, to: number) {
 
 export function useFrameSequencePlayer(enabled: boolean) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const frameCacheRef = useRef(new Map<number, HTMLImageElement>());
-  const frameRequestsRef = useRef(new Map<number, Promise<HTMLImageElement>>());
   const rafRef = useRef<number | null>(null);
   const taskIdRef = useRef(0);
-  const [state, setState] = useState<GenplanPlayerState>(INITIAL_STATE);
+  const [state, setState] = useState<GenplanPlayerState>(() =>
+    isFrameSequenceLoaded() ? READY_STATE : INITIAL_STATE,
+  );
 
   const drawFrame = useCallback((image: HTMLImageElement) => {
     const canvas = canvasRef.current;
@@ -49,10 +63,10 @@ export function useFrameSequencePlayer(enabled: boolean) {
   }, []);
 
   const loadFrame = useCallback((frameIndex: number) => {
-    const cached = frameCacheRef.current.get(frameIndex);
+    const cached = frameCache.get(frameIndex);
     if (cached) return Promise.resolve(cached);
 
-    const activeRequest = frameRequestsRef.current.get(frameIndex);
+    const activeRequest = frameRequests.get(frameIndex);
     if (activeRequest) return activeRequest;
 
     const source = GENPLAN_FRAME_PATHS[frameIndex];
@@ -72,17 +86,17 @@ export function useFrameSequencePlayer(enabled: boolean) {
           console.error(err)
         }
 
-        frameCacheRef.current.set(frameIndex, image);
-        frameRequestsRef.current.delete(frameIndex);
+        frameCache.set(frameIndex, image);
+        frameRequests.delete(frameIndex);
 
         return image;
       })
       .catch((error: unknown) => {
-        frameRequestsRef.current.delete(frameIndex);
+        frameRequests.delete(frameIndex);
         throw error;
       });
 
-    frameRequestsRef.current.set(frameIndex, request);
+    frameRequests.set(frameIndex, request);
 
     return request;
   }, []);
@@ -131,7 +145,7 @@ export function useFrameSequencePlayer(enabled: boolean) {
           );
 
           if (position !== lastDrawnPosition) {
-            const image = frameCacheRef.current.get(frameIndices[position]);
+            const image = frameCache.get(frameIndices[position]);
             if (image) drawFrame(image);
             lastDrawnPosition = position;
           }
@@ -173,7 +187,7 @@ export function useFrameSequencePlayer(enabled: boolean) {
 
       try {
         if (reducedMotion) {
-          const image = frameCacheRef.current.get(targetView.frameIndex);
+          const image = frameCache.get(targetView.frameIndex);
           if (image) drawFrame(image);
         } else {
           await animateFrames(frameIndices, taskId);
@@ -181,7 +195,7 @@ export function useFrameSequencePlayer(enabled: boolean) {
 
         if (taskIdRef.current !== taskId) return;
 
-        const finalFrame = frameCacheRef.current.get(targetView.frameIndex);
+        const finalFrame = frameCache.get(targetView.frameIndex);
         if (finalFrame) drawFrame(finalFrame);
 
         setState({
@@ -211,6 +225,13 @@ export function useFrameSequencePlayer(enabled: boolean) {
     const firstFrameIndex = GENPLAN_VIEWS[0].frameIndex;
     const allFrameIndices = GENPLAN_FRAME_PATHS.map((_, frameIndex) => frameIndex);
 
+    if (isFrameSequenceLoaded()) {
+      const image = frameCache.get(firstFrameIndex);
+      if (image) drawFrame(image);
+      setState(READY_STATE);
+      return;
+    }
+
     setState(INITIAL_STATE);
 
     void loadFrames(allFrameIndices, (progress) => {
@@ -220,7 +241,7 @@ export function useFrameSequencePlayer(enabled: boolean) {
       .then(() => {
         if (taskIdRef.current !== taskId) return;
 
-        const image = frameCacheRef.current.get(firstFrameIndex);
+        const image = frameCache.get(firstFrameIndex);
         if (!image) throw new Error("Не удалось подготовить первый кадр");
 
         drawFrame(image);
@@ -241,10 +262,6 @@ export function useFrameSequencePlayer(enabled: boolean) {
     () => () => {
       taskIdRef.current += 1;
       if (rafRef.current !== null) cancelAnimationFrame(rafRef.current);
-
-      for (const image of frameCacheRef.current.values()) image.src = "";
-      frameCacheRef.current.clear();
-      frameRequestsRef.current.clear();
     },
     [],
   );

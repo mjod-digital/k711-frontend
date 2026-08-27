@@ -72,7 +72,7 @@ export const GenplanFlat: FC<TGenplanFlat> = ({
 
       <div className={styles.genplanFlat__floorWrapper}>
         <div className={styles.genplanFlat__floor}>
-          этаж {floor} из 16
+          этаж {floor} из 8
         </div>
 
         {(amount && amountDiscount) && (
