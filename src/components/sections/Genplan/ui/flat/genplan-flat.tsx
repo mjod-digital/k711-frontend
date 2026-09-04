@@ -65,9 +65,11 @@ export const GenplanFlat: FC<TGenplanFlat> = ({
         <div>
           № {id}
         </div>
-        <div>
-          {ru(amountDiscount ?? amount)} ₽
-        </div>
+        {amount && (
+          <div>
+            {ru(amount)} ₽
+          </div>
+        )}
       </div>
 
       <div className={styles.genplanFlat__floorWrapper}>
@@ -75,9 +77,9 @@ export const GenplanFlat: FC<TGenplanFlat> = ({
           этаж {floor} из 8
         </div>
 
-        {(amount && amountDiscount) && (
+        {amountDiscount && amountDiscount !== amount && (
           <div className={styles.genplanFlat__priceOldWrapper}>
-            <div className={styles.genplanFlat__priceOld}>{ru(amount)} ₽</div>
+            <div className={styles.genplanFlat__priceOld}>{ru(amountDiscount)} ₽</div>
 
             <div
               className={styles.genplanFlat__alertWrapper}
