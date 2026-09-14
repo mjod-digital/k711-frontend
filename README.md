@@ -2,7 +2,7 @@
 
 Резиновый (fluid) премиум-лендинг: **Next.js 16** (App Router) · **React 19** · **TypeScript** ·
 **SCSS Modules** (без Tailwind) · headless **MODX** как CMS · инерционный скролл на **Lenis**.
-Прод — blue-green на `klimashkina711.ru` (см. [DEPLOY.md](DEPLOY.md)).
+Прод — `klimashkina711.ru`; выкладка из `main` через `deploy/deploy.sh` (см. [DEPLOY.md](DEPLOY.md)).
 
 > ⚠️ Это Next.js **16** — API и конвенции отличаются от привычных. Перед правкой кода,
 > завязанного на фреймворк, смотри локальные доки в `node_modules/next/dist/docs/`
@@ -94,7 +94,7 @@ lists, meta }`). Данные с внешней границы валидиру�
 
 ## Деплой
 
-Blue-green на прод-сервере (nginx + pm2 под Node 22). Полный ранбук — [DEPLOY.md](DEPLOY.md).
+Только из `main`: каждый коммит собирается в отдельный релиз на прод-сервере, затем атомарное переключение, проверка здоровья и автооткат (nginx + pm2 под Node 22). Запуск — GitHub Actions «Deploy production» или `deploy.sh` по SSH. Полный ранбук — [DEPLOY.md](DEPLOY.md).
 Конкретный хост и SSH-доступ держит владелец проекта.
 
 ## Известные проблемы

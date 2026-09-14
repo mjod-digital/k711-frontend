@@ -1,0 +1,121 @@
+# Выкладка фронтенда на прод. Вся логика — в серверном deploy/deploy.sh;
+# здесь проверка типов и вызов его по SSH ключом с forced command.
+#
+# ВЫКЛЮЧЕНО, пока нет переменной репозитория DEPLOY_ENABLED = true
+# (Settings → Secrets and variables → Actions → Variables). Выключатель действует и на
+# push в main, и на ручной запуск. Это защита от случайной выкладки, а НЕ граница
+# безопасности: секреты репозитория доступны workflow из любой ветки, поэтому любой
+# с write-доступом может обойти этот файл. См. DEPLOY.md, «Модель доверия».
+#
+# Нужны:  secrets.DEPLOY_SSH_KEY      приватный ключ CI (на сервере — только deploy.sh)
+#         secrets.DEPLOY_KNOWN_HOSTS  host key сервера — защита от подмены сервера
+#         vars.DEPLOY_HOST, vars.DEPLOY_USER
+
+name: Deploy production
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      command:
+        description: "Действие"
+        type: choice
+        options: [deploy, rollback, status]
+        default: deploy
+      release:
+        description: "Только для rollback: имя релиза (пусто — предыдущий живой). Узнать — через status"
+        type: string
+        required: false
+        default: ""
+
+# deploy и rollback — строго по очереди, начатую не отменяем (доедет или откатится сама).
+# status в очередь не встаёт: он только читает и не должен вытеснять ждущую выкладку.
+concurrency:
+  group: ${{ github.event_name == 'workflow_dispatch' && inputs.command == 'status' && format('status-{0}', github.run_id) || 'production-deploy' }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    if: github.ref == 'refs/heads/main' && vars.DEPLOY_ENABLED == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      COMMAND: ${{ github.event_name == 'workflow_dispatch' && inputs.command || 'deploy' }}
+      RELEASE: ${{ github.event_name == 'workflow_dispatch' && inputs.release || '' }}
+    steps:
+      - name: Проверить настройки
+        env:
+          DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          DEPLOY_KNOWN_HOSTS: ${{ secrets.DEPLOY_KNOWN_HOSTS }}
+          DEPLOY_HOST: ${{ vars.DEPLOY_HOST }}
+          DEPLOY_USER: ${{ vars.DEPLOY_USER }}
+        run: |
+          missing=""
+          for v in DEPLOY_SSH_KEY DEPLOY_KNOWN_HOSTS DEPLOY_HOST DEPLOY_USER; do
+            [ -n "${!v}" ] || missing="$missing $v"
+          done
+          if [ -n "$missing" ]; then
+            echo "::error::Не заданы:$missing — см. DEPLOY.md, «Первичная настройка»"
+            exit 1
+          fi
+          if [ -n "$RELEASE" ] && ! [[ "$RELEASE" =~ ^[0-9]{8}-[0-9]{6}-[0-9a-z]{6,12}$ ]]; then
+            echo "::error::Неверное имя релиза: $RELEASE"
+            exit 1
+          fi
+
+      - uses: actions/checkout@v4
+        if: env.COMMAND == 'deploy'
+
+      # Повторный запуск старого прогона («Re-run jobs») сохраняет старый GITHUB_SHA
+      # и выкатил бы устаревший коммит поверх нового. Выкладываем только текущую вершину main.
+      - name: Прогон актуален?
+        id: fresh
+        if: env.COMMAND == 'deploy'
+        run: |
+          tip="$(git ls-remote origin refs/heads/main | cut -f1)"
+          if [ "$tip" != "$GITHUB_SHA" ]; then
+            echo "::notice::main уже на ${tip:0:7}, а этот прогон — для ${GITHUB_SHA:0:7}. Устаревший прогон пропущен."
+            echo "stale=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/setup-node@v4
+        if: env.COMMAND == 'deploy' && steps.fresh.outputs.stale != 'true'
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - name: Проверка типов
+        if: env.COMMAND == 'deploy' && steps.fresh.outputs.stale != 'true'
+        run: |
+          npm ci --include=dev --no-audit --no-fund
+          npm run typecheck
+
+      - name: Выполнить на сервере
+        if: env.COMMAND != 'deploy' || steps.fresh.outputs.stale != 'true'
+        env:
+          DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          DEPLOY_KNOWN_HOSTS: ${{ secrets.DEPLOY_KNOWN_HOSTS }}
+          DEPLOY_HOST: ${{ vars.DEPLOY_HOST }}
+          DEPLOY_USER: ${{ vars.DEPLOY_USER }}
+        run: |
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$DEPLOY_SSH_KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          printf '%s\n' "$DEPLOY_KNOWN_HOSTS" > ~/.ssh/known_hosts
+          case "$COMMAND" in
+            deploy)   remote="deploy $GITHUB_SHA" ;;
+            rollback) remote="rollback${RELEASE:+ $RELEASE}" ;;
+            status)   remote="status" ;;
+            *) echo "::error::неизвестная команда: $COMMAND"; exit 1 ;;
+          esac
+          ssh -i ~/.ssh/deploy_key -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes \
+              -o ServerAliveInterval=30 -o ServerAliveCountMax=20 \
+              "$DEPLOY_USER@$DEPLOY_HOST" "$remote"
+
+      - name: Удалить ключ
+        if: always()
+        run: rm -f ~/.ssh/deploy_key
