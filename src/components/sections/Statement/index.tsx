@@ -67,7 +67,7 @@ export function Statement({
   return (
     <section className={styles.statement}>
       {leadHeading && (
-        <Reveal as="p" variant="fade" active={revealed} className={styles.leadHeading}>
+        <Reveal as="h1" variant="fade" active={revealed} className={styles.leadHeading}>
           {leadHeading}
         </Reveal>
       )}
