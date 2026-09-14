@@ -46,6 +46,11 @@ export const metadata: Metadata = {
     apple: [{ url: "/favicon/apple-touch-icon.png", sizes: "180x180" }],
   },
   manifest: "/favicon/site.webmanifest",
+  // Подтверждение прав в Google Search Console. Metadata API рендерит это как
+  // <meta name="google-site-verification"> в <head> — ровно там, где требует Google.
+  verification: {
+    google: "m6yOAdYYfkOHbfKHmjA1eecwujtpyCnt2BzuMPvOaNo",
+  },
 };
 
 export default function RootLayout({
