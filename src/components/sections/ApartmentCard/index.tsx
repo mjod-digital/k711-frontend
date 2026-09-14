@@ -1,9 +1,9 @@
 import Image from "next/image";
-import Link from "next/link";
 import { ru, type ApartmentDetail } from "@/lib/apartments";
 import { safeUrl } from "@/lib/url";
 import { FavoriteButton } from "@/components/ui/FavoriteButton";
 import { BookButton } from "@/components/ui/BookButton";
+import { Breadcrumb } from "@/components/ui/Breadcrumb";
 import styles from "./ApartmentCard.module.scss";
 
 // Компас из макета (481-12214) — вектор, инлайним.
@@ -55,19 +55,14 @@ export function ApartmentCard({ apt }: { apt: ApartmentDetail }) {
 
   return (
     <section className={styles.wrap}>
-      <nav className={styles.breadcrumb} aria-label="Хлебные крошки">
-        <Link href="/" aria-label="Главная">
-          …
-        </Link>
-        <span className={styles.sep} aria-hidden="true">
-          /
-        </span>
-        <Link href="/apartments">Квартиры</Link>
-        <span className={styles.sep} aria-hidden="true">
-          /
-        </span>
-        <span aria-current="page">Квартира №{apt.number}</span>
-      </nav>
+      <Breadcrumb
+        variant="apartment"
+        items={[
+          { label: "…", href: "/", ariaLabel: "Главная" },
+          { label: "Квартиры", href: "/apartments" },
+          { label: `Квартира №${apt.number}` },
+        ]}
+      />
 
       <article className={styles.card}>
         <h1 className={styles.title}>Квартира №{apt.number}</h1>

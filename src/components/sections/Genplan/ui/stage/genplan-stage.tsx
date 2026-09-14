@@ -1,0 +1,88 @@
+"use client";
+
+import type { GenplanApartment } from "@/lib/apartments";
+import { GENPLAN_FRAME_HEIGHT, GENPLAN_FRAME_WIDTH, GENPLAN_VIEWS } from "../../model/config";
+import { useDesktopViewport } from "../../model/useDesktopViewport";
+import { useFrameSequencePlayer } from "../../model/useFrameSequencePlayer";
+import { ApartmentOverlay } from "../apartment-overlay/apartment-overlay";
+import { GenplanNavigation } from "../navigation/genplan-navigation";
+import styles from "./genplan-stage.module.scss";
+import { FC, useState } from "react";
+import { GenplanFilter } from "../filter/genplan-filter";
+import { Button } from '@/components/ui/Button/button';
+import { ROUTES_PATH } from '@/config/site';
+
+type TGenplanStage = {
+  apartments: GenplanApartment[];
+};
+
+export const GenplanStage:FC<TGenplanStage> = ({ apartments }) => {
+  const isDesktop = useDesktopViewport();
+  const { canvasRef, state, goToView } = useFrameSequencePlayer(isDesktop);
+
+  const [selectedBedrooms, setSelectedBedrooms] = useState<number[]>([]);
+
+  const currentView = GENPLAN_VIEWS[state.currentViewIndex];
+  const isBusy = state.status === "loading" || state.status === "playing";
+
+  if (!isDesktop) return null;
+
+  return (
+    <div className={styles.genplanStage}>
+      <GenplanFilter
+        apartments={apartments}
+        selectedBedrooms={selectedBedrooms}
+        onChange={setSelectedBedrooms}
+        className={styles.genplanStage__filter}
+      />
+
+      <Button
+        className={styles.genplanStage__btn}
+        url={ROUTES_PATH.apartments}
+      >
+        Выбор по параметрам
+      </Button>
+
+      <div className={styles.genplanStage__viewport} aria-busy={isBusy}>
+        <GenplanNavigation
+          currentViewIndex={state.currentViewIndex}
+          status={state.status}
+          onSelect={goToView}
+          className={styles.genplanStage__navigation}
+        />
+
+        <canvas
+          ref={canvasRef}
+          className={styles.genplanStage__canvas}
+          width={GENPLAN_FRAME_WIDTH}
+          height={GENPLAN_FRAME_HEIGHT}
+          aria-hidden="true"
+        />
+
+        <ApartmentOverlay
+          apartments={apartments}
+          selectedBedrooms={selectedBedrooms}
+          viewId={currentView.id}
+          isInteractive={state.status === "ready"}
+        />
+
+        {state.status === "loading" && (
+          <div className={styles.genplanStage__initialLoader} aria-live="polite">
+            <div className={styles.genplanStage__loaderContent}>
+              <span className={styles.genplanStage__loaderLine} aria-hidden="true">
+                <span style={{ transform: `scaleX(${state.progress})` }} />
+              </span>
+              <span className={styles.genplanStage__loaderPercent}>{Math.round(state.progress * 100)}%</span>
+            </div>
+          </div>
+        )}
+
+        {state.error && (
+          <p className={styles.genplanStage__error} role="alert">
+            {state.error}
+          </p>
+        )}
+      </div>
+    </div>
+  );
+}

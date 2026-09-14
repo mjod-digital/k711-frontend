@@ -19,25 +19,6 @@
 }
 
 // Хлебные крошки — только мобайл.
-.breadcrumb {
-  display: none;
-
-  @include mobile {
-    display: flex;
-    align-items: center;
-    gap: fluid(6);
-    padding: fluid(6) 0;
-    color: var(--color-brown-dark);
-    font-family: var(--font-body);
-    font-size: fluid(12);
-    line-height: calc(16 / 12);
-    letter-spacing: 0.01em;
-  }
-}
-.sep {
-  color: var(--color-brown-light);
-}
-
 // Фото: десктоп — левая колонка на всю высоту (фикс. ширина → выше 1440 замирает);
 // мобайл — сверху, на всю ширину.
 .media {

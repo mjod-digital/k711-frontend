@@ -22,28 +22,6 @@
 }
 
 // ----- Хлебные крошки -----
-.breadcrumb {
-  display: flex;
-  align-items: center;
-  gap: fluid(6);
-  padding-block: fluid(4) fluid(16);
-  color: var(--color-brown-medium);
-  font-family: var(--font-body);
-  font-size: fluid(13);
-
-  a:hover {
-    color: var(--color-brown-dark-2);
-  }
-
-  @include mobile {
-    font-size: fluid(11);
-  }
-}
-
-.sep {
-  opacity: 0.6;
-}
-
 // ----- Карточка -----
 .card {
   position: relative;

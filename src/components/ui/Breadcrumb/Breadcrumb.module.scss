@@ -1,0 +1,99 @@
+@use "breakpoints" as *;
+
+.breadcrumb {
+  color: var(--color-brown-dark);
+  font-family: var(--font-body);
+  letter-spacing: 0.01em;
+
+  &__list {
+    display: flex;
+    align-items: center;
+    gap: fluid(6);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  &__item {
+    display: inline-flex;
+    align-items: center;
+    gap: fluid(6);
+
+    a {
+      transition: color 0.45s ease;
+
+      &:focus-visible {
+        outline: 2px solid var(--color-brown-dark);
+        outline-offset: 2px;
+      }
+    }
+  }
+
+  &__separator {
+    color: var(--color-brown-light);
+  }
+
+  &--hero {
+    padding: fluid(24) 0 fluid(20);
+    font-size: fluid(14);
+
+    a {
+      &:hover {
+        color: var(--color-brown-medium);
+      }
+    }
+
+    @include mobile {
+      padding: fluid(13) 0;
+      font-size: fluid(12);
+    }
+  }
+
+  &--apartment {
+    padding-block: fluid(4) fluid(16);
+    color: var(--color-brown-medium);
+    font-size: fluid(13);
+
+    a {
+      &:hover {
+        color: var(--color-brown-dark-2);
+      }
+    }
+
+    .breadcrumb__separator {
+      color: currentcolor;
+      opacity: 0.6;
+    }
+
+    @include mobile {
+      font-size: fluid(11);
+    }
+  }
+
+  &--contact {
+    display: none;
+    font-size: fluid(12);
+    line-height: calc(16 / 12);
+
+    @include mobile {
+      display: block;
+      padding: fluid(6) 0;
+    }
+  }
+
+  &--notFound {
+    padding: fluid(24) 0 0;
+    font-size: fluid(12);
+    line-height: calc(16 / 12);
+
+    a {
+      &:hover {
+        color: var(--color-brown-medium);
+      }
+    }
+
+    @include mobile {
+      padding: fluid(6) 0;
+    }
+  }
+}

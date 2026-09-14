@@ -23,7 +23,7 @@ const ALIAS = "home";
 // SEO-метаданные главной берём из MODX (/api/home → meta), фолбэк — дефолты layout.
 // Фолбэк SEO главной, если CMS/API недоступны (или /api/home ещё не заведён).
 const FALLBACK_META: Metadata = {
-  title: "К7/11 — клубный семейный дом с ультрасовременной архитектурой.",
+  title: "Климашкина 7/11 - официальный сайт клубного дома от MR Private",
   description:
     "К7/11 — клубный дом на Тихой Пресне. Всего 46 резиденций, собственный скандинавский сад. Архитектура от бюро СПИЧ Сергея Чобана.",
 };
@@ -202,6 +202,13 @@ export default async function HomePage() {
         imageAlt={content.texts.hero_alt || undefined}
       />
       <Statement
+        leadHeading={
+          <>
+            Клубный дом
+            <br />
+            на тихой пресне
+          </>
+        }
         headingLines={statementLines}
         paragraphs={
           statementP1 ? [statementP1, content.texts.statement_p2 ?? ""] : undefined

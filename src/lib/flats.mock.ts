@@ -37,6 +37,10 @@ export const MOCK_FLATS: Flat[] = [
     sectionNumber: "2",
     layoutUrl: "/images/apartment/plans/13.png",
     floorPlan: "",
+    polygon: [
+      { viewId: "street", points: "1115,331,1049,786,1636,755,1681,335" },
+      { viewId: "corner", points: "2485,1741,2493,2108,2630,2046,2630,1706" },
+    ],
   },
   {
     name: "KLM-1-1-К-3-2-2-28",
@@ -45,7 +49,7 @@ export const MOCK_FLATS: Flat[] = [
     area: 79.6,
     amount: 147260000,
     price: 1850000,
-    amountDiscount: 147260000,
+    amountDiscount: 127260000,
     areaProject: 79.6,
     type: "Flat",
     status: "Free",
@@ -57,6 +61,10 @@ export const MOCK_FLATS: Flat[] = [
     sectionNumber: "3",
     layoutUrl: "/images/apartment/plans/28.png",
     floorPlan: "",
+    polygon: [
+      { viewId: "corner", points: "1613,1521,1613,1653,1818,1684,1818,1534" },
+      { viewId: "courtyard", points: "2727,1843,2736,1689,2895,1693,3324,1781,3333,1962,3187,2002" },
+    ],
   },
   {
     name: "KLM-1-1-К-1-3-2-4",
@@ -65,7 +73,7 @@ export const MOCK_FLATS: Flat[] = [
     area: 106.8,
     amount: 223746000,
     price: 2095000,
-    amountDiscount: 223746000,
+    amountDiscount: 213526000,
     areaProject: 106.8,
     type: "Flat",
     status: "Free",
@@ -75,8 +83,23 @@ export const MOCK_FLATS: Flat[] = [
     ceilingHeightM: 3.4,
     viewFromWindowTypology: null,
     sectionNumber: "1",
+    images: [
+      {
+        src: "/images/apartment/plans/5.png",
+        alt: "plan"
+      },
+      {
+        src: "/images/apartment/plans/13.png",
+        alt: "plan"
+      }
+    ],
     layoutUrl: "/images/apartment/plans/4.png",
+    tags: ["Пентхаус", "Антресольный этаж", "Терраса", "Балкон", "Пентхаус"],
     floorPlan: "",
+    polygon: [
+      { viewId: "street", points: "2193,340,2184,757,2750,748,2727,329" },
+      { viewId: "corner", points: "2886,1380,2886,1512,3059,1508,3059,1393" },
+    ],
   },
   {
     name: "KLM-1-1-К-1-4-1-5",
@@ -97,6 +120,10 @@ export const MOCK_FLATS: Flat[] = [
     sectionNumber: "1",
     layoutUrl: "/images/apartment/plans/5.png",
     floorPlan: "",
+    polygon: [
+      { viewId: "street", points: "3425,320,3456,748,4022,739,3999,320" },
+      { viewId: "corner", points: "2555,1547,2564,1724,2683,1715,2683,1534" },
+    ],
   },
   {
     name: "KLM-1-1-К-3-2-3-29",
@@ -117,6 +144,10 @@ export const MOCK_FLATS: Flat[] = [
     sectionNumber: "3",
     layoutUrl: "/images/apartment/plans/29.png",
     floorPlan: "",
+    polygon: [
+      { viewId: "corner", points: "2074,1362,2078,1543,2211,1561,2396,1552,2621,1530,2617,1366,2379,1362,2197,1362" },
+      { viewId: "courtyard", points: "1460,1357,1469,1552,1893,1547,1884,1353" },
+    ],
   },
   {
     name: "KLM-1-1-К-3-3-1-31",
@@ -137,6 +168,10 @@ export const MOCK_FLATS: Flat[] = [
     sectionNumber: "3",
     layoutUrl: "/images/apartment/plans/31.png",
     floorPlan: "",
+    polygon: [
+      { viewId: "corner", points: "1389,1243,1389,1362,1592,1375,1575,1203" },
+      { viewId: "courtyard", points: "1469,430,1469,907,1893,938,1875,488" },
+    ],
   },
   // ----- Ниже — синтетические позиции для более полного превью (список длиннее,
   // все фильтры «живее»). Значения правдоподобны (amount = area × price), но
@@ -160,6 +195,9 @@ export const MOCK_FLATS: Flat[] = [
     sectionNumber: "2",
     layoutUrl: "/images/apartment/plans/28.png",
     floorPlan: "",
+    polygon: [
+      { viewId: "street", points: "3465,1097,3456,1353,4123,1340,4120,1105" },
+    ],
   },
   {
     name: "KLM-1-1-К-1-2-2-22",
@@ -180,6 +218,10 @@ export const MOCK_FLATS: Flat[] = [
     sectionNumber: "1",
     layoutUrl: "/images/apartment/plans/13.png",
     floorPlan: "",
+    polygon: [
+      { viewId: "street", points: "2202,1485,2202,1706,2797,1715,2794,1480" },
+      { viewId: "corner", points: "1990,819,1946,1136,2211,1123,2392,1115,2533,1137,2498,819,2379,761,2215,766" },
+    ],
   },
   {
     name: "KLM-1-1-К-1-4-2-11",
@@ -200,6 +242,10 @@ export const MOCK_FLATS: Flat[] = [
     sectionNumber: "1",
     layoutUrl: "/images/apartment/plans/4.png",
     floorPlan: "",
+    polygon: [
+      { viewId: "street", points: "934,1680,987,1711,1503,1702,1495,1490,1045,1494,930,1494" },
+      { viewId: "corner", points: "2047,408,1999,810,2220,753,2259,329" },
+    ],
   },
   {
     name: "KLM-1-1-К-1-5-1-15",
@@ -220,6 +266,10 @@ export const MOCK_FLATS: Flat[] = [
     sectionNumber: "1",
     layoutUrl: "/images/apartment/plans/5.png",
     floorPlan: "",
+    polygon: [
+      { viewId: "street", points: "2785,1711,2785,2046,2970,2046,2962,1715" },
+      { viewId: "corner", points: "1385,1238,1371,1357,1575,1353,1592,1199" },
+    ],
   },
   {
     name: "KLM-1-1-К-3-4-1-34",
@@ -240,6 +290,9 @@ export const MOCK_FLATS: Flat[] = [
     sectionNumber: "3",
     layoutUrl: "/images/apartment/plans/31.png",
     floorPlan: "",
+    polygon: [
+      { viewId: "courtyard", points: "3081,982,3081,1331,3545,1353,3704,1353,3659,894,3492,867" },
+    ],
   },
   {
     name: "KLM-1-1-К-3-5-3-40",
@@ -260,5 +313,8 @@ export const MOCK_FLATS: Flat[] = [
     sectionNumber: "3",
     layoutUrl: "/images/apartment/plans/29.png",
     floorPlan: "",
+    polygon: [
+      { viewId: "courtyard", points: "682,1817,691,2015,965,2002,965,1803" },
+    ],
   },
 ];

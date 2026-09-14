@@ -19,51 +19,6 @@
 }
 
 // ----- Хлебные крошки «… / 404» -----
-.breadcrumb {
-  padding: fluid(24) 0 0;
-  color: var(--color-brown-dark);
-  font-family: var(--font-body);
-  font-size: fluid(12);
-  line-height: calc(16 / 12);
-  letter-spacing: 0.01em;
-
-  @include mobile {
-    padding: fluid(6) 0;
-  }
-}
-
-.crumbs {
-  display: flex;
-  align-items: center;
-  gap: fluid(6);
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.crumb {
-  display: inline-flex;
-  align-items: center;
-  gap: fluid(6);
-
-  a {
-    transition: color 0.45s ease;
-
-    &:hover {
-      color: var(--color-brown-medium);
-    }
-
-    &:focus-visible {
-      outline: 2px solid var(--color-brown-dark);
-      outline-offset: 2px;
-    }
-  }
-}
-
-.sep {
-  color: var(--color-brown-light);
-}
-
 // ----- Сцена: фото + текст -----
 .body {
   position: relative;

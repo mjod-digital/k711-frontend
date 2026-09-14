@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Image from "next/image";
-import Link from "next/link";
 import { ContactForm } from "./ContactForm";
+import { Breadcrumb } from "@/components/ui/Breadcrumb";
 import { fetchContact } from "@/lib/api";
 import styles from "./contact.module.scss";
 
@@ -19,15 +19,13 @@ export default async function ContactPage() {
   return (
     <section className={styles.contact}>
       {/* Хлебные крошки — только мобайл (на десктопе фото занимает левую колонку). */}
-      <nav className={styles.breadcrumb} aria-label="Хлебные крошки">
-        <Link href="/" aria-label="Главная">
-          …
-        </Link>
-        <span className={styles.sep} aria-hidden="true">
-          /
-        </span>
-        <span aria-current="page">Офис продаж</span>
-      </nav>
+      <Breadcrumb
+        variant="contact"
+        items={[
+          { label: "…", href: "/", ariaLabel: "Главная" },
+          { label: "Офис продаж" },
+        ]}
+      />
 
       <div className={styles.media}>
         <Image loading="eager"

@@ -1,0 +1,11 @@
+@use "breakpoints" as *;
+
+.genplan {
+  padding-inline: fluid(20);
+  background: var(--color-badge-light);
+  color: var(--color-brown-dark);
+
+  @include mobile {
+    display: none;
+  }
+}

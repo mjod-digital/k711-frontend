@@ -1,4 +1,11 @@
-import type { Apartment, ApartmentDetail } from "./apartments";
+import {
+  GENPLAN_VIEW_IDS,
+  type Apartment,
+  type ApartmentDetail,
+  type ApartmentPolygon,
+  type GenplanApartment,
+  type GenplanViewId,
+} from "./apartments";
 import { MOCK_FLATS } from "./flats.mock";
 import { safeUrl } from "./url";
 
@@ -42,8 +49,14 @@ export type Flat = {
   ceilingHeightM: number;
   viewFromWindowTypology: string | null;
   sectionNumber: string;
+  tags?: string[];
+  images?: Array<{
+    src: string;
+    alt: string;
+  }>;
   layoutUrl: string; // планировка (внешний S3)
   floorPlan: string; // мини-план этажа (внешний S3)
+  polygon: ApartmentPolygon[]; // фасадные контуры на стоп-ракурсах генплана
 };
 
 // ----- Валидация внешних данных (ARCH-004/DATA-003) -----
@@ -54,6 +67,48 @@ export type Flat = {
 // (fallback-first: пустой каталог лучше каталога с NaN-ценами).
 function isFiniteNumber(v: unknown): v is number {
   return typeof v === "number" && Number.isFinite(v);
+}
+
+function isGenplanViewId(value: unknown): value is GenplanViewId {
+  return typeof value === "string" && GENPLAN_VIEW_IDS.includes(value as GenplanViewId);
+}
+
+function parseApartmentPolygons(value: unknown): ApartmentPolygon[] {
+  if (!Array.isArray(value)) return [];
+
+  return value.flatMap((item) => {
+    if (!item || typeof item !== "object") return [];
+
+    const polygon = item as Record<string, unknown>;
+    if (
+      !isGenplanViewId(polygon.viewId) ||
+      typeof polygon.points !== "string"
+    ) {
+      return [];
+    }
+
+    return [
+      {
+        viewId: polygon.viewId,
+        points: polygon.points,
+      },
+    ];
+  });
+}
+
+function parseFlatImages(value: unknown): Flat["images"] {
+  if (!Array.isArray(value)) return undefined;
+
+  return value.flatMap((item) => {
+    if (!item || typeof item !== "object") return [];
+
+    const image = item as Record<string, unknown>;
+    if (typeof image.src !== "string" || typeof image.alt !== "string") {
+      return [];
+    }
+
+    return [{ src: image.src, alt: image.alt }];
+  });
 }
 
 function toFlat(x: unknown): Flat | null {
@@ -98,8 +153,13 @@ function toFlat(x: unknown): Flat | null {
       typeof f.sectionNumber === "string"
         ? f.sectionNumber
         : String(f.sectionNumber ?? ""),
+    tags: Array.isArray(f.tags)
+      ? f.tags.filter((tag): tag is string => typeof tag === "string")
+      : undefined,
+    images: parseFlatImages(f.images),
     layoutUrl: typeof f.layoutUrl === "string" ? f.layoutUrl : "",
     floorPlan: typeof f.floorPlan === "string" ? f.floorPlan : "",
+    polygon: parseApartmentPolygons(f.polygon),
   };
 }
 
@@ -176,6 +236,21 @@ export function flatToApartment(f: Flat): Apartment {
     area: f.area,
     pricePerM2: Math.round(f.price / 1000),
     cost: f.amount / 1_000_000,
+  };
+}
+
+export function flatToGenplanApartment(f: Flat): GenplanApartment {
+  return {
+    ...flatToApartment(f),
+    section: f.sectionNumber,
+    status: f.status,
+    polygon: f.polygon,
+    tags: f.tags,
+    images: f.images,
+    layoutUrl: f.layoutUrl,
+    price: f.price,
+    amount: f.amount,
+    amountDiscount: f.amountDiscount,
   };
 }
 

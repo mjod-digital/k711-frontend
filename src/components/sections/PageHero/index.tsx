@@ -1,12 +1,14 @@
 "use client";
 
-import Link from "next/link";
 import { useRef, useState } from "react";
 import type { CSSProperties, ReactNode } from "react";
+import { Breadcrumb } from "@/components/ui/Breadcrumb";
 import { HeroImage } from "@/components/ui/HeroImage";
 import { Reveal } from "@/components/ui/Reveal";
 import { useIsomorphicLayoutEffect } from "@/lib/useIsomorphicLayoutEffect";
 import styles from "./PageHero.module.scss";
+import { Button} from '@/components/ui/Button/button';
+import { ROUTES_PATH } from '@/config/site';
 
 export type Crumb = {
   label: string;
@@ -102,26 +104,7 @@ export function PageHero({
 
   return (
     <section className={styles.hero}>
-      <nav className={styles.breadcrumb} aria-label="Хлебные крошки">
-        <ol className={styles.crumbs}>
-          {breadcrumb.map((crumb, i) => (
-            <li key={i} className={styles.crumb}>
-              {i > 0 && (
-                <span className={styles.sep} aria-hidden="true">
-                  /
-                </span>
-              )}
-              {crumb.href ? (
-                <Link href={crumb.href} aria-label={crumb.ariaLabel}>
-                  {crumb.label}
-                </Link>
-              ) : (
-                <span aria-current="page">{crumb.label}</span>
-              )}
-            </li>
-          ))}
-        </ol>
-      </nav>
+      <Breadcrumb items={breadcrumb} />
 
       <div
         className={styles.media}
@@ -135,6 +118,13 @@ export function PageHero({
           } as CSSProperties
         }
       >
+        <Button
+          className={styles.btnGenplan}
+          url={ROUTES_PATH.genplan}
+        >
+          Визуальный выбор
+        </Button>
+
         <div className={styles.parallax} ref={parallaxRef}>
           <HeroImage
             image={image}

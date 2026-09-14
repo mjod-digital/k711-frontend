@@ -18,11 +18,14 @@ const DEFAULT_HEADING = ["В центре", "культурной Москвы,"
 type StatementProps = {
   paragraphs?: [ReactNode, ReactNode];
   headingLines?: string[];
+  /** Доп. центрированный заголовок над блоком (запрос: дублируем hero-заголовок). */
+  leadHeading?: ReactNode;
 };
 
 export function Statement({
   paragraphs = DEFAULT_PARAGRAPHS,
   headingLines = DEFAULT_HEADING,
+  leadHeading,
 }: StatementProps = {}) {
   const innerRef = useRef<HTMLDivElement>(null);
   const [revealed, setRevealed] = useState(false);
@@ -63,6 +66,11 @@ export function Statement({
 
   return (
     <section className={styles.statement}>
+      {leadHeading && (
+        <Reveal as="p" variant="fade" active={revealed} className={styles.leadHeading}>
+          {leadHeading}
+        </Reveal>
+      )}
       <div className={styles.inner} ref={innerRef}>
         {/* Каждая ВИЗУАЛЬНАЯ строка — отдельный reveal-line: иначе длинная вторая
             строка переносится и из-за шторки снизу-вверх её нижняя часть
