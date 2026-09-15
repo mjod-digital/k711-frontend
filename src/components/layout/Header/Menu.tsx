@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useEffect, useRef } from "react";
 import type { CSSProperties } from "react";
 import Lenis from "lenis";
-import { siteConfig } from "@/config/site";
+import { ROUTES_PATH, siteConfig } from "@/config/site";
 import { cn } from "@/lib/utils";
 import styles from "./Menu.module.scss";
 
@@ -31,6 +31,8 @@ const NAV = [
 
 const PICK = [
   { label: "Выбор по параметрам", href: "/apartments" },
+  // Генплан только для десктопа: до 1200px /genplan редиректит на /apartments.
+  { label: "Визуальный выбор", href: ROUTES_PATH.genplan, desktopOnly: true },
 ];
 
 type MenuProps = { open: boolean; onClose: () => void };
@@ -167,7 +169,7 @@ export function Menu({ open, onClose }: MenuProps) {
               <p className={styles.label}>Выбрать квартиру</p>
               <ul className={styles.list}>
                 {PICK.map((item) => (
-                  <li key={item.label}>
+                  <li key={item.label} className={cn(item.desktopOnly && styles.desktopOnly)}>
                     <Link
                       href={item.href}
                       className={styles.link}
