@@ -196,6 +196,8 @@ export default async function HomePage() {
 
   return (
     <>
+      {/* Визуального заголовка на главной нет — <h1> только для поисковиков и скринридеров. */}
+      <h1 className="visually-hidden">Клубный дом на тихой пресне</h1>
       <Hero
         image={content.images.hero_image || undefined}
         imageMobile={content.images.hero_image_mobile || undefined}
