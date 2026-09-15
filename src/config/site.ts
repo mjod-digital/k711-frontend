@@ -23,12 +23,4 @@ export const ROUTES_PATH = {
   genplan: '/genplan',
 } as const;
 
-// Фичефлаги.
-// genplanLink — кнопка «Визуальный выбор» в PageHero. Выключена, пока на бэкенде нет
-// координат масок: без них /genplan открывается, но квартиры на нём не кликаются.
-// Страница /genplan при этом доступна по прямой ссылке.
-export const FEATURES = {
-  genplanLink: false,
-} as const;
-
 export type SiteConfig = typeof siteConfig;
