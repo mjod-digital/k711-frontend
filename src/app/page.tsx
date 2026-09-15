@@ -202,13 +202,6 @@ export default async function HomePage() {
         imageAlt={content.texts.hero_alt || undefined}
       />
       <Statement
-        leadHeading={
-          <>
-            Клубный дом
-            <br />
-            на тихой пресне
-          </>
-        }
         headingLines={statementLines}
         paragraphs={
           statementP1 ? [statementP1, content.texts.statement_p2 ?? ""] : undefined
