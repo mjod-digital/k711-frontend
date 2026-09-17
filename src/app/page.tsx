@@ -17,6 +17,7 @@ import { Contact } from "@/components/sections/Contact";
 import { Slider, type Slide } from "@/components/ui/Slider";
 import { GalleryStrip, type GalleryItem } from "@/components/ui/GalleryStrip";
 import { fetchPage, txt, cmsSlides, cmsGallery } from "@/lib/api";
+import { siteConfig } from "@/config/site";
 
 const ALIAS = "home";
 
@@ -26,6 +27,19 @@ const FALLBACK_META: Metadata = {
   title: "Климашкина 7/11 - официальный сайт клубного дома от MR Private",
   description:
     "К7/11 — клубный дом на Тихой Пресне. Всего 46 резиденций, собственный скандинавский сад. Архитектура от бюро СПИЧ Сергея Чобана.",
+};
+
+const { square } = siteConfig.searchImage;
+const HOME_JSON_LD = {
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  url: siteConfig.url,
+  primaryImageOfPage: {
+    "@type": "ImageObject",
+    url: new URL(square.url, siteConfig.url).href,
+    width: square.width,
+    height: square.height,
+  },
 };
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -198,6 +212,11 @@ export default async function HomePage() {
     <>
       {/* Визуального заголовка на главной нет — <h1> только для поисковиков и скринридеров. */}
       <h1 className="visually-hidden">Клубный дом на тихой пресне</h1>
+      {/* Предпочитаемая картинка для миниатюры в выдаче Google (schema.org primaryImageOfPage). */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(HOME_JSON_LD).replace(/</g, "\\u003c") }}
+      />
       <Hero
         image={content.images.hero_image || undefined}
         imageMobile={content.images.hero_image_mobile || undefined}

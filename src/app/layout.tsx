@@ -32,6 +32,7 @@ const ADRIVER_COUNTER = `!function(e,t){function r(e,t,r){t=t||"&",r=r||"=";var 
 ({sid:231322, bt:62},{id:"",gid1:"",yid1:""});`;
 
 export const metadata: Metadata = {
+  metadataBase: new URL(siteConfig.url),
   title: {
     default: siteConfig.name,
     template: `%s — ${siteConfig.name}`,
@@ -46,6 +47,11 @@ export const metadata: Metadata = {
     apple: [{ url: "/favicon/apple-touch-icon.png", sizes: "180x180" }],
   },
   manifest: "/favicon/site.webmanifest",
+  // og:image для всех страниц. Метаданные мержатся поверхностно: страница, задавшая
+  // свой openGraph, эту картинку потеряет.
+  openGraph: {
+    images: [{ ...siteConfig.searchImage.wide, alt: siteConfig.searchImage.alt }],
+  },
   // Подтверждение прав в Google Search Console. Metadata API рендерит это как
   // <meta name="google-site-verification"> в <head> — ровно там, где требует Google.
   verification: {
