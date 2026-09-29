@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import { siteConfig } from "@/config/site";
+import { ROUTES_PATH, siteConfig } from "@/config/site";
 import { useFavorites, useHydrated } from "@/store/favorites";
 import { cn } from "@/lib/utils";
 import { Menu } from "./Menu";
@@ -121,7 +121,12 @@ export function Header() {
             )}
           </Link>
 
-          <Link href={siteConfig.cta.href} className={styles.cta}>
+          {/* CTA ведёт на визуальный выборщик, а до 1200px — сразу в каталог:
+              /genplan на этих ширинах всё равно редиректит на /apartments. */}
+          <Link href={ROUTES_PATH.genplan} className={cn(styles.cta, styles.ctaGenplan)}>
+            {siteConfig.cta.label}
+          </Link>
+          <Link href={siteConfig.cta.href} className={cn(styles.cta, styles.ctaCatalog)}>
             {siteConfig.cta.label}
           </Link>
         </div>

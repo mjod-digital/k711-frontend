@@ -232,3 +232,17 @@
     display: none;
   }
 }
+
+// Один и тот же CTA двумя ссылками: до 1200px /genplan редиректит на каталог,
+// поэтому там сразу показываем ссылку на каталог (без лишнего перехода).
+.ctaGenplan {
+  @media (max-width: $bp-max-desktop-d) {
+    display: none;
+  }
+}
+
+.ctaCatalog {
+  @media (min-width: $bp-max-desktop-d + 0.02px) {
+    display: none;
+  }
+}
