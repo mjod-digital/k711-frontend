@@ -298,6 +298,25 @@ export async function fetchApartmentById(
   return { flat, relatedFlats: parseFlats(d.relatedFlats ?? []) };
 }
 
+// ----- В продаже ли квартира (DATA-007, SEC-024) -----
+// Каталог /flats отдаёт только свободные квартиры, а /flat?id= — любую по номеру,
+// с любым статусом. Страница квартиры строилась по второму и со списком не
+// сверялась: проданные и резервные лоты открывались по прямой ссылке с ценой и
+// кнопкой брони.
+// Правило: квартира в продаже, если она есть в публичном каталоге — тем же
+// списком пользуется сам сайт, и правило не зависит от названий статусов в CRM.
+// Если каталог недоступен или подменён снимком из кода — решаем по статусу
+// карточки, пропуская только свободные: неизвестный статус = не в продаже.
+const ON_SALE_STATUSES = new Set(["free"]);
+
+export async function isFlatOnSale(flat: Flat): Promise<boolean> {
+  const list = await fetchApartments();
+  if (list.ok && list.source === "api") {
+    return list.flats.some((f) => f.number === flat.number);
+  }
+  return ON_SALE_STATUSES.has(flat.status.trim().toLowerCase());
+}
+
 export async function fetchFloorData(id: string) {
   if (USE_MOCK_FLATS) return null; // плана этажа в снимке нет — UI берёт свой
   const url = `${API_BASE_URL}/floor?id=${encodeURIComponent(id)}`;

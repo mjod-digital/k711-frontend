@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { fetchApartmentById, fetchApartments, flatToDetail } from "@/lib/api";
+import { fetchApartmentById, fetchApartments, flatToDetail, isFlatOnSale } from "@/lib/api";
 import { ApartmentCard } from "@/components/sections/ApartmentCard";
 
 // Пререндерим все квартиры каталога (id = number из CRM).
@@ -19,7 +19,9 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { id } = await params;
   const data = await fetchApartmentById(id).catch(() => null);
-  if (!data?.flat) return { title: "Квартира не найдена" };
+  // Для квартиры не в продаже — тот же заголовок, что у 404: ни площадь, ни
+  // этаж в метаданные не попадают (страница всё равно уйдёт в notFound()).
+  if (!data?.flat || !(await isFlatOnSale(data.flat))) return { title: "Квартира не найдена" };
   const { flat } = data;
   return {
     title: `Квартира №${flat.number}`,
@@ -34,7 +36,9 @@ export default async function ApartmentDetailPage({
 }) {
   const { id } = await params;
   const data = await fetchApartmentById(id).catch(() => null);
-  // Некорректный/неполный ответ CRM (нет flat) → 404, а не краш пре-рендера сборки.
-  if (!data?.flat) notFound();
+  // 404 со своей страницей «квартира не найдена» (not-found.tsx рядом), если:
+  // номера нет, ответ CRM битый, или квартира не в продаже — продана, в резерве,
+  // снята. Раньше такие лоты открывались по прямой ссылке с ценой и бронью.
+  if (!data?.flat || !(await isFlatOnSale(data.flat))) notFound();
   return <ApartmentCard apt={flatToDetail(data.flat)} />;
 }
