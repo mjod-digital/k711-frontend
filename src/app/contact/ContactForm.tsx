@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useBooking } from "@/store/booking";
 import { sendLead } from "@/lib/comagic";
 import { PhoneInput, isPhoneComplete } from "@/components/ui/PhoneInput";
+import { siteConfig } from "@/config/site";
 import styles from "./contact.module.scss";
 
 // Валидация полей формы (как в проверенной прошлой форме): имя ≥ 2 символов и без
@@ -31,18 +32,22 @@ export function ContactForm() {
     consent: false,
   });
   const touch = (f: keyof typeof dirty) => setDirty((d) => ({ ...d, [f]: true }));
+  const [sending, setSending] = useState(false);
+  const [failed, setFailed] = useState(false);
 
   const nameErr = !isNameOk(name);
   const emailErr = !isEmailOk(email);
   const phoneErr = !isPhoneComplete(phone);
   const consentErr = !consent;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setDirty({ name: true, email: true, phone: true, consent: true });
-    if (nameErr || emailErr || phoneErr || consentErr) return;
+    if (nameErr || emailErr || phoneErr || consentErr || sending) return;
 
-    sendLead({
+    setSending(true);
+    setFailed(false);
+    const result = await sendLead({
       source: "contact",
       name,
       email,
@@ -51,7 +56,10 @@ export function ContactForm() {
       consent,
       marketing,
     });
-    openSuccess();
+    setSending(false);
+    // Успех — только по подтверждению от CoMagic: другого канала доставки нет.
+    if (result.ok) openSuccess();
+    else setFailed(true);
   };
 
   return (
@@ -137,9 +145,16 @@ export function ContactForm() {
         </div>
       </div>
 
-      <button type="submit" className={styles.submit}>
-        заказать звонок
+      <button type="submit" className={styles.submit} disabled={sending}>
+        {sending ? "отправляем…" : "заказать звонок"}
       </button>
+
+      {failed && (
+        <p className={styles.sendError} role="alert">
+          Не удалось отправить заявку. Позвоните нам:{" "}
+          <a href={siteConfig.phone.href}>{siteConfig.phone.display}</a>
+        </p>
+      )}
     </form>
   );
 }

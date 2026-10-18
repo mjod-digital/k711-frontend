@@ -6,6 +6,7 @@ import { useBooking } from "@/store/booking";
 import { sendLead, type LeadApartment } from "@/lib/comagic";
 import { Modal } from "@/components/ui/Modal";
 import { PhoneInput, isPhoneComplete } from "@/components/ui/PhoneInput";
+import { siteConfig } from "@/config/site";
 import styles from "./Popups.module.scss";
 
 const isNameOk = (v: string) => v.trim().length >= 2 && !/\d/.test(v);
@@ -26,18 +27,23 @@ function BookingForm({
 
   const [dirty, setDirty] = useState({ name: false, phone: false, consent: false });
   const touch = (f: keyof typeof dirty) => setDirty((d) => ({ ...d, [f]: true }));
+  const [sending, setSending] = useState(false);
+  const [failed, setFailed] = useState(false);
 
   const nameErr = !isNameOk(name);
   const phoneErr = !isPhoneComplete(phone);
   const consentErr = !consent;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setDirty({ name: true, phone: true, consent: true });
-    if (nameErr || phoneErr || consentErr) return;
+    if (nameErr || phoneErr || consentErr || sending) return;
 
-    // Заявка с инфой о квартире → CoMagic (fire-and-forget — попап сразу).
-    sendLead({
+    setSending(true);
+    setFailed(false);
+    // Заявка с инфой о квартире → CoMagic. Окно успеха закрывает форму и
+    // стирает введённое, поэтому открываем его только при подтверждении.
+    const result = await sendLead({
       source: "booking",
       apartment,
       name,
@@ -46,7 +52,9 @@ function BookingForm({
       consent,
       marketing,
     });
-    onDone();
+    setSending(false);
+    if (result.ok) onDone();
+    else setFailed(true);
   };
 
   return (
@@ -127,9 +135,16 @@ function BookingForm({
           </div>
         </div>
 
-        <button type="submit" className={styles.submit}>
-          оставить заявку
+        <button type="submit" className={styles.submit} disabled={sending}>
+          {sending ? "отправляем…" : "оставить заявку"}
         </button>
+
+        {failed && (
+          <p className={styles.sendError} role="alert">
+            Не удалось отправить заявку. Позвоните нам:{" "}
+            <a href={siteConfig.phone.href}>{siteConfig.phone.display}</a>
+          </p>
+        )}
       </form>
     </>
   );

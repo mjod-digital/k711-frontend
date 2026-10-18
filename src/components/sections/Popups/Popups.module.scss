@@ -170,6 +170,11 @@
   @include mobile {
     align-self: stretch;
   }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: progress;
+  }
 }
 
 // ============================================================
@@ -229,4 +234,21 @@
   text-transform: uppercase;
   white-space: nowrap;
   @include ctaSecondary;
+}
+
+// Отказ доставки: CoMagic — единственный канал, поэтому вместо ложного
+// подтверждения предлагаем позвонить. role="alert" озвучивает сообщение.
+.sendError {
+  margin-top: fluid(12);
+  font-family: var(--font-body);
+  font-size: fluid(14);
+  line-height: calc(20 / 14);
+  color: var(--color-error);
+
+  a {
+    color: inherit;
+    text-decoration: underline;
+    text-underline-offset: fluid(3);
+    white-space: nowrap;
+  }
 }
