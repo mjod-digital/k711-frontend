@@ -5,6 +5,7 @@ import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { SmoothScroll } from "@/components/layout/SmoothScroll";
 import Preloader from "@/components/layout/Preloader-new/Preloader";
+import { PreloaderBoot } from "@/components/layout/Preloader-new/PreloaderBoot";
 import { Popups } from "@/components/sections/Popups";
 import { siteConfig } from "@/config/site";
 import "./globals.scss";
@@ -65,8 +66,21 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="ru" className={`${ricordi.variable} ${cofo.variable}`}>
+    // suppressHydrationWarning: boot-скрипт прелоудера дописывает классы на <html>
+    // ещё до гидрации, и серверная разметка заведомо не совпадает с DOM. React
+    // должен оставить то, что в DOM, а не считать это ошибкой гидрации
+    // (next docs: 01-app/02-guides/preventing-flash-before-hydration.md).
+    <html
+      lang="ru"
+      className={`${ricordi.variable} ${cofo.variable}`}
+      suppressHydrationWarning
+    >
       <head>
+        {/* Включает прелоудер до первой отрисовки. Строго первым в <head> и до
+            любых внешних скриптов: занавес должен встать раньше, чем браузер
+            отрисует body. Без него прелоудера просто нет — страница видна. */}
+        <PreloaderBoot />
+
         {/* AdRiver code START. Type:JS-counter Site: 231322 */}
         <script
           type="text/javascript"

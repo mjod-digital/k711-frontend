@@ -64,9 +64,26 @@ export type Flat = {
 // одно кривое/пустое числовое поле (цена, площадь) давало NaN, который тихо протекал
 // в карточки и ломал фильтры каталога. Валидируем на границе: поля, на которых стоит
 // арифметика и фильтры, обязаны быть конечными числами — иначе строка отбрасывается
-// (fallback-first: пустой каталог лучше каталога с NaN-ценами).
-function isFiniteNumber(v: unknown): v is number {
-  return typeof v === "number" && Number.isFinite(v);
+// (одна битая строка не стоит каталога с NaN-ценами; а вот полный провал разбора
+// уводит уже на снимок, см. fetchApartments).
+
+// DATA-004: но «конечное число» ≠ «пришло типом number». MODX — это PHP, а json_encode
+// отдаёт DECIMAL/NUMERIC-колонки строками («50.20», «116464000»), и снип, собирающий
+// фид конкатенацией или через getTVValue, тоже отдаёт строки. Прежняя проверка
+// typeof v === "number" на таком фиде отбраковывала ВСЕ строки каталога — одно
+// изменение на стороне CRM (правка снипета, INT → DECIMAL, апгрейд PHP) обнуляло сайт.
+// Поэтому приводим: число берём как есть, строку — только непустую и только если она
+// приводится к конечному числу. Запятая как десятичный разделитель и пробелы-разделители
+// разрядов (включая NBSP и узкий пробел) — штатные варианты записи в CMS, их нормализуем.
+// Проверку не ослабляем: NaN, Infinity, пустая строка и любой другой тип → null,
+// а null в обязательном поле по-прежнему отбраковывает строку целиком.
+function toFiniteNumber(v: unknown): number | null {
+  if (typeof v === "number") return Number.isFinite(v) ? v : null;
+  if (typeof v !== "string") return null;
+  const s = v.replace(/[\s  ]/g, "").replace(",", ".");
+  if (!s) return null; // Number("") === 0 — пустую строку числом не считаем
+  const n = Number(s);
+  return Number.isFinite(n) ? n : null;
 }
 
 function isGenplanViewId(value: unknown): value is GenplanViewId {
@@ -119,34 +136,44 @@ function toFlat(x: unknown): Flat | null {
     typeof f.number === "string" ? f.number.trim() : String(f.number ?? "").trim();
   if (!number) return null;
   // Числовые поля, на которых держатся арифметика и фильтры.
+  const floor = toFiniteNumber(f.floor);
+  const area = toFiniteNumber(f.area);
+  const amount = toFiniteNumber(f.amount);
+  const price = toFiniteNumber(f.price);
+  const numberOfBedrooms = toFiniteNumber(f.numberOfBedrooms);
   if (
-    !isFiniteNumber(f.floor) ||
-    !isFiniteNumber(f.area) ||
-    !isFiniteNumber(f.amount) ||
-    !isFiniteNumber(f.price) ||
-    !isFiniteNumber(f.numberOfBedrooms)
+    floor === null ||
+    area === null ||
+    amount === null ||
+    price === null ||
+    numberOfBedrooms === null
   ) {
     return null;
   }
+  // numberOfBathrooms — единственное поле, где строка легальна сама по себе
+  // («2 + гостевой»): число достаём, нечисловую строку сохраняем как есть.
+  const numberOfBathrooms = toFiniteNumber(f.numberOfBathrooms);
+  const amountDiscount = toFiniteNumber(f.amountDiscount);
+  const areaProject = toFiniteNumber(f.areaProject);
+  const ceilingHeightM = toFiniteNumber(f.ceilingHeightM);
   // Необязательные поля добиваем безопасными дефолтами.
   return {
     name: typeof f.name === "string" ? f.name : "",
     number,
-    floor: f.floor,
-    area: f.area,
-    amount: f.amount,
-    price: f.price,
-    amountDiscount: isFiniteNumber(f.amountDiscount) ? f.amountDiscount : 0,
-    areaProject: isFiniteNumber(f.areaProject) ? f.areaProject : f.area,
+    floor,
+    area,
+    amount,
+    price,
+    amountDiscount: amountDiscount ?? 0,
+    areaProject: areaProject ?? area,
     type: typeof f.type === "string" ? f.type : "",
     status: typeof f.status === "string" ? f.status : "",
-    numberOfBedrooms: f.numberOfBedrooms,
+    numberOfBedrooms,
     numberOfBathrooms:
-      isFiniteNumber(f.numberOfBathrooms) || typeof f.numberOfBathrooms === "string"
-        ? (f.numberOfBathrooms as number | string)
-        : "",
+      numberOfBathrooms ??
+      (typeof f.numberOfBathrooms === "string" ? f.numberOfBathrooms : ""),
     pdf: typeof f.pdf === "string" ? f.pdf : "",
-    ceilingHeightM: isFiniteNumber(f.ceilingHeightM) ? f.ceilingHeightM : 0,
+    ceilingHeightM: ceilingHeightM ?? 0,
     viewFromWindowTypology:
       typeof f.viewFromWindowTypology === "string" ? f.viewFromWindowTypology : null,
     sectionNumber:
@@ -178,14 +205,65 @@ function parseFlats(raw: unknown): Flat[] {
   return flats;
 }
 
-export async function fetchApartments(): Promise<Flat[]> {
-  if (USE_MOCK_FLATS) return MOCK_FLATS;
-  const res = await fetch(`${API_BASE_URL}/flats`, {
-    next: { revalidate: REVALIDATE_TIME },
-    signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
-  });
-  if (!res.ok) throw new Error("Failed to fetch apartments");
-  return parseFlats(await res.json());
+// ----- Загрузка каталога: «источник недоступен» ≠ «ничего не найдено» (DATA-005) -----
+// Раньше fetchApartments бросал, а все страницы ловили ошибку в пустой массив — сбой CRM
+// выглядел как «нет квартир»: каталог пуст, избранное писало «пусто», генплан отдавал 404.
+// Теперь результат самодостаточен: ok:false — источник недоступен (UI показывает «временно
+// недоступно» с телефоном), ok:true + flats: [] — источник ответил, предложений нет.
+// source говорит, живой это фид или снимок из кода, — нужен и логам, и будущему маркеру
+// «данные актуальны на …» (DATA-023).
+export type ApartmentsResult =
+  | { ok: true; flats: Flat[]; source: "api" | "snapshot" }
+  | { ok: false; reason: string };
+
+// Причину сбоя пишем в лог текстом: без неё «каталог недоступен» в проде неотличим
+// от таймаута, 502 и сломанного контракта.
+function describeError(e: unknown): string {
+  return e instanceof Error ? `${e.name}: ${e.message}` : String(e);
+}
+
+export async function fetchApartments(): Promise<ApartmentsResult> {
+  if (USE_MOCK_FLATS) return { ok: true, flats: MOCK_FLATS, source: "snapshot" };
+  const url = `${API_BASE_URL}/flats`;
+  let res: Response;
+  try {
+    res = await fetch(url, {
+      next: { revalidate: REVALIDATE_TIME },
+      signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
+    });
+  } catch (e) {
+    // Сеть/DNS/таймаут AbortSignal — источника просто нет.
+    console.error(`[api] каталог недоступен: ${url} — ${describeError(e)}`);
+    return { ok: false, reason: "network" };
+  }
+  if (!res.ok) {
+    console.error(`[api] каталог недоступен: ${url} — HTTP ${res.status}`);
+    return { ok: false, reason: `http_${res.status}` };
+  }
+  let raw: unknown;
+  try {
+    raw = await res.json();
+  } catch (e) {
+    console.error(`[api] каталог недоступен: ${url} — тело не JSON: ${describeError(e)}`);
+    return { ok: false, reason: "bad_json" };
+  }
+  if (!Array.isArray(raw)) {
+    // Контракт сломан на уровне формы ответа — это сбой источника, а не пустой каталог.
+    console.error(`[api] каталог недоступен: ${url} — ответ не массив (${typeof raw})`);
+    return { ok: false, reason: "bad_shape" };
+  }
+  const flats = parseFlats(raw);
+  // Полный провал разбора: фид приехал, строки в нём есть, но ни одна не прошла
+  // валидацию — значит разъехался контракт (например, все числа стали строками),
+  // а не «всё продано». Снимок в коде лежит ровно для этого: отдаём его как
+  // последний рубеж и орём в лог, чтобы мониторинг увидел (DATA-004).
+  if (raw.length > 0 && flats.length === 0) {
+    console.error(
+      `[api] ${url}: ни одна из ${raw.length} квартир не прошла валидацию — отдаём снимок каталога (src/lib/flats.mock.ts), данные могут быть устаревшими`,
+    );
+    return { ok: true, flats: MOCK_FLATS, source: "snapshot" };
+  }
+  return { ok: true, flats, source: "api" };
 }
 
 export async function fetchApartmentById(
@@ -198,28 +276,45 @@ export async function fetchApartmentById(
     if (!flat) throw new Error("Failed to fetch apartment data");
     return { flat, relatedFlats: MOCK_FLATS.filter((f) => f.number !== id) };
   }
-  const res = await fetch(`${API_BASE_URL}/flat?id=${encodeURIComponent(id)}`, {
+  const url = `${API_BASE_URL}/flat?id=${encodeURIComponent(id)}`;
+  const res = await fetch(url, {
     next: { revalidate: REVALIDATE_TIME },
     signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
   });
-  if (!res.ok) throw new Error("Failed to fetch apartment data");
+  if (!res.ok) {
+    // 404 от CRM — штатный «нет такой квартиры» (боты ходят по старым ссылкам),
+    // остальные статусы — сбой источника, который иначе неотличим от битого id.
+    const log = res.status === 404 ? console.warn : console.error;
+    log(`[api] квартира ${id} не отдана: ${url} — HTTP ${res.status}`);
+    throw new Error("Failed to fetch apartment data");
+  }
   const d = (await res.json()) as { flat?: unknown; relatedFlats?: unknown };
   const flat = toFlat(d.flat);
   // Форма пришла битой — ведём себя как при 404 (вызывающая страница ловит → notFound()).
-  if (!flat) throw new Error("Failed to fetch apartment data");
+  if (!flat) {
+    console.error(`[api] квартира ${id} не отдана: ${url} — flat не прошёл валидацию формы`);
+    throw new Error("Failed to fetch apartment data");
+  }
   return { flat, relatedFlats: parseFlats(d.relatedFlats ?? []) };
 }
 
 export async function fetchFloorData(id: string) {
   if (USE_MOCK_FLATS) return null; // плана этажа в снимке нет — UI берёт свой
+  const url = `${API_BASE_URL}/floor?id=${encodeURIComponent(id)}`;
   try {
-    const res = await fetch(`${API_BASE_URL}/floor?id=${encodeURIComponent(id)}`, {
+    const res = await fetch(url, {
       next: { revalidate: REVALIDATE_TIME },
       signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
     });
-    if (!res.ok) return null;
+    // Деградация мягкая (UI подставит свой мини-план), но не молчаливая:
+    // раньше недоступный /floor не оставлял в логах ни строчки.
+    if (!res.ok) {
+      console.error(`[api] план этажа ${id} недоступен: ${url} — HTTP ${res.status}`);
+      return null;
+    }
     return res.json();
-  } catch {
+  } catch (e) {
+    console.error(`[api] план этажа ${id} недоступен: ${url} — ${describeError(e)}`);
     return null;
   }
 }

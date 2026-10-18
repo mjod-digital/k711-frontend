@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import type { CSSProperties } from "react";
 import { PageHero } from "@/components/sections/PageHero";
 import { ApartmentCatalog } from "@/components/sections/ApartmentCatalog";
+import { CatalogUnavailable } from "@/components/sections/CatalogUnavailable";
 import { fetchApartments, flatToApartment } from "@/lib/api";
 import styles from "./apartments.module.scss";
 
@@ -12,10 +13,10 @@ export const metadata: Metadata = {
 };
 
 export default async function ApartmentsPage() {
-  // Каталог из CRM; при сбое API показываем пустой список (не роняем страницу).
-  const apartments = await fetchApartments()
-    .then((flats) => flats.map(flatToApartment))
-    .catch(() => []);
+  // Каталог из CRM. Сбой источника НЕ превращаем в пустой список: пустая таблица
+  // с текстом «нет резиденций с такими параметрами» читается как «всё продано»
+  // (DATA-005). Ошибку источника показываем отдельным состоянием с телефоном.
+  const result = await fetchApartments();
 
   return (
     <>
@@ -42,7 +43,11 @@ export default async function ApartmentsPage() {
         </span>
       </PageHero>
 
-      <ApartmentCatalog apartments={apartments} />
+      {result.ok ? (
+        <ApartmentCatalog apartments={result.flats.map(flatToApartment)} />
+      ) : (
+        <CatalogUnavailable title="каталог временно недоступен" />
+      )}
     </>
   );
 }

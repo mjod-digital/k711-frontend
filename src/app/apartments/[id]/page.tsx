@@ -4,13 +4,12 @@ import { fetchApartmentById, fetchApartments, flatToDetail } from "@/lib/api";
 import { ApartmentCard } from "@/components/sections/ApartmentCard";
 
 // Пререндерим все квартиры каталога (id = number из CRM).
+// Источник недоступен на сборке — пререндерить нечего, страницы отрендерятся
+// по запросу; причину уже написал в лог сам fetchApartments (DATA-005).
 export async function generateStaticParams() {
-  try {
-    const flats = await fetchApartments();
-    return flats.map((f) => ({ id: f.number }));
-  } catch {
-    return [];
-  }
+  const result = await fetchApartments();
+  if (!result.ok) return [];
+  return result.flats.map((f) => ({ id: f.number }));
 }
 
 export async function generateMetadata({

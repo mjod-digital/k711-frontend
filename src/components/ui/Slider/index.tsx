@@ -21,9 +21,18 @@ type SliderProps = {
   className?: string;
   /** Мобайл: показывать «шахматкой» как GalleryStrip (макет 373-12585), не каруселью. */
   mobileGallery?: boolean;
+  /** Карусель на первом экране (редкий случай): первый слайд грузим сразу и
+   *  приоритетно (loading="eager" + fetchPriority="high"). По умолчанию все
+   *  слайды ленивые — см. eagerSlides ниже. */
+  priority?: boolean;
 };
 
-export function Slider({ slides, className, mobileGallery = false }: SliderProps) {
+export function Slider({
+  slides,
+  className,
+  mobileGallery = false,
+  priority = false,
+}: SliderProps) {
   const [prevEl, setPrevEl] = useState<HTMLButtonElement | null>(null);
   const [nextEl, setNextEl] = useState<HTMLButtonElement | null>(null);
   const viewportRef = useRef<HTMLDivElement>(null);
@@ -69,6 +78,51 @@ export function Slider({ slides, className, mobileGallery = false }: SliderProps
     return () => window.removeEventListener("resize", update);
   }, []);
 
+  // Картинки слайдов ленивые, пока карусель далеко. React выдаёт
+  // <link rel="preload" as="image"> в <head> на КАЖДУЮ не-ленивую картинку
+  // серверной разметки, поэтому eager у всех слайдов тянул кадры ниже первого
+  // экрана наперегонки с картинкой первого экрана. Когда карусель подходит к
+  // вьюпорту — переключаем слайды на eager: слайды за краем вьюпорта карусели
+  // (и клоны loop) клипает overflow:hidden, нативный lazy их не грузит, и при
+  // свайпе/доскролле они были бы пустыми.
+  const [eagerSlides, setEagerSlides] = useState(false);
+  useEffect(() => {
+    if (eagerSlides) return;
+    const el = viewportRef.current;
+    if (!el) return;
+    const io = new IntersectionObserver(
+      (entries, obs) => {
+        if (!entries.some((e) => e.isIntersecting)) return;
+        setEagerSlides(true);
+        obs.disconnect();
+      },
+      // Экран запаса: к моменту появления карусели кадры уже загружены.
+      { rootMargin: "100% 0px" },
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, [eagerSlides]);
+
+  // Дубли для loop показывают те же картинки, что и оригиналы. Если перевести
+  // в eager оба <img> с одинаковым src, браузер уходит в сеть дважды (вторая
+  // копия стартует до того, как придёт ответ по первой) — грузим каждый src
+  // один раз, по первому вхождению. Дубль останется lazy и возьмёт картинку
+  // из кэша, когда доедет до вьюпорта.
+  const firstBySrc = useMemo(() => {
+    const seen = new Set<string>();
+    return loopSlides.map((s) => {
+      if (seen.has(s.src)) return false;
+      seen.add(s.src);
+      return true;
+    });
+  }, [loopSlides]);
+
+  // Приоритет (preload в <head>) — только у первого слайда и только если его
+  // попросили пропом priority; остальные грузятся без preload.
+  const slideLoading = (i: number) =>
+    (priority && i === 0) || (eagerSlides && firstBySrc[i] !== false) ? "eager" : "lazy";
+  const slideFetchPriority = (i: number) => (priority && i === 0 ? "high" : undefined);
+
   // Параллакс при скролле: двигаем картинки внутри контейнеров (overflow:hidden).
   // Прогресс прохода вьюпортом через экран (0 — входит снизу, 1 — уходит вверх)
   // пишем в CSS-переменную --parallax на корне; все .parallax её наследуют.
@@ -105,6 +159,7 @@ export function Slider({ slides, className, mobileGallery = false }: SliderProps
     return (
       <GalleryStrip
         className={className}
+        priority={priority}
         items={slides.map((s, i) => ({
           src: s.src,
           caption: s.caption,
@@ -134,7 +189,8 @@ export function Slider({ slides, className, mobileGallery = false }: SliderProps
                       src={slide.src}
                       alt={slide.alt ?? slide.caption ?? ""}
                       fill
-                      loading="eager"
+                      loading={slideLoading(0)}
+                      fetchPriority={slideFetchPriority(0)}
                       sizes="(min-width: 768px) 76vw, 86vw"
                       className={styles.image}
                     />
@@ -167,13 +223,12 @@ export function Slider({ slides, className, mobileGallery = false }: SliderProps
             <SwiperSlide key={i} className={styles.slide}>
               <div className={styles.imageBox}>
                 <div className={styles.parallax}>
-                  <Image 
+                  <Image
                     src={slide.src}
                     alt={slide.alt ?? slide.caption ?? ""}
                     fill
-                    // Слайды за пределами вьюпорта карусели (в т.ч. клоны loop) не
-                    // грузятся при lazy → при свайпе/доскролле пустые. Грузим сразу.
-                    loading="eager"
+                    loading={slideLoading(i)}
+                    fetchPriority={slideFetchPriority(i)}
                     sizes="(min-width: 768px) 76vw, 86vw"
                     className={styles.image}
                   />

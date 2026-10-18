@@ -20,3 +20,10 @@ export const GENPLAN_VIEWS = [
   { id: "corner", label: "Угол", frameIndex: 67 },
   { id: "courtyard", label: "Двор", frameIndex: 237 },
 ] as const satisfies readonly GenplanView[];
+
+// Опорные кадры — единственные состояния покоя сцены (ракурсы «улица», «угол»,
+// «двор»). Остальные 235 кадров существуют только ради анимации перехода, поэтому
+// именно по этим трём считается готовность страницы и прогресс загрузки (PERF-001).
+export const GENPLAN_ANCHOR_FRAME_INDICES: readonly number[] = GENPLAN_VIEWS.map(
+  (view) => view.frameIndex,
+);

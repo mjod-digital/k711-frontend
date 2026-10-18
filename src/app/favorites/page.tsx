@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import type { CSSProperties } from "react";
 import { PageHero } from "@/components/sections/PageHero";
+import { CatalogUnavailable } from "@/components/sections/CatalogUnavailable";
 import { fetchApartments, flatToDetail } from "@/lib/api";
 import { FavoritesList } from "./FavoritesList";
 import styles from "./favorites.module.scss";
@@ -13,9 +14,9 @@ export const metadata: Metadata = {
 export default async function FavoritesPage() {
   // Полный каталог нужен, чтобы по сохранённым id (localStorage) показать карточки.
   // flatToDetail даёт планировку (plan), № и полную стоимость — всё, что нужно карточке.
-  const apartments = await fetchApartments()
-    .then((flats) => flats.map(flatToDetail))
-    .catch(() => []);
+  // При сбое источника список НЕ рендерим: без каталога он сказал бы «в избранном
+  // пока пусто», и покупатель решил бы, что его подборка потерялась (DATA-005).
+  const result = await fetchApartments();
 
   return (
     <>
@@ -42,7 +43,11 @@ export default async function FavoritesPage() {
         </span>
       </PageHero>
 
-      <FavoritesList apartments={apartments} />
+      {result.ok ? (
+        <FavoritesList apartments={result.flats.map(flatToDetail)} />
+      ) : (
+        <CatalogUnavailable title="избранное временно недоступно" />
+      )}
     </>
   );
 }
