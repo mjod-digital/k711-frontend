@@ -170,10 +170,13 @@
 }
 
 // «вернуться » — только мобайл (десктоп: «на главную»).
+// white-space: pre — кнопка inline-flex, span в ней отдельный flex-элемент,
+// и обычный пробел на его конце съедался: «вернутьсяна главную».
 .buttonReturn {
   display: none;
 
   @include mobile {
     display: inline;
+    white-space: pre;
   }
 }

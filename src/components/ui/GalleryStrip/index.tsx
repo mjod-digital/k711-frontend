@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useIsomorphicLayoutEffect } from "@/lib/useIsomorphicLayoutEffect";
 import { cn } from "@/lib/utils";
 import styles from "./GalleryStrip.module.scss";
@@ -17,14 +17,21 @@ export type GalleryItem = {
 type GalleryStripProps = {
   items: GalleryItem[];
   className?: string;
+  /** Лента на первом экране (редкий случай): первый кадр грузим сразу и
+   *  приоритетно (loading="eager" + fetchPriority="high"). По умолчанию все
+   *  кадры ленивые — см. eagerItems ниже. */
+  priority?: boolean;
 };
 
-export function GalleryStrip({ items, className }: GalleryStripProps) {
+export function GalleryStrip({ items, className, priority = false }: GalleryStripProps) {
   const sectionRef = useRef<HTMLElement>(null);
   const stickyRef = useRef<HTMLDivElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
   const boxRefs = useRef<(HTMLDivElement | null)[]>([]);
   const [pinned, setPinned] = useState(false);
+  // Десктоп (без учёта reduced-motion): лента едет по горизонтали — и в пине,
+  // и в нативном горизонтальном скролле. Мобайл — вертикальная колонка.
+  const [horizontal, setHorizontal] = useState(false);
 
   // Десктоп: секция «пинится» (sticky), вертикальный скролл ведёт ленту
   // горизонтально через translateX. Нативный скролл НЕ перехватывается — просто
@@ -35,7 +42,10 @@ export function GalleryStrip({ items, className }: GalleryStripProps) {
   useIsomorphicLayoutEffect(() => {
     const mqlDesktop = window.matchMedia("(min-width: 768px)");
     const mqlReduce = window.matchMedia("(prefers-reduced-motion: reduce)");
-    const decide = () => setPinned(mqlDesktop.matches && !mqlReduce.matches);
+    const decide = () => {
+      setHorizontal(mqlDesktop.matches);
+      setPinned(mqlDesktop.matches && !mqlReduce.matches);
+    };
     decide();
     mqlDesktop.addEventListener("change", decide);
     mqlReduce.addEventListener("change", decide);
@@ -160,6 +170,39 @@ export function GalleryStrip({ items, className }: GalleryStripProps) {
     };
   }, [pinned, items.length]);
 
+  // 3) Кадры ленты ленивые, пока секция далеко. React выдаёт
+  //    <link rel="preload" as="image"> в <head> на КАЖДУЮ не-ленивую картинку
+  //    серверной разметки, поэтому eager тянул кадры ниже первого экрана
+  //    наперегонки с картинкой первого экрана. На десктопе, когда секция
+  //    подходит к вьюпорту, переключаем кадры на eager: лента уезжает по X за
+  //    край экрана (overflow:hidden у .sticky), нативный lazy такие кадры не
+  //    грузит и при горизонтальном проезде они были бы пустыми. Замер пина это
+  //    не ломает: ширины/высоты кадров заданы в CSS, scrollWidth от загрузки
+  //    картинок не зависит. На мобайле лента — вертикальная колонка, там
+  //    нативный lazy отрабатывает сам и лишние байты не нужны.
+  const [eagerItems, setEagerItems] = useState(false);
+  useEffect(() => {
+    if (eagerItems || !horizontal) return;
+    const section = sectionRef.current;
+    if (!section) return;
+    const io = new IntersectionObserver(
+      (entries, obs) => {
+        if (!entries.some((e) => e.isIntersecting)) return;
+        setEagerItems(true);
+        obs.disconnect();
+      },
+      // Экран запаса: к началу проезда ленты кадры уже загружены.
+      { rootMargin: "100% 0px" },
+    );
+    io.observe(section);
+    return () => io.disconnect();
+  }, [eagerItems, horizontal]);
+
+  // Приоритет (preload в <head>) — только у первого кадра и только если его
+  // попросили пропом priority; остальные грузятся без preload.
+  const itemLoading = (i: number) =>
+    eagerItems || (priority && i === 0) ? "eager" : "lazy";
+
   return (
     <section
       ref={sectionRef}
@@ -181,10 +224,12 @@ export function GalleryStrip({ items, className }: GalleryStripProps) {
                   }}
                 >
                   <div className={styles.parallax}>
-                    <Image loading="eager"
+                    <Image
                       src={it.src}
                       alt={it.alt ?? it.caption ?? ""}
                       fill
+                      loading={itemLoading(i)}
+                      fetchPriority={priority && i === 0 ? "high" : undefined}
                       sizes="(min-width: 768px) 76vw, 96vw"
                       className={styles.image}
                     />

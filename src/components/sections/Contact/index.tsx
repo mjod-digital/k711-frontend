@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useState } from "react";
 import { useBooking } from "@/store/booking";
 import { sendLead } from "@/lib/comagic";
+import { siteConfig } from "@/config/site";
 import { PhoneInput, isPhoneComplete } from "@/components/ui/PhoneInput";
 import styles from "./Contact.module.scss";
 
@@ -19,18 +20,26 @@ export function Contact() {
 
   const [dirty, setDirty] = useState({ name: false, phone: false, consent: false });
   const touch = (f: keyof typeof dirty) => setDirty((d) => ({ ...d, [f]: true }));
+  const [sending, setSending] = useState(false);
+  const [failed, setFailed] = useState(false);
 
   const nameErr = !isNameOk(name);
   const phoneErr = !isPhoneComplete(phone);
   const consentErr = !consent;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setDirty({ name: true, phone: true, consent: true });
-    if (nameErr || phoneErr || consentErr) return;
+    if (nameErr || phoneErr || consentErr || sending) return;
 
-    sendLead({ source: "contact", name, phone, consent, marketing });
-    openSuccess();
+    setSending(true);
+    setFailed(false);
+    const result = await sendLead({ source: "contact", name, phone, consent, marketing });
+    setSending(false);
+    // Успех показываем только когда заявка принята: единственный канал —
+    // CoMagic, и его отказ означает, что заявки нет ни у кого.
+    if (result.ok) openSuccess();
+    else setFailed(true);
   };
 
   return (
@@ -110,9 +119,16 @@ export function Contact() {
               </label>
             </div>
 
-            <button type="submit" className={styles.submit}>
-              оставить заявку
+            <button type="submit" className={styles.submit} disabled={sending}>
+              {sending ? "отправляем…" : "оставить заявку"}
             </button>
+
+            {failed && (
+              <p className={styles.sendError} role="alert">
+                Не удалось отправить заявку. Позвоните нам:{" "}
+                <a href={siteConfig.phone.href}>{siteConfig.phone.display}</a>
+              </p>
+            )}
           </form>
         </div>
       </div>

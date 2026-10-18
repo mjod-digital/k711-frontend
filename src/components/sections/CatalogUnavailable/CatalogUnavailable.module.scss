@@ -1,0 +1,70 @@
+@use "breakpoints" as *;
+
+// ============================================================
+//   «Каталог временно недоступен» — состояние сбоя источника данных.
+//   Общий блок для /apartments, /favorites и /genplan: при недоступном CRM
+//   страница должна объяснить сбой и дать телефон, а не показывать пустоту.
+//   Типографика взята из пустых состояний каталога/избранного, чтобы состояние
+//   не выглядело чужим на странице.
+// ============================================================
+.block {
+  @include contentMax(1440);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: fluid(20);
+  padding: fluid(80) fluid(20) fluid(120);
+  color: var(--color-brown-medium);
+  font-family: var(--font-body);
+
+  @include mobile {
+    padding: fluid(40) fluid(12) fluid(80);
+  }
+}
+
+.title {
+  margin: 0;
+  color: var(--color-brown-dark);
+  font-family: var(--font-display);
+  font-size: var(--fs-h3);
+  letter-spacing: var(--ls-h3);
+  line-height: 1.1;
+  text-transform: lowercase;
+}
+
+.text {
+  max-width: fluid(620);
+  margin: 0;
+  font-size: fluid(18);
+
+  @include mobile {
+    max-width: none;
+    font-size: fluid(15);
+  }
+}
+
+// Телефон — главное действие в этом состоянии, поэтому крупнее текста.
+.phone {
+  color: var(--color-brown-dark);
+  font-family: var(--font-display);
+  font-size: var(--fs-h4);
+  letter-spacing: var(--ls-h4);
+  white-space: nowrap;
+  transition: color 0.45s ease;
+
+  &:hover {
+    color: var(--color-brown-light);
+  }
+}
+
+.action {
+  @include ctaSecondary;
+  display: inline-flex;
+  align-items: center;
+  height: fluid(48);
+  padding-inline: fluid(24);
+  font-family: var(--font-display);
+  font-size: var(--fs-button);
+  letter-spacing: var(--ls-button);
+  text-transform: uppercase;
+}

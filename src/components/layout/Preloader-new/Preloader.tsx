@@ -1,26 +1,53 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { useIsomorphicLayoutEffect } from '@/lib/useIsomorphicLayoutEffect';
-import styles from './Preloader.module.scss';
+import { useState } from "react";
+import { useIsomorphicLayoutEffect } from "@/lib/useIsomorphicLayoutEffect";
+import { LOADING_CLASS, PRELOADER_CLASS } from "./PreloaderBoot";
+import styles from "./Preloader.module.scss";
 
 type Lenis = { stop?: () => void; start?: () => void };
-const getLenis = () => (window as Window & { __lenis?: Lenis }).__lenis;
+type PreloaderWindow = Window & {
+    __lenis?: Lenis;
+    __preloaderDone?: boolean;
+    /** Ставит boot-скрипт, когда занавес снимала страховка, а не React. */
+    __preloaderFailsafe?: boolean;
+};
+const getWin = () => window as PreloaderWindow;
+const getLenis = () => getWin().__lenis;
 
 // Прелоудер первого экрана. Скролл залочен на hero (is-loading + Lenis.stop).
 // Число идёт ПОСЛЕДОВАТЕЛЬНО 0→100 за ~2.4с (не прыгает 0→100). Пока контент
-// реально не загрузился (window.load) — счётчик держится на 99 и не пускает
-// прелоудер исчезнуть; как только load пришёл — добивает 100 и гаснет. Картинки
-// секций loading="eager" → блокируют window.load, значит к концу они уже скачаны.
-// Страховка: если load не пришёл за 8с — всё равно завершаем.
+// реально не загрузился (hero-картинка) — счётчик держится на 99 и не пускает
+// прелоудер исчезнуть; как только load пришёл — добивает 100 и гаснет.
+// Страховка: если hero не пришла за 10с — всё равно завершаем.
+//
+// Слой ВИДЕН только при классе PRELOADER_CLASS на <html> — его ставит инлайн-
+// скрипт PreloaderBoot в <head> (почему именно так — там же в комментарии).
+// Разметка по-прежнему приходит с сервера, поэтому занавес на месте с первого
+// кадра, но без выполненного JS он не показывается вовсе: страница видна.
 function Preloader() {
     const [progress, setProgress] = useState(0);
-    const [phase, setPhase] = useState<'loading' | 'closing' | 'done'>('loading');
+    const [phase, setPhase] = useState<"loading" | "closing" | "done">("loading");
 
     useIsomorphicLayoutEffect(() => {
         const html = document.documentElement;
+
+        // Бандл приехал ПОЗЖЕ страховки (медленная сеть, долгий чанк): контент уже
+        // на экране и прокручивается — вешать занавес задним числом нельзя.
+        // Просто отмечаемся «готово»: шторки hero ждут этого сигнала.
+        if (getWin().__preloaderFailsafe) {
+            getWin().__preloaderDone = true;
+            window.dispatchEvent(new Event("preloader:done"));
+            setPhase("done");
+            return;
+        }
+
         window.scrollTo(0, 0);
-        html.classList.add('is-loading'); // CSS: overflow hidden на html/body
+        // Классы обычно уже стоят от boot-скрипта (add идемпотентен). Дублируем
+        // на случай, если инлайн-скрипт не выполнился (CSP без 'unsafe-inline')
+        // или эффект перезапустился в dev-StrictMode: тогда прелоудер отыграет
+        // с момента гидрации, а не с первого кадра.
+        html.classList.add(PRELOADER_CLASS, LOADING_CLASS); // CSS: показать слой + overflow hidden
         getLenis()?.stop?.();
         // Lenis может создаться чуть позже (соседний эффект) — добиваем stop.
         const stopRaf = requestAnimationFrame(() => getLenis()?.stop?.());
@@ -34,22 +61,24 @@ function Preloader() {
         const markLoaded = () => {
             loaded = true;
         };
-        const hero = document.querySelector<HTMLImageElement>('img[data-hero]');
+        const hero = document.querySelector<HTMLImageElement>("img[data-hero]");
         const detachHero = () => {
-            hero?.removeEventListener('load', markLoaded);
-            hero?.removeEventListener('error', markLoaded);
+            hero?.removeEventListener("load", markLoaded);
+            hero?.removeEventListener("error", markLoaded);
         };
         if (hero) {
             if (hero.complete && hero.naturalWidth > 0) {
                 loaded = true; // уже загружена (кэш)
             } else {
-                hero.addEventListener('load', markLoaded, { once: true });
-                hero.addEventListener('error', markLoaded, { once: true }); // не виснем на ошибке
+                hero.addEventListener("load", markLoaded, { once: true });
+                hero.addEventListener("error", markLoaded, { once: true }); // не виснем на ошибке
             }
-        } else if (document.readyState === 'complete') {
-            loaded = true; // нет hero на странице — по общему load
         } else {
-            window.addEventListener('load', markLoaded, { once: true });
+            // Нет hero (например, /genplan) — защищать нечего, гасим вместе со
+            // счётчиком. window.load тут не ждём: его держат сторонние трекеры
+            // (GTM, Метрика, CoMagic), и на генплане шторка висела ~10с до
+            // страховки, хотя сцена была готова за секунду.
+            loaded = true;
         }
 
         let done = false;
@@ -61,22 +90,33 @@ function Preloader() {
             done = true;
             window.clearInterval(tick);
             setProgress(100);
-            html.classList.remove('is-loading');
+            html.classList.remove(LOADING_CLASS); // прокрутка снова свободна
             getLenis()?.start?.();
             window.scrollTo(0, 0);
-            setPhase('closing');
+            setPhase("closing");
             // Сигнал hero: прелоудер уходит — только теперь запускаем шторку
             // заголовка (иначе она отыгрывает «вслепую» под прелоудером).
-            (window as Window & { __preloaderDone?: boolean }).__preloaderDone = true;
-            window.dispatchEvent(new Event('preloader:done'));
-            closeT = window.setTimeout(() => setPhase('done'), 500); // = fade в CSS
+            getWin().__preloaderDone = true;
+            window.dispatchEvent(new Event("preloader:done"));
+            closeT = window.setTimeout(() => {
+                // PRELOADER_CLASS снимаем только ПОСЛЕ fade: он управляет display,
+                // и убери его раньше — плавное гашение сменилось бы рывком.
+                html.classList.remove(PRELOADER_CLASS);
+                setPhase("done");
+            }, 500); // = fade в CSS
         };
 
-        // 100 шагов × 24мс ≈ 2.4с. Пока hero не загружена — потолок 99 (держим).
+        // 0→100 за 2.4с. Шаг считаем по ЧАСАМ, а не «+1 за тик»: в фоновой вкладке
+        // браузер режет setInterval до ~1 раза в секунду, и счётчик по тикам
+        // растянулся бы на ~100с — дольше CSS-страховки, т.е. слой снялся бы
+        // из-под ещё работающего скрипта. По времени 100% достигается за те же
+        // 2.4с в любой вкладке, а на видимой вкладке шаг тот же 1%/24мс.
+        const startedAt = performance.now();
         let current = 0;
         tick = window.setInterval(() => {
-            const cap = loaded ? 100 : 99;
-            current = Math.min(current + 1, cap);
+            const cap = loaded ? 100 : 99; // пока hero не загружена — потолок 99
+            const byTime = Math.floor((performance.now() - startedAt) / 24);
+            current = Math.max(current, Math.min(byTime, cap)); // только вперёд
             setProgress(current);
             if (current >= 100) finish();
         }, 24);
@@ -92,18 +132,18 @@ function Preloader() {
             window.clearTimeout(closeT);
             cancelAnimationFrame(stopRaf);
             detachHero();
-            window.removeEventListener('load', markLoaded);
-            html.classList.remove('is-loading');
+            window.removeEventListener("load", markLoaded);
+            html.classList.remove(PRELOADER_CLASS, LOADING_CLASS);
             getLenis()?.start?.();
         };
     }, []);
 
-    if (phase === 'done') return null;
+    if (phase === "done") return null;
 
     return (
         <div
             id="preloader"
-            className={`${styles.root} ${phase === 'closing' ? styles.fadeOut : ''}`}
+            className={`${styles.root} ${phase === "closing" ? styles.fadeOut : ""}`}
             aria-hidden="true"
         >
             <div className={styles.txt}>

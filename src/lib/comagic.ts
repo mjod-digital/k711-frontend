@@ -1,7 +1,10 @@
 "use client";
 
 // ============================================================
-//   Отправка заявок с форм в CoMagic (скрипт cs.min.js подключён в layout.tsx).
+//   Отправка заявок с форм в CoMagic. ВАЖНО: виджет приходит из контейнера GTM
+//   (из кода убран, см. layout.tsx), поэтому его может не быть — блокировщик
+//   рекламы, фильтрующий DNS, сбой GTM. Это единственный канал доставки, так что
+//   sendLead возвращает результат, а форма показывает успех только при нём.
 //   Метод Comagic.addOfflineRequest({name,email,phone,message}, cb) — своих
 //   произвольных полей у него нет, поэтому источник, комментарий и данные
 //   квартиры собираем в текст message. Дополнительно дублируем заявку на
@@ -81,22 +84,30 @@ function buildMessage(lead: Lead): string {
   return lines.join("\n");
 }
 
-// CoMagic грузится afterInteractive — к моменту сабмита обычно готов. На всякий
-// ждём появления window.Comagic до ~3с, потом сдаёмся (заявка всё равно уйдёт
-// в /api/lead). Так первая форма после загрузки страницы не теряется.
-function withComagic(cb: (api: ComagicApi) => void, tries = 20): void {
-  if (typeof window === "undefined") return;
+/** Чем закончилась отправка. CoMagic — единственный реальный канал доставки. */
+export type LeadResult =
+  | { ok: true }
+  | { ok: false; reason: "no-widget" | "rejected" | "timeout" | "error" };
+
+// CoMagic приходит из контейнера GTM, поэтому его может не быть вовсе:
+// блокировщик рекламы, фильтрующий DNS, сбой GTM. Ждём появления до ~3с и
+// честно сообщаем вызывающему, дождались или нет.
+function waitForComagic(tries = 20): Promise<ComagicApi | null> {
+  if (typeof window === "undefined") return Promise.resolve(null);
   const api = window.Comagic;
-  if (api?.addOfflineRequest) {
-    cb(api);
-    return;
-  }
-  if (tries <= 0) return;
-  window.setTimeout(() => withComagic(cb, tries - 1), 150);
+  if (api?.addOfflineRequest) return Promise.resolve(api);
+  if (tries <= 0) return Promise.resolve(null);
+  return new Promise((resolve) => {
+    window.setTimeout(() => resolve(waitForComagic(tries - 1)), 150);
+  });
 }
 
-// Отправка заявки. Fire-and-forget: UI (попап успеха) не ждёт ответа.
-export function sendLead(lead: Lead): void {
+/**
+ * Отправка заявки. Возвращает результат доставки — форма показывает успех
+ * только при `ok: true`, иначе предлагает позвонить. Серверный дубль на
+ * /api/lead остаётся журналом и на результат не влияет.
+ */
+export async function sendLead(lead: Lead): Promise<LeadResult> {
   const req: ComagicOfflineRequest = {
     name: lead.name?.trim() || "",
     phone: lead.phone?.trim() || "",
@@ -110,15 +121,7 @@ export function sendLead(lead: Lead): void {
   if (lead.marketing !== undefined) userFields.mailing = lead.marketing ? "Да" : "Нет";
   if (Object.keys(userFields).length) req.user_fields = userFields;
 
-  withComagic((api) => {
-    try {
-      api.addOfflineRequest(req);
-    } catch {
-      /* не роняем UI, если CoMagic бросил ошибку */
-    }
-  });
-
-  // Дубль на сервер — как было раньше (лог + будущая почта/CRM).
+  // Дубль на сервер — журнал факта заявки, результат отправки не определяет.
   void fetch("/api/lead", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -133,4 +136,33 @@ export function sendLead(lead: Lead): void {
       marketing: lead.marketing ?? null,
     }),
   }).catch(() => {});
+
+  const api = await waitForComagic();
+  if (!api) {
+    console.error("[lead] CoMagic недоступен — заявка не отправлена", { source: lead.source });
+    return { ok: false, reason: "no-widget" };
+  }
+
+  // addOfflineRequest асинхронный и о результате сообщает колбэком. Без
+  // ответа за 10с считаем отправку неудачной: лучше предложить позвонить,
+  // чем показать подтверждение заявке, которой нет.
+  return new Promise<LeadResult>((resolve) => {
+    let settled = false;
+    const finish = (result: LeadResult) => {
+      if (settled) return;
+      settled = true;
+      if (!result.ok) console.error("[lead] CoMagic отказал", { reason: result.reason, source: lead.source });
+      resolve(result);
+    };
+    const timer = window.setTimeout(() => finish({ ok: false, reason: "timeout" }), 10_000);
+    try {
+      api.addOfflineRequest(req, (o) => {
+        window.clearTimeout(timer);
+        finish(o?.success ? { ok: true } : { ok: false, reason: "rejected" });
+      });
+    } catch {
+      window.clearTimeout(timer);
+      finish({ ok: false, reason: "error" });
+    }
+  });
 }

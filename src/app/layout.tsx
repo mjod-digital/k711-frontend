@@ -5,6 +5,7 @@ import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { SmoothScroll } from "@/components/layout/SmoothScroll";
 import Preloader from "@/components/layout/Preloader-new/Preloader";
+import { PreloaderBoot } from "@/components/layout/Preloader-new/PreloaderBoot";
 import { Popups } from "@/components/sections/Popups";
 import { siteConfig } from "@/config/site";
 import "./globals.scss";
@@ -32,6 +33,7 @@ const ADRIVER_COUNTER = `!function(e,t){function r(e,t,r){t=t||"&",r=r||"=";var 
 ({sid:231322, bt:62},{id:"",gid1:"",yid1:""});`;
 
 export const metadata: Metadata = {
+  metadataBase: new URL(siteConfig.url),
   title: {
     default: siteConfig.name,
     template: `%s — ${siteConfig.name}`,
@@ -46,6 +48,11 @@ export const metadata: Metadata = {
     apple: [{ url: "/favicon/apple-touch-icon.png", sizes: "180x180" }],
   },
   manifest: "/favicon/site.webmanifest",
+  // og:image для всех страниц. Метаданные мержатся поверхностно: страница, задавшая
+  // свой openGraph, эту картинку потеряет.
+  openGraph: {
+    images: [{ ...siteConfig.searchImage.wide, alt: siteConfig.searchImage.alt }],
+  },
   // Подтверждение прав в Google Search Console. Metadata API рендерит это как
   // <meta name="google-site-verification"> в <head> — ровно там, где требует Google.
   verification: {
@@ -59,8 +66,21 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="ru" className={`${ricordi.variable} ${cofo.variable}`}>
+    // suppressHydrationWarning: boot-скрипт прелоудера дописывает классы на <html>
+    // ещё до гидрации, и серверная разметка заведомо не совпадает с DOM. React
+    // должен оставить то, что в DOM, а не считать это ошибкой гидрации
+    // (next docs: 01-app/02-guides/preventing-flash-before-hydration.md).
+    <html
+      lang="ru"
+      className={`${ricordi.variable} ${cofo.variable}`}
+      suppressHydrationWarning
+    >
       <head>
+        {/* Включает прелоудер до первой отрисовки. Строго первым в <head> и до
+            любых внешних скриптов: занавес должен встать раньше, чем браузер
+            отрисует body. Без него прелоудера просто нет — страница видна. */}
+        <PreloaderBoot />
+
         {/* AdRiver code START. Type:JS-counter Site: 231322 */}
         <script
           type="text/javascript"
